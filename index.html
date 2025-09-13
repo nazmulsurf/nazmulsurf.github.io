@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Billing & Production — Nazmul Twisting Mill</title>
+<style>
+  :root{
+    --bg: #ffffff;
+    --panel: #f5f5f5;
+    --text: #101010;
+    --muted: #6b6b6b;
+    --accent: #000000;
+    --radius: 10px;
+    --btn-radius: 8px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    padding:18px;
+  }
+  .container{max-width:1150px;margin:0 auto}
+  header{
+    background:var(--accent);
+    color: #fff;
+    padding:18px;
+    border-radius:var(--radius);
+    margin-bottom:16px;
+    text-align:center;
+  }
+  header h1{margin:0;font-size:20px;font-weight:600}
+  header p{margin:2px 0;font-size:13px;opacity:.9}
+  .nav{
+    display:flex;
+    gap:8px;
+    margin:14px 0 20px;
+    flex-wrap:wrap;
+  }
+  .nav button{
+    background:#fff;
+    color:var(--text);
+    border:1px solid #dcdcdc;
+    padding:8px 12px;
+    border-radius:var(--btn-radius);
+    cursor:pointer;
+    font-weight:600;
+    font-size:13px;
+  }
+  .nav button.active{
+    background:var(--accent);
+    color:#fff;
+    border-color:var(--accent);
+  }
+
+  .page{display:none;background:var(--panel);padding:16px;border-radius:var(--radius);margin-bottom:18px}
+  .page.active{display:block}
+
+  h2{margin-top:0;margin-bottom:8px;font-size:18px}
+  p.lead{margin-top:0;margin-bottom:12px;color:var(--muted)}
+
+  .grid {
+    display:grid;
+    gap:12px;
+  }
+  .grid.cols-2{grid-template-columns:repeat(2,1fr)}
+  .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+  .grid.cols-4{grid-template-columns:repeat(4,1fr)}
+  .card{
+    background:#fff;border-radius:8px;padding:12px;border:1px solid #eee;
+  }
+
+  label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
+  input[type="number"], input[type="text"]{
+    width:100%;
+    padding:8px 10px;
+    border-radius:6px;
+    border:1px solid #ddd;
+    font-size:14px;
+  }
+
+  .small {font-size:13px;color:var(--muted)}
+
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+  th,td{padding:10px;border:1px solid #eee;text-align:left;font-size:14px}
+  th{background:#fafafa;font-weight:700;color:var(--muted);text-transform:uppercase;font-size:12px}
+  tfoot th{font-weight:700}
+
+  .btn { display:inline-block; padding:8px 12px; border-radius:var(--btn-radius); border:1px solid #111; background:#111; color:#fff; cursor:pointer; font-weight:600; font-size:13px; }
+  .btn.secondary{ background:#fff; color:#111; border:1px solid #111; }
+  .btn.ghost{ background:transparent; color:#111; border:1px solid #ccc; }
+  .btn.restore{ background:#fff; color:#111; border:1px dashed #bbb; }
+  .btn.small{ padding:6px 8px; font-size:13px; }
+  .muted{ color:var(--muted) }
+
+  .worker-pills{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px }
+  .pill{ padding:8px 12px; border-radius:40px; background:#fff; border:1px solid #ddd; cursor:pointer; display:flex; align-items:center; gap:8px; font-weight:600 }
+  .pill.active{ background:var(--accent); color:#fff; border-color:var(--accent) }
+
+  .actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px }
+
+  .modal{ position:fixed; inset:0; background:rgba(0,0,0,0.45); display:none; align-items:center; justify-content:center; z-index:40 }
+  .modal .box{ background:#fff; padding:18px; border-radius:10px; width:96%; max-width:420px; box-shadow:0 8px 30px rgba(0,0,0,0.12) }
+
+  /* signature */
+  #signature-area{margin-top:18px;display:flex;gap:40px;justify-content:flex-end;align-items:flex-end;}
+  .signature-box{text-align:center;width:200px;}
+  .signature-line{border-top:1px solid #000;margin-top:48px;height:2px;width:100%}
+
+  @media (max-width:860px){
+    .grid.cols-2{ grid-template-columns:1fr }
+    .grid.cols-4{ grid-template-columns:repeat(2,1fr) }
+  }
+
+  /* Print only invoice section */
+  @media print{
+    body * { visibility: hidden !important; }
+    #invoice, #invoice * { visibility: visible !important; }
+    #invoice { position: absolute; left: 0; top: 0; width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>Nazmul Twisting Mill Ltd — Billing & Production</h1>
+    <p class="small">Old Bogura Road, Telkupi — Phone: (+880) 1766759293 — Email: nazmul.fig@gmail.com</p>
+  </header>
+
+  <nav class="nav" role="navigation" aria-label="Main">
+    <button class="nav-btn active" data-page="dashboard">Dashboard</button>
+    <button class="nav-btn" data-page="workers">Workers</button>
+    <button class="nav-btn" data-page="production">Production</button>
+    <button class="nav-btn" data-page="rates">Rates</button>
+    <button class="nav-btn" data-page="expenses">Expenses</button>
+    <button class="nav-btn" data-page="invoice">Invoice</button>
+    <button class="nav-btn" data-page="settings">Settings</button>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="page active">
+    <h2>Dashboard</h2>
+    <p class="lead">Summary and histories</p>
+
+    <div class="grid cols-4">
+      <div class="card">
+        <div class="small">Revenue from Mohajon</div>
+        <div id="summary-mohajon" style="font-weight:700;font-size:20px">৳0.00</div>
+      </div>
+      <div class="card">
+        <div class="small">Total Worker Payments</div>
+        <div id="summary-workers" style="font-weight:700;font-size:20px">৳0.00</div>
+      </div>
+      <div class="card">
+        <div class="small">Total Expenses</div>
+        <div id="summary-expenses" style="font-weight:700;font-size:20px">৳0.00</div>
+      </div>
+      <div class="card">
+        <div class="small">Weekly Profit</div>
+        <div id="summary-profit" style="font-weight:700;font-size:20px">৳0.00</div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px">
+      <h3 style="margin-bottom:10px">Weekly Invoice History</h3>
+      <div id="weekly-invoices-list">
+        <table id="weekly-invoices-table">
+          <thead><tr><th>Invoice #</th><th>Date</th><th>Period</th><th>Total</th><th>Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORKERS -->
+  <section id="workers" class="page">
+    <h2>Workers</h2>
+    <p class="lead">Edit worker names inline. Press <strong>Save Names</strong> to confirm changes and update everywhere.</p>
+
+    <div class="card">
+      <div class="worker-pills" id="worker-pills"></div>
+
+      <div style="margin-top:12px">
+        <table>
+          <thead><tr><th>Worker #</th><th>Name (editable)</th></tr></thead>
+          <tbody id="workers-edit-table"></tbody>
+        </table>
+        <div class="actions" style="margin-top:10px">
+          <button class="btn" id="save-names-btn">Save Names</button>
+          <!-- Revert removed per request -->
+        </div>
+      </div>
+
+      <div style="margin-top:14px">
+        <h4 style="margin:0 0 8px 0">Selected Worker Details</h4>
+        <div id="worker-details-area" class="card">
+          <!-- Filled dynamically -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCTION -->
+  <section id="production" class="page">
+    <h2>Production Input</h2>
+    <p class="lead">Calculate Mohajon and Weekly production. Rates in the Rates menu are used for production calculations and update when you press <strong>Set Rates</strong>.</p>
+
+    <div class="grid cols-2">
+      <!-- Mohajon -->
+      <div class="card">
+        <h4 style="margin:0 0 8px 0">Mohajon Calculation</h4>
+        <label>Mohajon Rate (৳ per pound)</label>
+        <input type="number" id="mohajon-rate" step="0.01" value="0" min="0" />
+
+        <label style="margin-top:8px">Total Machine Production (pounds)</label>
+        <input type="number" id="mohajon-total-production" step="0.01" value="0" min="0" />
+
+        <div class="actions">
+          <button class="btn" id="calc-mohajon-btn">Calculate Mohajon</button>
+          <button class="btn restore" id="restore-mohajon-btn">Restore Mohajon</button>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="small">Amount from Mohajon</div>
+          <div id="mohajon-amount" style="font-weight:700; font-size:18px">৳0.00</div>
+        </div>
+      </div>
+
+      <!-- Weekly Production Calculation -->
+      <div class="card">
+        <h4 style="margin:0 0 8px 0">Weekly Production Calculation</h4>
+
+        <div style="margin-bottom:8px" class="small">Enter pounds and adjustments for each worker</div>
+        <table>
+          <thead><tr><th>Worker</th><th>Role</th><th>Pounds</th><th>Adjustment</th><th>Rate (৳/pound)</th><th>Earnings (after adj.)</th></tr></thead>
+          <tbody id="production-workers-body"></tbody>
+          <tfoot>
+            <tr>
+              <th colspan="5" style="text-align:right">This Week Total</th>
+              <th id="this-week-total">৳0.00</th>
+            </tr>
+          </tfoot>
+        </table>
+
+        <div class="actions">
+          <button class="btn" id="calc-weekly-btn">Calculate Weekly</button>
+          <button class="btn restore" id="restore-weekly-btn">Restore Weekly</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px">
+      <button class="btn" id="switch-to-invoice">Generate Invoice (go to Invoice page)</button>
+    </div>
+  </section>
+
+  <!-- RATES -->
+  <section id="rates" class="page">
+    <h2>Rates</h2>
+    <p class="lead">Default rates are zero. Editing rates here updates production automatically; press <strong>Set Rates</strong> to commit and save.</p>
+
+    <div class="card">
+      <table>
+        <thead><tr><th>Worker</th><th>Current Rate (৳ / pound)</th></tr></thead>
+        <tbody id="rates-table-body"></tbody>
+      </table>
+      <div class="actions" style="margin-top:10px">
+        <button class="btn" id="set-rates-btn">Set Rates</button>
+        <button class="btn secondary" id="restore-rate-defaults">Reset Rates to 0</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPENSES -->
+  <section id="expenses" class="page">
+    <h2>Expenses</h2>
+    <p class="lead">Expenses update only when you press <strong>Update Expenses</strong>.</p>
+
+    <div class="card">
+      <div class="grid cols-2">
+        <div>
+          <label>Electricity (৳)</label>
+          <input type="number" id="expense-electricity" value="0" min="0" step="0.01" />
+        </div>
+        <div>
+          <label>Maintenance (৳)</label>
+          <input type="number" id="expense-maintenance" value="0" min="0" step="0.01" />
+        </div>
+        <div>
+          <label>Other (৳)</label>
+          <input type="number" id="expense-other" value="0" min="0" step="0.01" />
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <div class="actions">
+            <button class="btn" id="update-expenses-btn">Update Expenses</button>
+            <button class="btn secondary" id="restore-expenses-btn">Restore Expenses</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="small">Total Expenses</div>
+        <div id="expenses-total" style="font-weight:700;font-size:18px">৳0.00</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INVOICE -->
+  <section id="invoice" class="page">
+    <h2>Invoice</h2>
+    <p class="lead">Review and save the weekly invoice (saving updates histories).</p>
+
+    <div class="card">
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
+        <div>
+          <label>Invoice #</label>
+          <input type="text" id="invoice-number" readonly />
+        </div>
+        <div>
+          <label>Date</label>
+          <input type="text" id="invoice-date" readonly />
+        </div>
+        <div>
+          <label>Period</label>
+          <input type="text" id="invoice-period" readonly />
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <table>
+          <thead><tr><th>Worker</th><th>Role</th><th>Pounds</th><th>Rate</th><th>Earnings</th><th>Adjustment</th><th>Final Amount</th></tr></thead>
+          <tbody id="invoice-table-body"></tbody>
+          <tfoot id="invoice-tfoot"></tfoot>
+        </table>
+
+        <!-- Signature area -->
+        <div id="signature-area">
+          <div class="signature-box">
+            <div class="signature-line"></div>
+            <div class="small">Authorized Signature</div>
+          </div>
+          <div class="signature-box">
+            <div class="signature-line"></div>
+            <div class="small">Receiver Signature</div>
+          </div>
+        </div>
+
+        <div class="actions" style="margin-top:12px">
+          <button class="btn" id="save-invoice-btn">Save Invoice</button>
+          <button class="btn secondary" id="print-invoice-btn">Print</button>
+          <!-- Save app state removed per request -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETTINGS (developer conveniences) -->
+  <section id="settings" class="page">
+    <h2>Settings</h2>
+    <p class="small">Local storage controls</p>
+    <div class="actions">
+      <button class="btn secondary" id="clear-storage-btn">Clear All Local Storage</button>
+      <button class="btn" id="load-defaults-btn">Load Defaults</button>
+    </div>
+  </section>
+
+</div>
+
+<!-- Modal: confirm delete -->
+<div class="modal" id="confirm-modal">
+  <div class="box">
+    <div id="confirm-text">Are you sure?</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn secondary" id="confirm-cancel">Cancel</button>
+      <button class="btn" id="confirm-ok">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------------------
+   App data model + persistence
+   --------------------------- */
+const STORAGE_KEY = 'ntm_app_v1';
+
+const defaultState = () => ({
+  workers: [
+    { id: 'w1', name: 'Name_1', role: 'Machine', rate: 0, adjustments: 0 },
+    { id: 'w2', name: 'Name_2', role: 'Machine', rate: 0, adjustments: 0 },
+    { id: 'w3', name: 'Name_3', role: 'Drum', rate: 0, adjustments: 0 },
+    { id: 'w4', name: 'Name_4', role: 'Drum', rate: 0, adjustments: 0 },
+    { id: 'w5', name: 'Name_5', role: 'Kun', rate: 0, adjustments: 0 }
+  ],
+  ratesSavedAt: null,
+  productionInputs: { 'w1': 0, 'w2': 0, 'w3': 0, 'w4': 0, 'w5': 0 },
+  mohajon: { rate: 0, totalProduction: 0, amount: 0 },
+  expenses: { electricity: 0, maintenance: 0, other: 0 },
+  invoices: [],
+  billingHistory: { 'w1': [], 'w2': [], 'w3': [], 'w4': [], 'w5': [] }
+});
+
+let appState = loadState() || defaultState();
+
+/* ---------------------------
+   Utility functions
+   --------------------------- */
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+  renderAll();
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) {
+    console.error('Failed to load state', e);
+    return null;
+  }
+}
+function resetStateToDefaults() {
+  appState = defaultState();
+  saveState();
+}
+
+/* ---------------------------
+   Navigation
+   --------------------------- */
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const page = btn.dataset.page;
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById(page).classList.add('active');
+    if(page === 'invoice') renderInvoicePreview();
+  });
+});
+
+/* ---------------------------
+   Render functions
+   --------------------------- */
+function renderAll() {
+  renderDashboard();
+  renderWorkers();
+  renderProductionInputs();
+  renderRatesTable();
+  renderExpenses();
+  renderInvoicePreview();
+  renderWeeklyInvoicesTable();
+}
+function formatMoney(n){ return '৳' + Number(n || 0).toFixed(2); }
+function formatDateISO(d=new Date()){ return d.toLocaleDateString() + ' ' + d.toLocaleTimeString(); }
+function getWeekPeriodText(d=new Date()){
+  const end = new Date(d);
+  const start = new Date(d);
+  start.setDate(end.getDate() - 6);
+  return `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+}
+
+/* DASHBOARD */
+function renderDashboard(){
+  const mohajonAmt = appState.mohajon.amount || 0;
+  const totalWorkersPaid = computeWorkersTotalPaid();
+  const expensesTotal = (appState.expenses.electricity||0) + (appState.expenses.maintenance||0) + (appState.expenses.other||0);
+  const profit = mohajonAmt - totalWorkersPaid - expensesTotal;
+  document.getElementById('summary-mohajon').textContent = formatMoney(mohajonAmt);
+  document.getElementById('summary-workers').textContent = formatMoney(totalWorkersPaid);
+  document.getElementById('summary-expenses').textContent = formatMoney(expensesTotal);
+  document.getElementById('summary-profit').textContent = formatMoney(profit);
+}
+
+/* WORKERS */
+function renderWorkers(){
+  // pills
+  const pillContainer = document.getElementById('worker-pills');
+  pillContainer.innerHTML = '';
+  appState.workers.forEach((w, idx) => {
+    const div = document.createElement('div');
+    div.className = 'pill' + (idx===0 ? ' active' : '');
+    div.dataset.workerId = w.id;
+    div.innerHTML = `<span class="pill-name">${escapeHtml(w.name)}</span>`;
+    div.addEventListener('click', () => {
+      document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+      div.classList.add('active');
+      showWorkerDetails(w.id);
+    });
+    pillContainer.appendChild(div);
+  });
+
+  // edit table
+  const tbody = document.getElementById('workers-edit-table');
+  tbody.innerHTML = '';
+  appState.workers.forEach((w, idx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="width:85px">${idx+1}</td>
+      <td contenteditable="true" class="worker-name-edit" data-worker-id="${w.id}">${escapeHtml(w.name)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // show first worker details by default
+  showWorkerDetails(appState.workers[0].id);
+}
+
+/* show a selected worker's details and history */
+function showWorkerDetails(workerId){
+  const w = appState.workers.find(x=>x.id===workerId);
+  const area = document.getElementById('worker-details-area');
+  const history = appState.billingHistory[workerId] || [];
+  let html = `<div class="small">Name</div><div style="font-weight:700">${escapeHtml(w.name)} (${w.role})</div>`;
+  html += `<div style="margin-top:8px"><div class="small">Rate</div><div>${formatMoney(w.rate)}/pound</div></div>`;
+  html += `<div style="margin-top:10px"><h4 style="margin:6px 0">Billing History</h4>`;
+  if(history.length === 0) html += '<div class="small">No history yet</div>';
+  else {
+    html += `<table><thead><tr><th>Date</th><th>Pounds</th><th>Earnings</th><th>Adjustment</th><th>Total</th><th>Actions</th></tr></thead><tbody>`;
+    history.forEach((rec, idx) => {
+      html += `<tr>
+        <td>${escapeHtml(rec.date)}</td>
+        <td>${rec.pounds}</td>
+        <td>${formatMoney(rec.earnings)}</td>
+        <td>${formatMoney(rec.adjustments)}</td>
+        <td>${formatMoney(rec.total)}</td>
+        <td>
+          <!-- Edit removed per request; keep Delete -->
+          <button class="btn small secondary" onclick="deleteWorkerHistory('${workerId}', ${idx})">Delete</button>
+        </td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+  }
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+/* PRODUCTION */
+function renderProductionInputs(){
+  const tbody = document.getElementById('production-workers-body');
+  tbody.innerHTML = '';
+  appState.workers.forEach(w => {
+    const tr = document.createElement('tr');
+    const poundsVal = appState.productionInputs[w.id] || 0;
+    const adjustmentVal = Number(w.adjustments || 0).toFixed(2);
+    tr.innerHTML = `
+      <td>${escapeHtml(w.name)}</td>
+      <td>${escapeHtml(w.role)}</td>
+      <td><input type="number" class="prod-pounds" data-worker="${w.id}" min="0" step="0.01" value="${poundsVal}" /></td>
+      <td><input type="number" class="prod-adjust" data-worker="${w.id}" step="0.01" value="${adjustmentVal}" /></td>
+      <td class="prod-rate" data-worker="${w.id}">${formatMoney(w.rate)}</td>
+      <td class="prod-earnings" data-worker="${w.id}">${formatMoney(0)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // wire up inputs to update internal model as user types
+  document.querySelectorAll('.prod-pounds').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const id = inp.dataset.worker;
+      const v = parseFloat(inp.value) || 0;
+      appState.productionInputs[id] = v;
+      // update total machine production for convenience
+      const total = Object.values(appState.productionInputs).reduce((s,x)=>s+(Number(x)||0),0);
+      document.getElementById('mohajon-total-production').value = total;
+      // don't recalc earnings automatically (per requirement)
+    });
+  });
+
+  // adjustments inputs
+  document.querySelectorAll('.prod-adjust').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const id = inp.dataset.worker;
+      const v = parseFloat(inp.value) || 0;
+      const w = appState.workers.find(x=>x.id===id);
+      if(w) w.adjustments = v;
+    });
+  });
+
+  // update rates column (in case rates changed)
+  document.querySelectorAll('.prod-rate').forEach(td=>{
+    const id = td.dataset.worker;
+    const w = appState.workers.find(x=>x.id===id);
+    td.textContent = formatMoney(w.rate);
+  });
+}
+
+/* RATES */
+function renderRatesTable(){
+  const tbody = document.getElementById('rates-table-body');
+  tbody.innerHTML = '';
+  appState.workers.forEach(w=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escapeHtml(w.name)}</td>
+      <td>
+        <input type="number" class="rate-input" data-worker="${w.id}" min="0" step="0.01" value="${Number(w.rate).toFixed(2)}" />
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // wire up change handler: live preview updates production rates (value not saved until Set Rates is pressed)
+  document.querySelectorAll('.rate-input').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const id = inp.dataset.worker;
+      const v = parseFloat(inp.value) || 0;
+      // temporarily update display in production table
+      document.querySelectorAll('.prod-rate').forEach(td=>{
+        if(td.dataset.worker === id) td.textContent = formatMoney(v);
+      });
+    });
+  });
+}
+
+/* EXPENSES */
+function renderExpenses(){
+  document.getElementById('expense-electricity').value = Number(appState.expenses.electricity || 0).toFixed(2);
+  document.getElementById('expense-maintenance').value = Number(appState.expenses.maintenance || 0).toFixed(2);
+  document.getElementById('expense-other').value = Number(appState.expenses.other || 0).toFixed(2);
+  const totalExp = (appState.expenses.electricity||0) + (appState.expenses.maintenance||0) + (appState.expenses.other||0);
+  document.getElementById('expenses-total').textContent = formatMoney(totalExp);
+  // also reflect in dashboard summary-expenses
+  document.getElementById('summary-expenses').textContent = formatMoney(totalExp);
+}
+
+/* INVOICE PREVIEW (not auto-saved) */
+function renderInvoicePreview(){
+  const tbody = document.getElementById('invoice-table-body');
+  tbody.innerHTML = '';
+  let totalEarnings = 0;
+  appState.workers.forEach(w=>{
+    const pounds = Number(appState.productionInputs[w.id] || 0);
+    const earnings = pounds * Number(w.rate || 0);
+    const adjustment = Number(w.adjustments || 0);
+    const finalAmount = earnings - adjustment;
+    totalEarnings += finalAmount;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escapeHtml(w.name)}</td>
+      <td>${escapeHtml(w.role)}</td>
+      <td>${pounds}</td>
+      <td>${formatMoney(w.rate)}</td>
+      <td>${formatMoney(earnings)}</td>
+      <td>${formatMoney(adjustment)}</td>
+      <td>${formatMoney(finalAmount)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const tfoot = document.getElementById('invoice-tfoot');
+  tfoot.innerHTML = `
+    <tr>
+      <th colspan="6" style="text-align:right">Subtotal</th>
+      <th>${formatMoney(totalEarnings)}</th>
+    </tr>
+    <tr>
+      <th colspan="6" style="text-align:right">Expenses</th>
+      <th>${formatMoney((appState.expenses.electricity||0) + (appState.expenses.maintenance||0) + (appState.expenses.other||0))}</th>
+    </tr>
+  `;
+
+  // fill invoice meta fields
+  document.getElementById('invoice-number').value = generateInvoiceNumber();
+  document.getElementById('invoice-date').value = formatDateISO();
+  document.getElementById('invoice-period').value = getWeekPeriodText();
+}
+
+/* Weekly invoices (dashboard) */
+function renderWeeklyInvoicesTable(){
+  const tbody = document.querySelector('#weekly-invoices-table tbody');
+  tbody.innerHTML = '';
+  (appState.invoices || []).forEach((inv, idx)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escapeHtml(inv.id)}</td>
+      <td>${escapeHtml(inv.date)}</td>
+      <td>${escapeHtml(inv.period)}</td>
+      <td>${formatMoney(inv.total)}</td>
+      <td>
+        <!-- Edit removed per request; keep Delete -->
+        <button class="btn small secondary" onclick="deleteInvoice(${idx})">Delete</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ---------------------------
+   Computations & interactions
+   --------------------------- */
+function computeWorkersTotalPaid(){
+  // Sum of final amount for each worker based on current production inputs and rates and adjustments
+  let total = 0;
+  appState.workers.forEach(w=>{
+    const pounds = Number(appState.productionInputs[w.id] || 0);
+    const earnings = pounds * Number(w.rate || 0);
+    const finalAmount = earnings - Number(w.adjustments || 0);
+    total += finalAmount;
+  });
+  return total;
+}
+
+/* Mohajon calculation (Calculate button) */
+document.getElementById('calc-mohajon-btn').addEventListener('click', ()=>{
+  const rate = parseFloat(document.getElementById('mohajon-rate').value) || 0;
+  const totalProd = parseFloat(document.getElementById('mohajon-total-production').value) || 0;
+  appState.mohajon.rate = rate;
+  appState.mohajon.totalProduction = totalProd;
+  appState.mohajon.amount = rate * totalProd;
+  document.getElementById('mohajon-amount').textContent = formatMoney(appState.mohajon.amount);
+  renderDashboard();
+});
+
+/* Restore mohajon */
+document.getElementById('restore-mohajon-btn').addEventListener('click', ()=>{
+  appState.mohajon = { rate:0, totalProduction:0, amount:0 };
+  document.getElementById('mohajon-rate').value = '0';
+  document.getElementById('mohajon-total-production').value = '0';
+  document.getElementById('mohajon-amount').textContent = formatMoney(0);
+  renderDashboard();
+});
+
+/* Weekly Calculation: pressing calculate updates table earnings & "This Week Total" */
+document.getElementById('calc-weekly-btn').addEventListener('click', ()=>{
+  const rows = document.querySelectorAll('#production-workers-body tr');
+  let total = 0;
+  rows.forEach(row=>{
+    const workerId = row.querySelector('.prod-pounds').dataset.worker;
+    const pounds = Number(row.querySelector('.prod-pounds').value) || 0;
+    // update productionInputs model
+    appState.productionInputs[workerId] = pounds;
+    // read adjustment (from worker object, updated by input handler too)
+    const worker = appState.workers.find(w => w.id === workerId);
+    const earnings = pounds * Number(worker.rate || 0);
+    const finalAmount = earnings - Number(worker.adjustments || 0);
+    total += finalAmount;
+    row.querySelector('.prod-earnings').textContent = formatMoney(finalAmount);
+  });
+  document.getElementById('this-week-total').textContent = formatMoney(total);
+  // update invoice preview earnings (not saved yet)
+  renderInvoicePreview();
+  // Update dashboard summary
+  renderDashboard();
+});
+
+/* Restore weekly inputs: zero all worker pounds and earnings and week total */
+document.getElementById('restore-weekly-btn').addEventListener('click', ()=>{
+  appState.productionInputs = Object.fromEntries(appState.workers.map(w=>[w.id,0]));
+  document.querySelectorAll('.prod-pounds').forEach(inp => inp.value = '0');
+  document.querySelectorAll('.prod-earnings').forEach(td => td.textContent = formatMoney(0));
+  document.getElementById('this-week-total').textContent = formatMoney(0);
+  renderInvoicePreview();
+  renderDashboard();
+});
+
+/* Rates: Set Rates button updates worker rates and saves to storage */
+document.getElementById('set-rates-btn').addEventListener('click', ()=>{
+  document.querySelectorAll('.rate-input').forEach(inp=>{
+    const id = inp.dataset.worker;
+    const val = parseFloat(inp.value) || 0;
+    const w = appState.workers.find(x=>x.id===id);
+    if(w) w.rate = val;
+  });
+  appState.ratesSavedAt = new Date().toISOString();
+  saveState(); // commit rates
+  // refresh production rates column
+  renderProductionInputs();
+});
+
+/* Reset rates to zero */
+document.getElementById('restore-rate-defaults').addEventListener('click', ()=>{
+  appState.workers.forEach(w=> w.rate = 0);
+  renderRatesTable();
+  renderProductionInputs();
+});
+
+/* Expenses: Update only when the Update Expenses button is pressed */
+document.getElementById('update-expenses-btn').addEventListener('click', ()=>{
+  appState.expenses.electricity = parseFloat(document.getElementById('expense-electricity').value) || 0;
+  appState.expenses.maintenance = parseFloat(document.getElementById('expense-maintenance').value) || 0;
+  appState.expenses.other = parseFloat(document.getElementById('expense-other').value) || 0;
+  saveState();
+});
+
+/* Restore Expenses (sets inputs to zero but does not save unless user presses Update Expenses) */
+document.getElementById('restore-expenses-btn').addEventListener('click', ()=>{
+  appState.expenses = { electricity: 0, maintenance: 0, other: 0 };
+  document.getElementById('expense-electricity').value = Number(0).toFixed(2);
+  document.getElementById('expense-maintenance').value = Number(0).toFixed(2);
+  document.getElementById('expense-other').value = Number(0).toFixed(2);
+  renderExpenses();
+  renderDashboard();
+});
+
+/* Workers: Save names (applies edits across UI & state) */
+document.getElementById('save-names-btn').addEventListener('click', ()=>{
+  const nameCells = document.querySelectorAll('.worker-name-edit');
+  nameCells.forEach(cell=>{
+    const id = cell.dataset.workerId;
+    const text = (cell.textContent || '').trim() || 'Unnamed';
+    const w = appState.workers.find(x=>x.id===id);
+    if(w) w.name = text;
+  });
+  saveState();
+});
+
+/* Generate invoice ID */
+function generateInvoiceNumber(){
+  return 'INV-' + Math.floor(100000 + Math.random()*900000);
+}
+
+/* Save invoice: when user presses Save Invoice */
+document.getElementById('save-invoice-btn').addEventListener('click', ()=>{
+  const invoice = {
+    id: generateInvoiceNumber(),
+    date: formatDateISO(),
+    period: getWeekPeriodText(),
+    workers: [],
+    total: 0
+  };
+  appState.workers.forEach(w=>{
+    const pounds = Number(appState.productionInputs[w.id] || 0);
+    const earnings = pounds * Number(w.rate || 0);
+    const adjustment = Number(w.adjustments || 0);
+    const final = earnings - adjustment;
+    invoice.workers.push({ id: w.id, name: w.name, pounds, rate: w.rate, earnings, adjustment, final });
+    invoice.total += final;
+  });
+
+  // save invoice to app state
+  appState.invoices.unshift(invoice); // most recent first
+
+  // update per-worker billing history
+  invoice.workers.forEach(workerRec=>{
+    const rec = {
+      date: invoice.date,
+      pounds: workerRec.pounds,
+      earnings: workerRec.earnings,
+      adjustments: workerRec.adjustment,
+      total: workerRec.final
+    };
+    appState.billingHistory[workerRec.id] = appState.billingHistory[workerRec.id] || [];
+    appState.billingHistory[workerRec.id].unshift(rec);
+  });
+
+  saveState();
+  // go to dashboard and show updated table
+  document.querySelector('[data-page="dashboard"]').click();
+});
+
+/* Print invoice: print the invoice preview area only */
+document.getElementById('print-invoice-btn').addEventListener('click', ()=>{
+  window.print();
+});
+
+/* Switch to invoice page from production */
+document.getElementById('switch-to-invoice').addEventListener('click', ()=>{
+  document.querySelector('[data-page="invoice"]').click();
+});
+
+/* Delete invoice */
+function deleteInvoice(index){
+  if(!confirm('Delete this invoice?')) return;
+  appState.invoices.splice(index,1);
+  saveState();
+}
+window.deleteInvoice = deleteInvoice;
+
+/* Delete worker history entry */
+function deleteWorkerHistory(workerId, histIndex){
+  if(!confirm('Delete this history entry?')) return;
+  appState.billingHistory[workerId].splice(histIndex,1);
+  saveState();
+}
+window.deleteWorkerHistory = deleteWorkerHistory;
+
+/* Settings buttons */
+document.getElementById('clear-storage-btn').addEventListener('click', ()=>{
+  if(!confirm('Clear all app data from local storage?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  appState = defaultState();
+  renderAll();
+});
+document.getElementById('load-defaults-btn').addEventListener('click', ()=>{
+  if(!confirm('Load built-in defaults? This will overwrite current in-memory state (not saved unless you Save App State).')) return;
+  appState = defaultState();
+  renderAll();
+});
+
+/* Confirm modal helpers */
+const confirmModal = document.getElementById('confirm-modal');
+const confirmText = document.getElementById('confirm-text');
+const confirmOk = document.getElementById('confirm-ok');
+const confirmCancel = document.getElementById('confirm-cancel');
+confirmCancel.addEventListener('click', ()=> confirmModal.style.display = 'none');
+confirmOk.addEventListener('click', ()=> confirmModal.style.display = 'none');
+
+/* ---------------------------
+   Small helpers + security
+   --------------------------- */
+function escapeHtml(str){
+  if(!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+/* ---------------------------
+   Initialization
+   --------------------------- */
+function init(){
+  if(!appState) appState = defaultState();
+  appState.workers = appState.workers || defaultState().workers;
+  appState.productionInputs = appState.productionInputs || defaultState().productionInputs;
+  appState.mohajon = appState.mohajon || defaultState().mohajon;
+  appState.expenses = appState.expenses || defaultState().expenses;
+  appState.invoices = appState.invoices || [];
+  appState.billingHistory = appState.billingHistory || defaultState().billingHistory;
+
+  document.getElementById('mohajon-rate').value = Number(appState.mohajon.rate || 0).toFixed(2);
+  document.getElementById('mohajon-total-production').value = Number(appState.mohajon.totalProduction || 0).toFixed(2);
+  document.getElementById('mohajon-amount').textContent = formatMoney(appState.mohajon.amount || 0);
+
+  renderAll();
+
+  const totalProd = Object.values(appState.productionInputs).reduce((s,x)=>s+Number(x||0),0);
+  document.getElementById('mohajon-total-production').value = Number(totalProd).toFixed(2);
+}
+
+/* Generate friendly invoice id (short) - single definition kept */
+function generateInvoiceNumber(){
+  return 'INV-' + Math.floor(100000 + Math.random()*900000);
+}
+
+// On page load
+document.addEventListener('DOMContentLoaded',()=>{
+  init();
+});
+
+/* Initial render */
+renderAll();
+</script>
+</body>
+</html>
