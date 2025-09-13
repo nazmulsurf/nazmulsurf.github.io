@@ -4,6 +4,10 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Billing & Production — Nazmul Twisting Mill</title>
+
+<!-- Default favicon (user-specified name: assets/favicon.png) -->
+<link id="favico" rel="icon" href="assets/favicon.png" type="image/png" />
+
 <style>
   :root{
     --bg: #ffffff;
@@ -32,9 +36,16 @@
     border-radius:var(--radius);
     margin-bottom:16px;
     text-align:center;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:center;
   }
   header h1{margin:0;font-size:20px;font-weight:600}
   header p{margin:2px 0;font-size:13px;opacity:.9}
+  header .logo{width:56px;height:56px;border-radius:8px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center}
+  header .logo img{max-width:48px;max-height:48px;display:block}
+
   .nav{
     display:flex;
     gap:8px;
@@ -75,7 +86,7 @@
   }
 
   label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
-  input[type="number"], input[type="text"]{
+  input[type="number"], input[type="text"], input[type="password"], textarea{
     width:100%;
     padding:8px 10px;
     border-radius:6px;
@@ -124,14 +135,24 @@
   }
 
   .muted-small{ color:var(--muted); font-size:13px }
+  .company-header { display:flex; gap:12px; align-items:center; margin-bottom:8px; }
+  .company-header img { width:72px; height:72px; border-radius:8px; object-fit:contain; }
+  .settings-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:860px){ .settings-grid{ grid-template-columns:1fr } }
+
 </style>
 </head>
 <body>
 <div class="container">
 
   <header>
-    <h1>Nazmul Twisting Mill Ltd — Billing & Production</h1>
-    <p class="small">Old Bogura Road, Telkupi — Phone: (+880) 1766759293 — Email: nazmul.fig@gmail.com</p>
+    <div class="logo">
+      <img id="header-logo" src="assets/favicon.png" alt="Company logo" onerror="this.style.display='none'"/>
+    </div>
+    <div style="text-align:left">
+      <h1 id="header-name">Nazmul Twisting Mill Ltd — Billing & Production</h1>
+      <p class="small" id="header-contact">Old Bogura Road, Telkupi — Phone: (+880) 1766759293 — Email: nazmul.fig@gmail.com</p>
+    </div>
   </header>
 
   <nav class="nav" role="navigation" aria-label="Main">
@@ -141,6 +162,7 @@
     <button class="nav-btn" data-page="rates">Rates</button>
     <button class="nav-btn" data-page="expenses">Expenses</button>
     <button class="nav-btn" data-page="bill-summary">Bill Summary</button>
+    <button class="nav-btn" data-page="settings">Settings</button>
   </nav>
 
   <!-- DASHBOARD -->
@@ -328,6 +350,15 @@
     <p class="lead">A printable summary that includes Mohajon, worker production, expenses and net revenue. Save summaries to the dashboard for later download or printing.</p>
 
     <div class="card printable" id="bill-summary-card">
+      <div class="company-header">
+        <img id="bs-logo" src="assets/favicon.png" alt="logo" onerror="this.style.display='none'"/>
+        <div>
+          <div style="font-weight:700" id="company-name-display">Nazmul Twisting Mill Ltd</div>
+          <div class="muted-small" id="company-address-display">Old Bogura Road, Telkupi</div>
+          <div class="muted-small" id="company-contact-display">Phone: (+880) 1766759293 — Email: nazmul.fig@gmail.com</div>
+        </div>
+      </div>
+
       <h3 style="margin-top:0">Mohajon</h3>
       <table>
         <thead><tr><th>Rate (৳/pound)</th><th>Total Production (pounds)</th><th>Total Amount (৳)</th></tr></thead>
@@ -380,7 +411,63 @@
 
       <div class="actions" style="margin-top:12px">
         <button class="btn" id="print-summary-btn">Print Summary</button>
-        <button class="btn secondary" id="save-summary-btn">Save Summary to Dashboard</button>
+        <button class="btn secondary" id="save-summary-btn">Save Summary</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="settings" class="page">
+    <h2>Settings</h2>
+    <p class="lead">Update company details and site settings. Uploaded logo images will be saved and used as the site favicon and logo in printouts.</p>
+
+    <div class="card">
+      <div class="settings-grid">
+        <div>
+          <label>Company Name</label>
+          <input type="text" id="setting-company-name" />
+
+          <label style="margin-top:8px">Address</label>
+          <textarea id="setting-company-address" rows="2"></textarea>
+
+          <label style="margin-top:8px">Phone</label>
+          <input type="text" id="setting-company-phone" />
+
+          <label style="margin-top:8px">Email</label>
+          <input type="text" id="setting-company-email" />
+        </div>
+
+        <div>
+          <label>Logo path (type a path like <code>assets/favicon.png</code>)</label>
+          <input type="text" id="setting-company-logo-path" placeholder="assets/favicon.png" />
+
+          <label style="margin-top:8px">Or upload a logo image (jpg/png)</label>
+          <input type="file" id="setting-company-logo-file" accept="image/*" />
+
+          <div style="margin-top:12px">
+            <label>Current Favicon Preview</label>
+            <div style="display:flex;gap:12px;align-items:center;margin-top:8px">
+              <img id="settings-logo-preview" src="assets/favicon.png" alt="logo preview" style="width:72px;height:72px;object-fit:contain;border-radius:8px" onerror="this.style.display='none'"/>
+              <div class="muted-small" id="settings-current-logo-path">assets/favicon.png</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px">
+        <h4>Password & Security</h4>
+        <label>Current delete password (masked)</label>
+        <input type="password" id="setting-delete-password-current" placeholder="Enter current to change" />
+
+        <label style="margin-top:8px">New delete password</label>
+        <input type="password" id="setting-delete-password-new" placeholder="Leave blank to keep same" />
+
+        <div class="small" style="margin-top:8px">Note: This password is required when deleting saved summaries, invoices, or worker history entries.</div>
+
+        <div class="actions" style="margin-top:12px">
+          <button class="btn" id="save-settings-btn">Save Settings</button>
+          <button class="btn secondary" id="reset-defaults-btn">Reset App to Defaults</button>
+        </div>
       </div>
     </div>
   </section>
@@ -390,7 +477,7 @@
 <!-- Hidden: area used to render single-worker invoice for printing -->
 <div id="worker-invoice-area" style="display:none"></div>
 
-<!-- Modal: confirm delete -->
+<!-- Modal: confirm delete (not used for password prompt fallback) -->
 <div class="modal" id="confirm-modal">
   <div class="box">
     <div id="confirm-text">Are you sure?</div>
@@ -405,9 +492,17 @@
 /* ---------------------------
    App data model + persistence
    --------------------------- */
-const STORAGE_KEY = 'ntm_app_v1';
+const STORAGE_KEY = 'ntm_app_v2';
 
 const defaultState = () => ({
+  company: {
+    name: 'Nazmul Twisting Mill Ltd',
+    address: 'Old Bogura Road, Telkupi',
+    phone: '(+880) 1766759293',
+    email: 'nazmul.fig@gmail.com',
+    logo: 'assets/favicon.png' // default to user's favicon name
+  },
+  deletePassword: '1234', // default password (configurable)
   workers: [
     { id: 'w1', name: 'Name_1', role: 'Machine', rate: 0, adjustments: 0 },
     { id: 'w2', name: 'Name_2', role: 'Machine', rate: 0, adjustments: 0 },
@@ -419,9 +514,9 @@ const defaultState = () => ({
   productionInputs: { 'w1': 0, 'w2': 0, 'w3': 0, 'w4': 0, 'w5': 0 },
   mohajon: { rate: 0, totalProduction: 0, amount: 0 },
   expenses: { electricity: 0, maintenance: 0, other: 0 },
-  invoices: [], // weekly invoices saved earlier (kept for compatibility)
+  invoices: [],
   billingHistory: { 'w1': [], 'w2': [], 'w3': [], 'w4': [], 'w5': [] },
-  summaries: [] // new: saved bill summaries
+  summaries: []
 });
 
 let appState = loadState() || defaultState();
@@ -443,8 +538,26 @@ function loadState() {
   }
 }
 function resetStateToDefaults() {
+  if(!confirm('Reset the entire app to defaults? This will remove saved summaries and settings.')) return;
   appState = defaultState();
   saveState();
+  // reload to reflect favicon reset
+  location.reload();
+}
+
+/* update favicon <link> */
+function updateFavicon(url){
+  const link = document.getElementById('favico') || document.querySelector('link[rel="icon"]');
+  if(link){
+    link.href = url;
+  } else {
+    const l = document.createElement('link');
+    l.id = 'favico';
+    l.rel = 'icon';
+    l.href = url;
+    l.type = 'image/png';
+    document.head.appendChild(l);
+  }
 }
 
 /* ---------------------------
@@ -459,6 +572,7 @@ document.querySelectorAll('.nav-btn').forEach(btn=>{
     const el = document.getElementById(page);
     if(el) el.classList.add('active');
     if(page === 'bill-summary') renderBillSummary();
+    if(page === 'settings') populateSettingsForm();
   });
 });
 
@@ -474,6 +588,7 @@ function renderAll() {
   renderBillSummary();
   renderWeeklyInvoicesTable();
   renderSavedSummariesTable();
+  applyCompanyHeader();
 }
 function formatMoney(n){ return '৳' + Number(n || 0).toFixed(2); }
 function formatDateISO(d=new Date()){ return d.toLocaleDateString() + ' ' + d.toLocaleTimeString(); }
@@ -482,6 +597,29 @@ function getWeekPeriodText(d=new Date()){
   const start = new Date(d);
   start.setDate(end.getDate() - 6);
   return `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+}
+
+/* Apply company info to header & print sections */
+function applyCompanyHeader(){
+  const c = appState.company || {};
+  const headerName = document.getElementById('header-name');
+  const headerContact = document.getElementById('header-contact');
+  const headerLogo = document.getElementById('header-logo');
+  const bsLogo = document.getElementById('bs-logo');
+  const compName = document.getElementById('company-name-display');
+  const compAddr = document.getElementById('company-address-display');
+  const compContact = document.getElementById('company-contact-display');
+
+  if(headerName) headerName.textContent = (c.name || 'Company') + ' — Billing & Production';
+  if(headerContact) headerContact.textContent = `${c.address || ''} — Phone: ${c.phone || ''} — Email: ${c.email || ''}`;
+  if(headerLogo) { headerLogo.src = c.logo || ''; headerLogo.style.display = c.logo ? '' : 'none'; }
+  if(bsLogo) { bsLogo.src = c.logo || ''; bsLogo.style.display = c.logo ? '' : 'none'; }
+  if(compName) compName.textContent = c.name || '';
+  if(compAddr) compAddr.textContent = c.address || '';
+  if(compContact) compContact.textContent = `Phone: ${c.phone || ''} — Email: ${c.email || ''}`;
+
+  // update favicon link
+  if(c.logo) updateFavicon(c.logo);
 }
 
 /* DASHBOARD */
@@ -537,6 +675,7 @@ function showWorkerDetails(workerId){
   const history = appState.billingHistory[workerId] || [];
   let html = `<div class="small">Name</div><div style="font-weight:700">${escapeHtml(w.name)} (${w.role})</div>`;
   html += `<div style="margin-top:8px"><div class="small">Rate</div><div>${formatMoney(w.rate)}/pound</div></div>`;
+  html += `<div style="margin-top:8px"><div class="small">Adjustments (current)</div><div>${formatMoney(w.adjustments)}</div></div>`;
   html += `<div style="margin-top:10px"><h4 style="margin:6px 0">Billing History</h4>`;
   if(history.length === 0) html += '<div class="small">No history yet</div>';
   else {
@@ -724,7 +863,6 @@ function renderSavedSummariesTable(){
   tbody.innerHTML = '';
   (appState.summaries || []).forEach((s, idx) => {
     const tr = document.createElement('tr');
-    const downloadId = `summary-download-${idx}`;
     tr.innerHTML = `
       <td>${escapeHtml(s.id)}</td>
       <td>${escapeHtml(s.date)}</td>
@@ -799,14 +937,30 @@ document.getElementById('calc-weekly-btn').addEventListener('click', ()=>{
   renderDashboard();
 });
 
-/* Restore weekly inputs: zero all worker pounds and earnings and week total */
+/* Restore weekly inputs: zero all worker pounds and earnings and week total (also adjustments) */
 document.getElementById('restore-weekly-btn').addEventListener('click', ()=>{
+  // Zero production inputs model
   appState.productionInputs = Object.fromEntries(appState.workers.map(w=>[w.id,0]));
+  // Zero adjustments for each worker (persisted)
+  appState.workers.forEach(w => w.adjustments = 0);
+
+  // Update UI inputs (pounds and adjustments)
   document.querySelectorAll('.prod-pounds').forEach(inp => inp.value = '0');
+  document.querySelectorAll('.prod-adjust').forEach(inp => inp.value = '0');
+
+  // Zero earnings display
   document.querySelectorAll('.prod-earnings').forEach(td => td.textContent = formatMoney(0));
   document.getElementById('this-week-total').textContent = formatMoney(0);
+
+  // Also ensure mohajon total production field is updated (optional)
+  document.getElementById('mohajon-total-production').value = Object.values(appState.productionInputs).reduce((s,x)=>s+Number(x||0),0);
+
+  // Re-render bill summary and dashboard
   renderBillSummary();
   renderDashboard();
+
+  // Persist change (user expects restore to persist)
+  saveState();
 });
 
 /* Rates: Set Rates button updates worker rates and saves to storage */
@@ -838,7 +992,7 @@ document.getElementById('update-expenses-btn').addEventListener('click', ()=>{
   saveState();
 });
 
-/* Restore Expenses (sets inputs to zero but does not save unless user presses Update Expenses) */
+/* Restore Expenses (sets inputs to zero and saves) */
 document.getElementById('restore-expenses-btn').addEventListener('click', ()=>{
   appState.expenses = { electricity: 0, maintenance: 0, other: 0 };
   document.getElementById('expense-electricity').value = Number(0).toFixed(2);
@@ -846,6 +1000,7 @@ document.getElementById('restore-expenses-btn').addEventListener('click', ()=>{
   document.getElementById('expense-other').value = Number(0).toFixed(2);
   renderExpenses();
   renderDashboard();
+  saveState();
 });
 
 /* Workers: Save names (applies edits across UI & state) */
@@ -860,13 +1015,14 @@ document.getElementById('save-names-btn').addEventListener('click', ()=>{
   saveState();
 });
 
-/* Save Bill Summary to appState.summaries */
+/* Save Bill Summary to appState.summaries (button renamed to Save Summary) */
 document.getElementById('save-summary-btn').addEventListener('click', ()=>{
   // create snapshot
   const summary = {
     id: 'BS-' + Math.floor(100000 + Math.random()*900000),
     date: formatDateISO(),
     period: getWeekPeriodText(),
+    company: {...(appState.company || {})},
     mohajon: { ...appState.mohajon },
     workers: [],
     expenses: { ...appState.expenses },
@@ -905,7 +1061,7 @@ document.getElementById('save-summary-btn').addEventListener('click', ()=>{
 document.getElementById('print-summary-btn').addEventListener('click', ()=>{
   // ensure bill summary is rendered
   renderBillSummary();
-  // temporary add printable class to card, then print (CSS handles visibility)
+  // print
   window.print();
 });
 
@@ -934,7 +1090,15 @@ function printSavedSummary(index){
   const printable = document.createElement('div');
   printable.className = 'printable';
   printable.innerHTML = `<div style="padding:18px; font-family:inherit">
-    <h2>Bill Summary - ${escapeHtml(s.id)}</h2>
+    <div style="display:flex;gap:12px;align-items:center">
+      <img src="${escapeHtml(s.company && s.company.logo || appState.company.logo)}" style="width:72px;height:72px;object-fit:contain" onerror="this.style.display='none'"/>
+      <div>
+        <h2 style="margin:0">${escapeHtml(s.company && s.company.name || appState.company.name)}</h2>
+        <div class="muted-small">${escapeHtml(s.company && s.company.address || appState.company.address)}</div>
+        <div class="muted-small">Phone: ${escapeHtml(s.company && s.company.phone || appState.company.phone)} — Email: ${escapeHtml(s.company && s.company.email || appState.company.email)}</div>
+      </div>
+    </div>
+    <div class="muted-small" style="margin-top:8px">Bill Summary - ${escapeHtml(s.id)}</div>
     <div class="muted-small">Date: ${escapeHtml(s.date)} | Period: ${escapeHtml(s.period)}</div>
     <h3>Mohajon</h3>
     <table><thead><tr><th>Rate</th><th>Total Production</th><th>Total</th></tr></thead>
@@ -956,8 +1120,10 @@ function printSavedSummary(index){
 }
 window.printSavedSummary = printSavedSummary;
 
-/* Delete saved summary */
+/* Delete saved summary (requires configured password) */
 function deleteSavedSummary(index){
+  const password = prompt('Enter delete password to remove this saved summary:');
+  if(password !== (appState.deletePassword || '1234')) { alert('Incorrect password. Deletion cancelled.'); return; }
   if(!confirm('Delete this saved summary?')) return;
   appState.summaries.splice(index,1);
   saveState();
@@ -969,16 +1135,20 @@ document.getElementById('switch-to-billsummary').addEventListener('click', ()=>{
   document.querySelector('[data-page="bill-summary"]').click();
 });
 
-/* Delete invoice (legacy) */
+/* Delete invoice - requires configured password */
 function deleteInvoice(index){
+  const password = prompt('Enter delete password to remove this invoice:');
+  if(password !== (appState.deletePassword || '1234')) { alert('Incorrect password. Deletion cancelled.'); return; }
   if(!confirm('Delete this invoice?')) return;
   appState.invoices.splice(index,1);
   saveState();
 }
 window.deleteInvoice = deleteInvoice;
 
-/* Delete worker history entry */
+/* Delete worker history entry - requires configured password */
 function deleteWorkerHistory(workerId, histIndex){
+  const password = prompt('Enter delete password to remove this history entry:');
+  if(password !== (appState.deletePassword || '1234')) { alert('Incorrect password. Deletion cancelled.'); return; }
   if(!confirm('Delete this history entry?')) return;
   appState.billingHistory[workerId].splice(histIndex,1);
   saveState();
@@ -986,19 +1156,32 @@ function deleteWorkerHistory(workerId, histIndex){
 window.deleteWorkerHistory = deleteWorkerHistory;
 
 /* Print single worker's saved weekly invoice (from billing history) */
-/* This prints only the selected worker record (weekly). No expenses or bank info included. */
+/* Prints only the selected worker record (weekly). Includes company header and unique invoice number. */
 function printWorkerInvoice(workerId, historyIndex){
   const hist = (appState.billingHistory[workerId] || [])[historyIndex];
   if(!hist) return;
   const worker = appState.workers.find(w => w.id === workerId) || { name: 'Worker' };
+  const invoiceId = generateShortId('INV');
   const printable = document.createElement('div');
   printable.className = 'printable';
   printable.style.padding = '18px';
   printable.innerHTML = `
     <div style="font-family:inherit">
-      <h2>Worker Invoice</h2>
-      <div class="muted-small">Worker: ${escapeHtml(worker.name)}</div>
-      <div class="muted-small">Date: ${escapeHtml(hist.date)}</div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <img src="${escapeHtml(appState.company && appState.company.logo)}" style="width:72px;height:72px;object-fit:contain" onerror="this.style.display='none'"/>
+        <div>
+          <h2 style="margin:0">${escapeHtml(appState.company && appState.company.name)}</h2>
+          <div class="muted-small">${escapeHtml(appState.company && appState.company.address)}</div>
+          <div class="muted-small">Phone: ${escapeHtml(appState.company && appState.company.phone)} — Email: ${escapeHtml(appState.company && appState.company.email)}</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="muted-small">Invoice: <strong>${escapeHtml(invoiceId)}</strong></div>
+        <div class="muted-small">Worker: <strong>${escapeHtml(worker.name)}</strong></div>
+        <div class="muted-small">Date: ${escapeHtml(hist.date)}</div>
+      </div>
+
       <table style="margin-top:12px">
         <thead><tr><th>Description</th><th>Value</th></tr></thead>
         <tbody>
@@ -1008,6 +1191,7 @@ function printWorkerInvoice(workerId, historyIndex){
           <tr><th>Total</th><th>${formatMoney(hist.total)}</th></tr>
         </tbody>
       </table>
+
       <div style="margin-top:36px">
         <div style="width:300px">
           <div style="border-top:1px solid #000; margin-top:48px;"></div>
@@ -1022,21 +1206,83 @@ function printWorkerInvoice(workerId, historyIndex){
 }
 window.printWorkerInvoice = printWorkerInvoice;
 
-/* Settings buttons (removed) - not present */
+/* ---------------------------
+   Settings form handling
+   --------------------------- */
+function populateSettingsForm(){
+  const c = appState.company || {};
+  document.getElementById('setting-company-name').value = c.name || '';
+  document.getElementById('setting-company-address').value = c.address || '';
+  document.getElementById('setting-company-phone').value = c.phone || '';
+  document.getElementById('setting-company-email').value = c.email || '';
+  document.getElementById('setting-company-logo-path').value = c.logo || '';
+  document.getElementById('settings-logo-preview').src = c.logo || '';
+  document.getElementById('settings-current-logo-path').textContent = c.logo || '';
+  // clear file input
+  document.getElementById('setting-company-logo-file').value = '';
+  // clear password fields
+  document.getElementById('setting-delete-password-current').value = '';
+  document.getElementById('setting-delete-password-new').value = '';
+}
 
-/* Confirm modal helpers */
-const confirmModal = document.getElementById('confirm-modal');
-const confirmText = document.getElementById('confirm-text');
-const confirmOk = document.getElementById('confirm-ok');
-const confirmCancel = document.getElementById('confirm-cancel');
-confirmCancel.addEventListener('click', ()=> confirmModal.style.display = 'none');
-confirmOk.addEventListener('click', ()=> confirmModal.style.display = 'none');
+/* handle logo file upload -> convert to dataURL and update preview */
+document.getElementById('setting-company-logo-file').addEventListener('change', (e)=>{
+  const f = e.target.files && e.target.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const dataUrl = ev.target.result;
+    document.getElementById('settings-logo-preview').src = dataUrl;
+    document.getElementById('setting-company-logo-path').value = dataUrl;
+  };
+  reader.readAsDataURL(f);
+});
+
+/* Save settings button */
+document.getElementById('save-settings-btn').addEventListener('click', ()=>{
+  const currentCheck = document.getElementById('setting-delete-password-current').value || '';
+  const newPass = (document.getElementById('setting-delete-password-new').value || '').trim();
+
+  // If user attempts to change password, require matching current
+  if(newPass){
+    if(currentCheck !== (appState.deletePassword || '1234')){
+      alert('Current password does not match. Cannot change delete password.');
+      return;
+    }
+    appState.deletePassword = newPass;
+    alert('Delete password updated.');
+  }
+
+  // apply company info
+  const name = document.getElementById('setting-company-name').value || '';
+  const address = document.getElementById('setting-company-address').value || '';
+  const phone = document.getElementById('setting-company-phone').value || '';
+  const email = document.getElementById('setting-company-email').value || '';
+  const logoPath = document.getElementById('setting-company-logo-path').value || '';
+
+  appState.company = appState.company || {};
+  appState.company.name = name;
+  appState.company.address = address;
+  appState.company.phone = phone;
+  appState.company.email = email;
+  if(logoPath) appState.company.logo = logoPath;
+
+  // apply immediately
+  applyCompanyHeader();
+  saveState();
+  alert('Settings saved.');
+});
+
+/* Reset app default button */
+document.getElementById('reset-defaults-btn').addEventListener('click', ()=>{
+  resetStateToDefaults();
+});
 
 /* ---------------------------
    Small helpers + security
    --------------------------- */
 function escapeHtml(str){
-  if(!str) return '';
+  if(!str && str !== 0) return '';
   return String(str)
     .replace(/&/g,'&amp;')
     .replace(/</g,'&lt;')
@@ -1057,6 +1303,8 @@ function init(){
   appState.invoices = appState.invoices || [];
   appState.billingHistory = appState.billingHistory || defaultState().billingHistory;
   appState.summaries = appState.summaries || [];
+  appState.company = appState.company || defaultState().company;
+  if(!appState.deletePassword) appState.deletePassword = defaultState().deletePassword;
 
   document.getElementById('mohajon-rate').value = Number(appState.mohajon.rate || 0).toFixed(2);
   document.getElementById('mohajon-total-production').value = Number(appState.mohajon.totalProduction || 0).toFixed(2);
@@ -1066,6 +1314,7 @@ function init(){
   const totalProd = Object.values(appState.productionInputs).reduce((s,x)=>s+Number(x||0),0);
   document.getElementById('mohajon-total-production').value = Number(totalProd).toFixed(2);
 
+  applyCompanyHeader();
   renderAll();
 }
 
@@ -1079,6 +1328,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   init();
 });
 
+// Expose delete functions to window
 renderAll();
 </script>
 </body>
