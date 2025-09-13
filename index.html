@@ -116,12 +116,14 @@
     .grid.cols-4{ grid-template-columns:repeat(2,1fr) }
   }
 
-  /* Print only invoice section */
+  /* Print control: show only printable area */
   @media print{
     body * { visibility: hidden !important; }
-    #invoice, #invoice * { visibility: visible !important; }
-    #invoice { position: absolute; left: 0; top: 0; width: 100%; }
+    .printable, .printable * { visibility: visible !important; }
+    .printable { position: absolute; left: 0; top: 0; width: 100%; }
   }
+
+  .muted-small{ color:var(--muted); font-size:13px }
 </style>
 </head>
 <body>
@@ -138,8 +140,7 @@
     <button class="nav-btn" data-page="production">Production</button>
     <button class="nav-btn" data-page="rates">Rates</button>
     <button class="nav-btn" data-page="expenses">Expenses</button>
-    <button class="nav-btn" data-page="invoice">Invoice</button>
-    <button class="nav-btn" data-page="settings">Settings</button>
+    <button class="nav-btn" data-page="bill-summary">Bill Summary</button>
   </nav>
 
   <!-- DASHBOARD -->
@@ -175,6 +176,17 @@
         </table>
       </div>
     </div>
+
+    <div style="margin-top:18px">
+      <h3 style="margin-bottom:10px">Saved Bill Summaries</h3>
+      <div id="saved-summaries-list" class="card">
+        <table id="saved-summaries-table">
+          <thead><tr><th>Summary ID</th><th>Date</th><th>Period</th><th>Total Income</th><th>Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
   </section>
 
   <!-- WORKERS -->
@@ -192,7 +204,6 @@
         </table>
         <div class="actions" style="margin-top:10px">
           <button class="btn" id="save-names-btn">Save Names</button>
-          <!-- Revert removed per request -->
         </div>
       </div>
 
@@ -255,7 +266,7 @@
     </div>
 
     <div style="margin-top:12px">
-      <button class="btn" id="switch-to-invoice">Generate Invoice (go to Invoice page)</button>
+      <button class="btn" id="switch-to-billsummary">Generate Bill Summary (go to Bill Summary page)</button>
     </div>
   </section>
 
@@ -311,66 +322,73 @@
     </div>
   </section>
 
-  <!-- INVOICE -->
-  <section id="invoice" class="page">
-    <h2>Invoice</h2>
-    <p class="lead">Review and save the weekly invoice (saving updates histories).</p>
+  <!-- BILL SUMMARY -->
+  <section id="bill-summary" class="page">
+    <h2>Bill Summary</h2>
+    <p class="lead">A printable summary that includes Mohajon, worker production, expenses and net revenue. Save summaries to the dashboard for later download or printing.</p>
 
-    <div class="card">
-      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
-        <div>
-          <label>Invoice #</label>
-          <input type="text" id="invoice-number" readonly />
-        </div>
-        <div>
-          <label>Date</label>
-          <input type="text" id="invoice-date" readonly />
-        </div>
-        <div>
-          <label>Period</label>
-          <input type="text" id="invoice-period" readonly />
-        </div>
+    <div class="card printable" id="bill-summary-card">
+      <h3 style="margin-top:0">Mohajon</h3>
+      <table>
+        <thead><tr><th>Rate (৳/pound)</th><th>Total Production (pounds)</th><th>Total Amount (৳)</th></tr></thead>
+        <tbody>
+          <tr>
+            <td id="bs-mohajon-rate">৳0.00</td>
+            <td id="bs-total-production">0.00</td>
+            <td id="bs-total-amount">৳0.00</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top:12px">Workers Production</h3>
+      <table>
+        <thead><tr><th>Worker</th><th>Role</th><th>Pounds</th><th>Rate</th><th>Earnings</th><th>Adjustment</th><th>Final Amount</th></tr></thead>
+        <tbody id="bill-summary-workers-body"></tbody>
+        <tfoot>
+          <tr>
+            <th colspan="6" style="text-align:right">Subtotal</th>
+            <th id="bs-workers-subtotal">৳0.00</th>
+          </tr>
+        </tfoot>
+      </table>
+
+      <h3 style="margin-top:12px">Expenses</h3>
+      <table>
+        <thead><tr><th>Electricity</th><th>Maintenance</th><th>Other</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr>
+            <td id="bs-exp-elec">৳0.00</td>
+            <td id="bs-exp-maint">৳0.00</td>
+            <td id="bs-exp-other">৳0.00</td>
+            <td id="bs-exp-total">৳0.00</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top:12px">Summary</h3>
+      <table>
+        <thead><tr><th>Income</th><th>Payments to Workers</th><th>Expenses</th><th>Net Revenue</th></tr></thead>
+        <tbody>
+          <tr>
+            <td id="bs-income">৳0.00</td>
+            <td id="bs-payments">৳0.00</td>
+            <td id="bs-expenses">৳0.00</td>
+            <td id="bs-net">৳0.00</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="actions" style="margin-top:12px">
+        <button class="btn" id="print-summary-btn">Print Summary</button>
+        <button class="btn secondary" id="save-summary-btn">Save Summary to Dashboard</button>
       </div>
-
-      <div style="margin-top:12px">
-        <table>
-          <thead><tr><th>Worker</th><th>Role</th><th>Pounds</th><th>Rate</th><th>Earnings</th><th>Adjustment</th><th>Final Amount</th></tr></thead>
-          <tbody id="invoice-table-body"></tbody>
-          <tfoot id="invoice-tfoot"></tfoot>
-        </table>
-
-        <!-- Signature area -->
-        <div id="signature-area">
-          <div class="signature-box">
-            <div class="signature-line"></div>
-            <div class="small">Authorized Signature</div>
-          </div>
-          <div class="signature-box">
-            <div class="signature-line"></div>
-            <div class="small">Receiver Signature</div>
-          </div>
-        </div>
-
-        <div class="actions" style="margin-top:12px">
-          <button class="btn" id="save-invoice-btn">Save Invoice</button>
-          <button class="btn secondary" id="print-invoice-btn">Print</button>
-          <!-- Save app state removed per request -->
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SETTINGS (developer conveniences) -->
-  <section id="settings" class="page">
-    <h2>Settings</h2>
-    <p class="small">Local storage controls</p>
-    <div class="actions">
-      <button class="btn secondary" id="clear-storage-btn">Clear All Local Storage</button>
-      <button class="btn" id="load-defaults-btn">Load Defaults</button>
     </div>
   </section>
 
 </div>
+
+<!-- Hidden: area used to render single-worker invoice for printing -->
+<div id="worker-invoice-area" style="display:none"></div>
 
 <!-- Modal: confirm delete -->
 <div class="modal" id="confirm-modal">
@@ -401,8 +419,9 @@ const defaultState = () => ({
   productionInputs: { 'w1': 0, 'w2': 0, 'w3': 0, 'w4': 0, 'w5': 0 },
   mohajon: { rate: 0, totalProduction: 0, amount: 0 },
   expenses: { electricity: 0, maintenance: 0, other: 0 },
-  invoices: [],
-  billingHistory: { 'w1': [], 'w2': [], 'w3': [], 'w4': [], 'w5': [] }
+  invoices: [], // weekly invoices saved earlier (kept for compatibility)
+  billingHistory: { 'w1': [], 'w2': [], 'w3': [], 'w4': [], 'w5': [] },
+  summaries: [] // new: saved bill summaries
 });
 
 let appState = loadState() || defaultState();
@@ -437,8 +456,9 @@ document.querySelectorAll('.nav-btn').forEach(btn=>{
     btn.classList.add('active');
     const page = btn.dataset.page;
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-    document.getElementById(page).classList.add('active');
-    if(page === 'invoice') renderInvoicePreview();
+    const el = document.getElementById(page);
+    if(el) el.classList.add('active');
+    if(page === 'bill-summary') renderBillSummary();
   });
 });
 
@@ -451,8 +471,9 @@ function renderAll() {
   renderProductionInputs();
   renderRatesTable();
   renderExpenses();
-  renderInvoicePreview();
+  renderBillSummary();
   renderWeeklyInvoicesTable();
+  renderSavedSummariesTable();
 }
 function formatMoney(n){ return '৳' + Number(n || 0).toFixed(2); }
 function formatDateISO(d=new Date()){ return d.toLocaleDateString() + ' ' + d.toLocaleTimeString(); }
@@ -528,8 +549,8 @@ function showWorkerDetails(workerId){
         <td>${formatMoney(rec.adjustments)}</td>
         <td>${formatMoney(rec.total)}</td>
         <td>
-          <!-- Edit removed per request; keep Delete -->
           <button class="btn small secondary" onclick="deleteWorkerHistory('${workerId}', ${idx})">Delete</button>
+          <button class="btn small" onclick="printWorkerInvoice('${workerId}', ${idx})">Print</button>
         </td>
       </tr>`;
     });
@@ -558,7 +579,7 @@ function renderProductionInputs(){
     tbody.appendChild(tr);
   });
 
-  // wire up inputs to update internal model as user types
+  // wire up inputs to update internal model as user types (only update stored inputs; earnings calc happens on button)
   document.querySelectorAll('.prod-pounds').forEach(inp=>{
     inp.addEventListener('input', e=>{
       const id = inp.dataset.worker;
@@ -567,7 +588,6 @@ function renderProductionInputs(){
       // update total machine production for convenience
       const total = Object.values(appState.productionInputs).reduce((s,x)=>s+(Number(x)||0),0);
       document.getElementById('mohajon-total-production').value = total;
-      // don't recalc earnings automatically (per requirement)
     });
   });
 
@@ -628,17 +648,23 @@ function renderExpenses(){
   document.getElementById('summary-expenses').textContent = formatMoney(totalExp);
 }
 
-/* INVOICE PREVIEW (not auto-saved) */
-function renderInvoicePreview(){
-  const tbody = document.getElementById('invoice-table-body');
+/* BILL SUMMARY rendering */
+function renderBillSummary(){
+  // Fill Mohajon
+  document.getElementById('bs-mohajon-rate').textContent = formatMoney(appState.mohajon.rate || 0);
+  document.getElementById('bs-total-production').textContent = (Number(appState.mohajon.totalProduction || 0)).toFixed(2);
+  document.getElementById('bs-total-amount').textContent = formatMoney(appState.mohajon.amount || 0);
+
+  // Fill workers table and compute workers subtotal
+  const tbody = document.getElementById('bill-summary-workers-body');
   tbody.innerHTML = '';
-  let totalEarnings = 0;
+  let workersSubtotal = 0;
   appState.workers.forEach(w=>{
     const pounds = Number(appState.productionInputs[w.id] || 0);
     const earnings = pounds * Number(w.rate || 0);
     const adjustment = Number(w.adjustments || 0);
     const finalAmount = earnings - adjustment;
-    totalEarnings += finalAmount;
+    workersSubtotal += finalAmount;
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${escapeHtml(w.name)}</td>
@@ -651,23 +677,26 @@ function renderInvoicePreview(){
     `;
     tbody.appendChild(tr);
   });
+  document.getElementById('bs-workers-subtotal').textContent = formatMoney(workersSubtotal);
 
-  const tfoot = document.getElementById('invoice-tfoot');
-  tfoot.innerHTML = `
-    <tr>
-      <th colspan="6" style="text-align:right">Subtotal</th>
-      <th>${formatMoney(totalEarnings)}</th>
-    </tr>
-    <tr>
-      <th colspan="6" style="text-align:right">Expenses</th>
-      <th>${formatMoney((appState.expenses.electricity||0) + (appState.expenses.maintenance||0) + (appState.expenses.other||0))}</th>
-    </tr>
-  `;
+  // Fill expenses
+  const expElec = Number(appState.expenses.electricity || 0);
+  const expMaint = Number(appState.expenses.maintenance || 0);
+  const expOther = Number(appState.expenses.other || 0);
+  const expTotal = expElec + expMaint + expOther;
+  document.getElementById('bs-exp-elec').textContent = formatMoney(expElec);
+  document.getElementById('bs-exp-maint').textContent = formatMoney(expMaint);
+  document.getElementById('bs-exp-other').textContent = formatMoney(expOther);
+  document.getElementById('bs-exp-total').textContent = formatMoney(expTotal);
 
-  // fill invoice meta fields
-  document.getElementById('invoice-number').value = generateInvoiceNumber();
-  document.getElementById('invoice-date').value = formatDateISO();
-  document.getElementById('invoice-period').value = getWeekPeriodText();
+  // Summary: Income, Payments, Expenses, Net
+  const income = Number(appState.mohajon.amount || 0);
+  const payments = workersSubtotal;
+  const net = income - payments - expTotal;
+  document.getElementById('bs-income').textContent = formatMoney(income);
+  document.getElementById('bs-payments').textContent = formatMoney(payments);
+  document.getElementById('bs-expenses').textContent = formatMoney(expTotal);
+  document.getElementById('bs-net').textContent = formatMoney(net);
 }
 
 /* Weekly invoices (dashboard) */
@@ -682,8 +711,29 @@ function renderWeeklyInvoicesTable(){
       <td>${escapeHtml(inv.period)}</td>
       <td>${formatMoney(inv.total)}</td>
       <td>
-        <!-- Edit removed per request; keep Delete -->
         <button class="btn small secondary" onclick="deleteInvoice(${idx})">Delete</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+/* Saved Bill Summaries table */
+function renderSavedSummariesTable(){
+  const tbody = document.querySelector('#saved-summaries-table tbody');
+  tbody.innerHTML = '';
+  (appState.summaries || []).forEach((s, idx) => {
+    const tr = document.createElement('tr');
+    const downloadId = `summary-download-${idx}`;
+    tr.innerHTML = `
+      <td>${escapeHtml(s.id)}</td>
+      <td>${escapeHtml(s.date)}</td>
+      <td>${escapeHtml(s.period)}</td>
+      <td>${formatMoney(s.totals && s.totals.income ? s.totals.income : 0)}</td>
+      <td>
+        <button class="btn small" onclick="printSavedSummary(${idx})">Print</button>
+        <button class="btn small secondary" onclick="downloadSavedSummary(${idx})">Download</button>
+        <button class="btn small secondary" onclick="deleteSavedSummary(${idx})">Delete</button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -714,6 +764,7 @@ document.getElementById('calc-mohajon-btn').addEventListener('click', ()=>{
   appState.mohajon.amount = rate * totalProd;
   document.getElementById('mohajon-amount').textContent = formatMoney(appState.mohajon.amount);
   renderDashboard();
+  renderBillSummary();
 });
 
 /* Restore mohajon */
@@ -723,6 +774,7 @@ document.getElementById('restore-mohajon-btn').addEventListener('click', ()=>{
   document.getElementById('mohajon-total-production').value = '0';
   document.getElementById('mohajon-amount').textContent = formatMoney(0);
   renderDashboard();
+  renderBillSummary();
 });
 
 /* Weekly Calculation: pressing calculate updates table earnings & "This Week Total" */
@@ -742,9 +794,8 @@ document.getElementById('calc-weekly-btn').addEventListener('click', ()=>{
     row.querySelector('.prod-earnings').textContent = formatMoney(finalAmount);
   });
   document.getElementById('this-week-total').textContent = formatMoney(total);
-  // update invoice preview earnings (not saved yet)
-  renderInvoicePreview();
-  // Update dashboard summary
+  // update bill summary and dashboard
+  renderBillSummary();
   renderDashboard();
 });
 
@@ -754,7 +805,7 @@ document.getElementById('restore-weekly-btn').addEventListener('click', ()=>{
   document.querySelectorAll('.prod-pounds').forEach(inp => inp.value = '0');
   document.querySelectorAll('.prod-earnings').forEach(td => td.textContent = formatMoney(0));
   document.getElementById('this-week-total').textContent = formatMoney(0);
-  renderInvoicePreview();
+  renderBillSummary();
   renderDashboard();
 });
 
@@ -809,61 +860,116 @@ document.getElementById('save-names-btn').addEventListener('click', ()=>{
   saveState();
 });
 
-/* Generate invoice ID */
-function generateInvoiceNumber(){
-  return 'INV-' + Math.floor(100000 + Math.random()*900000);
-}
-
-/* Save invoice: when user presses Save Invoice */
-document.getElementById('save-invoice-btn').addEventListener('click', ()=>{
-  const invoice = {
-    id: generateInvoiceNumber(),
+/* Save Bill Summary to appState.summaries */
+document.getElementById('save-summary-btn').addEventListener('click', ()=>{
+  // create snapshot
+  const summary = {
+    id: 'BS-' + Math.floor(100000 + Math.random()*900000),
     date: formatDateISO(),
     period: getWeekPeriodText(),
+    mohajon: { ...appState.mohajon },
     workers: [],
-    total: 0
+    expenses: { ...appState.expenses },
+    totals: {}
   };
+
+  let workersSubtotal = 0;
   appState.workers.forEach(w=>{
     const pounds = Number(appState.productionInputs[w.id] || 0);
     const earnings = pounds * Number(w.rate || 0);
     const adjustment = Number(w.adjustments || 0);
-    const final = earnings - adjustment;
-    invoice.workers.push({ id: w.id, name: w.name, pounds, rate: w.rate, earnings, adjustment, final });
-    invoice.total += final;
+    const finalAmount = earnings - adjustment;
+    workersSubtotal += finalAmount;
+    summary.workers.push({ id: w.id, name: w.name, role: w.role, pounds, rate: w.rate, earnings, adjustment, finalAmount });
   });
 
-  // save invoice to app state
-  appState.invoices.unshift(invoice); // most recent first
+  const expTotal = (summary.expenses.electricity||0) + (summary.expenses.maintenance||0) + (summary.expenses.other||0);
+  const income = Number(summary.mohajon.amount || 0);
+  const net = income - workersSubtotal - expTotal;
 
-  // update per-worker billing history
-  invoice.workers.forEach(workerRec=>{
-    const rec = {
-      date: invoice.date,
-      pounds: workerRec.pounds,
-      earnings: workerRec.earnings,
-      adjustments: workerRec.adjustment,
-      total: workerRec.final
-    };
-    appState.billingHistory[workerRec.id] = appState.billingHistory[workerRec.id] || [];
-    appState.billingHistory[workerRec.id].unshift(rec);
-  });
+  summary.totals = {
+    income,
+    payments: workersSubtotal,
+    expenses: expTotal,
+    net
+  };
 
+  appState.summaries = appState.summaries || [];
+  appState.summaries.unshift(summary); // newest first
   saveState();
-  // go to dashboard and show updated table
+  // go to dashboard to show saved summary
   document.querySelector('[data-page="dashboard"]').click();
 });
 
-/* Print invoice: print the invoice preview area only */
-document.getElementById('print-invoice-btn').addEventListener('click', ()=>{
+/* Print Bill Summary: print the bill-summary card only (the card already has class printable) */
+document.getElementById('print-summary-btn').addEventListener('click', ()=>{
+  // ensure bill summary is rendered
+  renderBillSummary();
+  // temporary add printable class to card, then print (CSS handles visibility)
   window.print();
 });
 
-/* Switch to invoice page from production */
-document.getElementById('switch-to-invoice').addEventListener('click', ()=>{
-  document.querySelector('[data-page="invoice"]').click();
+/* Download saved summary as JSON (via blob) */
+function downloadSavedSummary(index){
+  const s = appState.summaries && appState.summaries[index];
+  if(!s) return;
+  const data = JSON.stringify(s, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${s.id || 'bill-summary'}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+window.downloadSavedSummary = downloadSavedSummary;
+
+/* Print saved summary (renders it into printable area, then prints) */
+function printSavedSummary(index){
+  const s = appState.summaries && appState.summaries[index];
+  if(!s) return;
+  // create a simple printable HTML for the summary
+  const printable = document.createElement('div');
+  printable.className = 'printable';
+  printable.innerHTML = `<div style="padding:18px; font-family:inherit">
+    <h2>Bill Summary - ${escapeHtml(s.id)}</h2>
+    <div class="muted-small">Date: ${escapeHtml(s.date)} | Period: ${escapeHtml(s.period)}</div>
+    <h3>Mohajon</h3>
+    <table><thead><tr><th>Rate</th><th>Total Production</th><th>Total</th></tr></thead>
+      <tbody><tr><td>${formatMoney(s.mohajon.rate)}</td><td>${Number(s.mohajon.totalProduction).toFixed(2)}</td><td>${formatMoney(s.mohajon.amount)}</td></tr></tbody></table>
+    <h3>Workers</h3>
+    <table><thead><tr><th>Worker</th><th>Role</th><th>Pounds</th><th>Rate</th><th>Final</th></tr></thead><tbody>
+    ${s.workers.map(w => `<tr><td>${escapeHtml(w.name)}</td><td>${escapeHtml(w.role)}</td><td>${w.pounds}</td><td>${formatMoney(w.rate)}</td><td>${formatMoney(w.finalAmount)}</td></tr>`).join('')}
+    </tbody></table>
+    <h3>Expenses</h3>
+    <table><thead><tr><th>Electricity</th><th>Maintenance</th><th>Other</th><th>Total</th></tr></thead>
+      <tbody><tr><td>${formatMoney(s.expenses.electricity)}</td><td>${formatMoney(s.expenses.maintenance)}</td><td>${formatMoney(s.expenses.other)}</td><td>${formatMoney(s.totals.expenses)}</td></tr></tbody></table>
+    <h3>Totals</h3>
+    <table><thead><tr><th>Income</th><th>Payments</th><th>Expenses</th><th>Net</th></tr></thead>
+      <tbody><tr><td>${formatMoney(s.totals.income)}</td><td>${formatMoney(s.totals.payments)}</td><td>${formatMoney(s.totals.expenses)}</td><td>${formatMoney(s.totals.net)}</td></tr></tbody></table>
+    </div>`;
+  document.body.appendChild(printable);
+  window.print();
+  printable.remove();
+}
+window.printSavedSummary = printSavedSummary;
+
+/* Delete saved summary */
+function deleteSavedSummary(index){
+  if(!confirm('Delete this saved summary?')) return;
+  appState.summaries.splice(index,1);
+  saveState();
+}
+window.deleteSavedSummary = deleteSavedSummary;
+
+/* Switch to bill summary from production */
+document.getElementById('switch-to-billsummary').addEventListener('click', ()=>{
+  document.querySelector('[data-page="bill-summary"]').click();
 });
 
-/* Delete invoice */
+/* Delete invoice (legacy) */
 function deleteInvoice(index){
   if(!confirm('Delete this invoice?')) return;
   appState.invoices.splice(index,1);
@@ -879,18 +985,44 @@ function deleteWorkerHistory(workerId, histIndex){
 }
 window.deleteWorkerHistory = deleteWorkerHistory;
 
-/* Settings buttons */
-document.getElementById('clear-storage-btn').addEventListener('click', ()=>{
-  if(!confirm('Clear all app data from local storage?')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  appState = defaultState();
-  renderAll();
-});
-document.getElementById('load-defaults-btn').addEventListener('click', ()=>{
-  if(!confirm('Load built-in defaults? This will overwrite current in-memory state (not saved unless you Save App State).')) return;
-  appState = defaultState();
-  renderAll();
-});
+/* Print single worker's saved weekly invoice (from billing history) */
+/* This prints only the selected worker record (weekly). No expenses or bank info included. */
+function printWorkerInvoice(workerId, historyIndex){
+  const hist = (appState.billingHistory[workerId] || [])[historyIndex];
+  if(!hist) return;
+  const worker = appState.workers.find(w => w.id === workerId) || { name: 'Worker' };
+  const printable = document.createElement('div');
+  printable.className = 'printable';
+  printable.style.padding = '18px';
+  printable.innerHTML = `
+    <div style="font-family:inherit">
+      <h2>Worker Invoice</h2>
+      <div class="muted-small">Worker: ${escapeHtml(worker.name)}</div>
+      <div class="muted-small">Date: ${escapeHtml(hist.date)}</div>
+      <table style="margin-top:12px">
+        <thead><tr><th>Description</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Pounds</td><td>${hist.pounds}</td></tr>
+          <tr><td>Earnings</td><td>${formatMoney(hist.earnings)}</td></tr>
+          <tr><td>Adjustment</td><td>${formatMoney(hist.adjustments)}</td></tr>
+          <tr><th>Total</th><th>${formatMoney(hist.total)}</th></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:36px">
+        <div style="width:300px">
+          <div style="border-top:1px solid #000; margin-top:48px;"></div>
+          <div class="muted-small">Receiver Signature</div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(printable);
+  window.print();
+  printable.remove();
+}
+window.printWorkerInvoice = printWorkerInvoice;
+
+/* Settings buttons (removed) - not present */
 
 /* Confirm modal helpers */
 const confirmModal = document.getElementById('confirm-modal');
@@ -924,20 +1056,22 @@ function init(){
   appState.expenses = appState.expenses || defaultState().expenses;
   appState.invoices = appState.invoices || [];
   appState.billingHistory = appState.billingHistory || defaultState().billingHistory;
+  appState.summaries = appState.summaries || [];
 
   document.getElementById('mohajon-rate').value = Number(appState.mohajon.rate || 0).toFixed(2);
   document.getElementById('mohajon-total-production').value = Number(appState.mohajon.totalProduction || 0).toFixed(2);
   document.getElementById('mohajon-amount').textContent = formatMoney(appState.mohajon.amount || 0);
 
-  renderAll();
-
+  // initialize production total
   const totalProd = Object.values(appState.productionInputs).reduce((s,x)=>s+Number(x||0),0);
   document.getElementById('mohajon-total-production').value = Number(totalProd).toFixed(2);
+
+  renderAll();
 }
 
-/* Generate friendly invoice id (short) - single definition kept */
-function generateInvoiceNumber(){
-  return 'INV-' + Math.floor(100000 + Math.random()*900000);
+/* Generate friendly id */
+function generateShortId(prefix='ID'){
+  return prefix + '-' + Math.floor(100000 + Math.random()*900000);
 }
 
 // On page load
@@ -945,7 +1079,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   init();
 });
 
-/* Initial render */
 renderAll();
 </script>
 </body>
