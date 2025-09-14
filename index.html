@@ -13,7 +13,7 @@
   *{box-sizing:border-box}
   body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text);padding:18px}
   .container{max-width:1150px;margin:0 auto}
-  header{background:var(--accent);color:#fff;padding:18px;border-radius:var(--radius);margin-bottom:16px;display:flex;gap:12px;align-items:center;justify-content:center}
+  header{background:var(--accent);color:#fff;padding:18px;border-radius:var(--radius);margin-bottom:16px;display:flex;gap:12px;align-items:center;justify-content:flex-start}
   header h1{margin:0;font-size:20px;font-weight:600}
   header p{margin:2px 0;font-size:13px;opacity:.95}
   header .logo{width:56px;height:56px;border-radius:8px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center}
@@ -59,18 +59,36 @@
   @media (max-width:860px){.settings-grid{grid-template-columns:1fr}}
   .worker-settings-list .worker-card{background:#fafafa;border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid #eee}
   .worker-settings-list .ws-row-top{margin-bottom:8px}
-  .worker-settings-list .ws-row-bottom{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+  .worker-settings-list .ws-row-bottom{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
   @media (max-width:860px){ .worker-settings-list .ws-row-bottom{grid-template-columns:repeat(2,1fr)} }
   .worker-settings-row input, .worker-settings-row select{padding:6px;font-size:13px}
-  /* print */
-  @media print{body *{visibility:hidden !important}.printable,.printable *{visibility:visible !important}.printable{position:absolute;left:0;top:0;width:100%;padding:18px}}
+  /* make tables scrollable on small screens */
+  @media (max-width:640px){
+    table{display:block;overflow:auto;white-space:nowrap}
+    header{flex-direction:column;align-items:flex-start;gap:8px}
+    header .logo{width:48px;height:48px}
+    header h1{font-size:18px}
+    .grid.cols-4{grid-template-columns:repeat(2,1fr)}
+    .grid.cols-2{grid-template-columns:1fr}
+  }
+
+  /* improved print */
+  @media print{
+    body *{visibility:hidden !important}
+    .printable, .printable *{visibility:visible !important}
+    .printable{position:absolute;left:0;top:0;width:100%;padding:18px}
+    @page { size: auto; margin: 10mm; }
+  }
+
   .print-page{background:#fff;color:#000;max-width:780px;margin:0 auto;padding:18px;border-radius:6px}
+  .print-page table{margin-bottom:18px} /* extra space between table and signature */
   .page-break{page-break-after:always}
   .invoice-total{font-weight:800;font-size:18px}
   .signature-line{margin-top:28px;border-top:1px solid #000;width:260px;padding-top:8px;text-align:center}
-  .footer-signature{display:flex;justify-content:center;margin-top:24px}
+  .footer-signature{display:flex;justify-content:center;margin-top:28px}
   .footer-signature .sig-box{width:260px;border-bottom:1px solid #000;height:48px}
   .footer-signature .sig-caption{font-size:13px;text-align:center;margin-top:6px}
+  .after-sign-space{height:18px}
 </style>
 </head>
 <body>
@@ -81,7 +99,7 @@
       <img id="header-logo" src="assets/favicon.png" alt="Company logo" onerror="this.style.display='none'"/>
     </div>
     <div style="text-align:left">
-      <h1 id="header-name">Nazmul Twisting Mill Ltd — Billing & Production</h1>
+      <h1 id="header-name">Nazmul Twisting Mill</h1>
       <p class="small" id="header-contact">Old Bogura Road, Telkupi — Phone: (+880) 1766759293 — Email: nazmul.fig@gmail.com</p>
     </div>
   </header>
@@ -253,7 +271,7 @@
       <div class="company-header">
         <img id="bs-logo" src="assets/favicon.png" alt="logo" onerror="this.style.display='none'"/>
         <div>
-          <div style="font-weight:700" id="company-name-display">Nazmul Twisting Mill Ltd</div>
+          <div style="font-weight:700" id="company-name-display">Nazmul Twisting Mill</div>
           <div class="muted-small" id="company-address-display">Old Bogura Road, Telkupi</div>
           <div class="muted-small" id="company-phone-display">Phone: (+880) 1766759293</div>
           <div class="muted-small" id="company-email-display">Email: nazmul.fig@gmail.com</div>
@@ -355,34 +373,29 @@
           <label style="margin-top:8px">Mohajon Email</label>
           <input type="text" id="setting-mohajon-email" />
 
-          <!-- NEW: Mohajon Rate and Money Given -->
           <label style="margin-top:8px">Mohajon Rate (৳/pound)</label>
-          <input type="number" id="setting-mohajon-rate" step="0.01" min="0" placeholder="Rate (e.g., 120.00)" />
+          <input type="number" id="setting-mohajon-rate" step="0.01" min="0" placeholder="Rate (e.g. 120.00)" />
 
           <label style="margin-top:8px">Mohajon Money Given (৳)</label>
-          <input type="number" id="setting-mohajon-moneygiven" step="0.01" min="0" placeholder="Money given (e.g., 5000.00)" />
+          <input type="number" id="setting-mohajon-moneygiven" step="0.01" min="0" placeholder="Money given (e.g. 5000.00)" />
         </div>
       </div>
 
       <hr style="margin:12px 0;border-top:1px solid #eee" />
 
       <div>
-        <h3 style="margin:6px 0">Worker Details (name, address, phone, designation, rate, adjustment, bonus)</h3>
+        <h3 style="margin:6px 0">Worker Details (name, address, phone, designation, rate, production (pounds), adjustment, bonus)</h3>
         <div class="small">Edit worker information and financial defaults. After saving, values update throughout the app.</div>
         <div id="worker-settings-list" class="worker-settings-list" style="margin-top:12px"></div>
 
-        <div style="margin-top:12px" class="actions">
-          <button class="btn" id="save-worker-details-btn">Set Data</button>
-          <button class="btn secondary" id="reset-worker-details-btn">Reset Data</button>
-        </div>
-      </div>
+        <div style="margin-top:14px">
+          <div class="small" style="margin-top:8px">Note: Deletions require typing <code>delete</code> in the confirmation box.</div>
 
-      <div style="margin-top:14px">
-        <div class="small" style="margin-top:8px">Note: Deletions require typing <code>delete</code> in the confirmation box.</div>
-
-        <div class="actions" style="margin-top:12px">
-          <button class="btn" id="save-settings-btn">Save Settings</button>
-          <button class="btn secondary" id="reset-defaults-btn">Reset App to Defaults</button>
+          <!-- SINGLE Save & Reset buttons as requested -->
+          <div class="actions" style="margin-top:12px">
+            <button class="btn" id="save-data-btn">Save Data</button>
+            <button class="btn secondary" id="reset-data-btn">Reset Data</button>
+          </div>
         </div>
       </div>
     </div>
@@ -411,7 +424,7 @@ const STORAGE_KEY = 'ntm_app_v5';
 
 const defaultState = () => ({
   company: {
-    name: 'Nazmul Twisting Mill Ltd',
+    name: 'Nazmul Twisting Mill',
     address: 'Old Bogura Road, Telkupi',
     phone: '(+880) 1766759293',
     email: 'nazmul.fig@gmail.com',
@@ -454,6 +467,7 @@ function formatMoney(n){ return '৳' + Number(n || 0).toFixed(2); }
 function formatDateISO(d=new Date()){ return d.toLocaleDateString() + ' ' + d.toLocaleTimeString(); }
 function getWeekPeriodText(d=new Date()){ const end=new Date(d); const start=new Date(d); start.setDate(end.getDate()-6); return `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`; }
 function onlyDigits(str=''){ return (String(str||'').match(/\d+/g) || []).join('') || Math.floor(100000+Math.random()*900000); }
+function escapeHtml(str){ if(str===null||str===undefined) return ''; return String(str).replace(/[&<>"']/g, function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];}); }
 
 /* ---------------------------
    Navigation wiring
@@ -486,7 +500,7 @@ function applyCompanyHeader(){
   const compPhone = document.getElementById('company-phone-display');
   const compEmail = document.getElementById('company-email-display');
 
-  if(headerName) headerName.textContent = (c.name || 'Company') + ' — Billing & Production';
+  if(headerName) headerName.textContent = (c.name || 'Company');
   if(headerContact) headerContact.textContent = `${c.address || ''} — Phone: ${c.phone || ''} — Email: ${c.email || ''}`;
   if(headerLogo) { headerLogo.src = c.logo || 'assets/favicon.png'; headerLogo.style.display = c.logo ? '' : ''; }
   if(bsLogo) { bsLogo.src = c.logo || 'assets/favicon.png'; bsLogo.style.display = ''; }
@@ -659,7 +673,7 @@ function renderBillSummary(){
   document.getElementById('bs-exp-other').textContent = formatMoney(expOther);
   document.getElementById('bs-exp-total').textContent = formatMoney(expTotal);
 
-  const income = Number(appState.mohajon.moneyGiven || 0); // IMPORTANT: use moneyGiven as income
+  const income = Number(appState.mohajon.moneyGiven || 0);
   const payments = workersSubtotal;
   const net = income - payments - expTotal;
   document.getElementById('bs-income').textContent = formatMoney(income);
@@ -677,14 +691,12 @@ function renderWeeklyInvoicesTable(){
     tr.innerHTML = `<td>${escapeHtml(inv.id)}</td><td>${escapeHtml(inv.date)}</td><td>${escapeHtml(inv.period)}</td><td>${formatMoney(inv.total)}</td><td></td>`;
     const actionsTd = tr.querySelector('td:last-child');
 
-    // Print this invoice (one page per invoice)
     const printBtn = document.createElement('button');
     printBtn.className = 'btn small';
     printBtn.textContent = 'Print Invoice';
     printBtn.addEventListener('click', ()=> printInvoice(idx));
     actionsTd.appendChild(printBtn);
 
-    // Print Per-Worker (one page per worker)
     const printWorkersBtn = document.createElement('button');
     printWorkersBtn.className = 'btn small';
     printWorkersBtn.style.marginLeft='8px';
@@ -692,7 +704,6 @@ function renderWeeklyInvoicesTable(){
     printWorkersBtn.addEventListener('click', ()=> printAllWorkersForInvoice(idx));
     actionsTd.appendChild(printWorkersBtn);
 
-    // Receipt button: prints Mohajon receipt form
     const receiptBtn = document.createElement('button');
     receiptBtn.className = 'btn small';
     receiptBtn.style.marginLeft='8px';
@@ -700,7 +711,6 @@ function renderWeeklyInvoicesTable(){
     receiptBtn.addEventListener('click', ()=> printMohajonReceipt(idx));
     actionsTd.appendChild(receiptBtn);
 
-    // Delete button
     const del = document.createElement('button');
     del.className = 'btn delete';
     del.style.marginLeft = '8px';
@@ -766,37 +776,33 @@ document.getElementById('restore-expenses-btn').addEventListener('click', ()=>{
   saveState();
 });
 
-/* Save Settings (company + mohajon) */
-document.getElementById('save-settings-btn').addEventListener('click', ()=>{
-  const name = document.getElementById('setting-company-name').value || '';
-  const address = document.getElementById('setting-company-address').value || '';
-  const phone = document.getElementById('setting-company-phone').value || '';
-  const email = document.getElementById('setting-company-email').value || '';
+/* ---------------------------
+   Settings: populate, worker list, save, reset (combined)
+   --------------------------- */
 
-  appState.company = appState.company || {};
-  appState.company.name = name;
-  appState.company.address = address;
-  appState.company.phone = phone;
-  appState.company.email = email;
+function populateSettingsForm(){
+  // company
+  const c = appState.company || {};
+  document.getElementById('setting-company-name').value = c.name || '';
+  document.getElementById('setting-company-address').value = c.address || '';
+  document.getElementById('setting-company-phone').value = c.phone || '';
+  document.getElementById('setting-company-email').value = c.email || '';
 
   // mohajon
-  appState.mohajon = appState.mohajon || {};
-  appState.mohajon.company = document.getElementById('setting-mohajon-company').value || '';
-  appState.mohajon.name = document.getElementById('setting-mohajon-name').value || '';
-  appState.mohajon.address = document.getElementById('setting-mohajon-address').value || '';
-  appState.mohajon.phone = document.getElementById('setting-mohajon-phone').value || '';
-  appState.mohajon.email = document.getElementById('setting-mohajon-email').value || '';
+  const m = appState.mohajon || {};
+  document.getElementById('setting-mohajon-company').value = m.company || '';
+  document.getElementById('setting-mohajon-name').value = m.name || '';
+  document.getElementById('setting-mohajon-address').value = m.address || '';
+  document.getElementById('setting-mohajon-phone').value = m.phone || '';
+  document.getElementById('setting-mohajon-email').value = m.email || '';
+  document.getElementById('setting-mohajon-rate').value = Number(m.rate||0) !== 0 ? Number(m.rate).toFixed(2) : '';
+  document.getElementById('setting-mohajon-moneygiven').value = Number(m.moneyGiven||0) !== 0 ? Number(m.moneyGiven).toFixed(2) : '';
 
-  // NEW: save mohajon rate & money given
-  appState.mohajon.rate = parseFloat(document.getElementById('setting-mohajon-rate').value) || 0;
-  appState.mohajon.moneyGiven = parseFloat(document.getElementById('setting-mohajon-moneygiven').value) || 0;
+  // worker list (and production inputs)
+  populateWorkerSettingsList();
+}
 
-  applyCompanyHeader();
-  saveState();
-  alert('Settings saved.');
-});
-
-/* Populate worker settings list (name on first row; address, phone, designation, rate, adjustment, bonus on second row) */
+/* Populate worker settings list (name on first row; address, phone, designation, rate, production, adjustment, bonus on second row) */
 function populateWorkerSettingsList(){
   const container = document.getElementById('worker-settings-list');
   container.innerHTML = '';
@@ -812,6 +818,7 @@ function populateWorkerSettingsList(){
     const rateValue = Number(w.rate || 0) !== 0 ? Number(w.rate).toFixed(2) : '';
     const adjustValue = Number(w.adjustment || 0) !== 0 ? Number(w.adjustment).toFixed(2) : '';
     const bonusValue = Number(w.bonus || 0) !== 0 ? Number(w.bonus).toFixed(2) : '';
+    const poundsValue = Number(appState.productionInputs[w.id] || 0) !== 0 ? Number(appState.productionInputs[w.id]).toFixed(2) : '';
 
     const rowBottom = document.createElement('div');
     rowBottom.className = 'ws-row-bottom';
@@ -819,9 +826,10 @@ function populateWorkerSettingsList(){
       <input class="ws-address" placeholder="Address" value="${escapeHtml(w.address||'')}" />
       <input class="ws-phone" placeholder="Phone" value="${escapeHtml(w.phone||'')}" />
       <input class="ws-designation" placeholder="Designation" value="${escapeHtml(w.designation||'')}" />
-      <input type="number" class="ws-rate" placeholder="Rate (e.g., 120.00)" step="0.01" min="0" value="${escapeHtml(rateValue)}" />
-      <input type="number" class="ws-adjust" placeholder="Adjustment (e.g., 5.00)" step="0.01" value="${escapeHtml(adjustValue)}" />
-      <input type="number" class="ws-bonus" placeholder="Bonus (e.g., 10.00)" step="0.01" value="${escapeHtml(bonusValue)}" />
+      <input type="number" class="ws-rate" placeholder="Rate (e.g. 120.00)" step="0.01" min="0" value="${escapeHtml(rateValue)}" />
+      <input type="number" class="ws-pounds" placeholder="Production (pounds)" step="0.01" min="0" value="${escapeHtml(poundsValue)}" />
+      <input type="number" class="ws-adjust" placeholder="Adjustment (e.g. 5.00)" step="0.01" value="${escapeHtml(adjustValue)}" />
+      <input type="number" class="ws-bonus" placeholder="Bonus (e.g. 10.00)" step="0.01" value="${escapeHtml(bonusValue)}" />
     `;
 
     card.appendChild(rowTop);
@@ -830,8 +838,31 @@ function populateWorkerSettingsList(){
   });
 }
 
-/* Save worker details from Settings (Set Data) */
-document.getElementById('save-worker-details-btn').addEventListener('click', ()=>{
+/* Combined save: company + mohajon + workers (Save Data) */
+document.getElementById('save-data-btn').addEventListener('click', ()=>{
+  // Company
+  const name = document.getElementById('setting-company-name').value || '';
+  const address = document.getElementById('setting-company-address').value || '';
+  const phone = document.getElementById('setting-company-phone').value || '';
+  const email = document.getElementById('setting-company-email').value || '';
+
+  appState.company = appState.company || {};
+  appState.company.name = name;
+  appState.company.address = address;
+  appState.company.phone = phone;
+  appState.company.email = email;
+
+  // Mohajon
+  appState.mohajon = appState.mohajon || {};
+  appState.mohajon.company = document.getElementById('setting-mohajon-company').value || '';
+  appState.mohajon.name = document.getElementById('setting-mohajon-name').value || '';
+  appState.mohajon.address = document.getElementById('setting-mohajon-address').value || '';
+  appState.mohajon.phone = document.getElementById('setting-mohajon-phone').value || '';
+  appState.mohajon.email = document.getElementById('setting-mohajon-email').value || '';
+  appState.mohajon.rate = parseFloat(document.getElementById('setting-mohajon-rate').value) || 0;
+  appState.mohajon.moneyGiven = parseFloat(document.getElementById('setting-mohajon-moneygiven').value) || 0;
+
+  // Workers + production input
   const cards = document.querySelectorAll('.worker-card');
   cards.forEach(card=>{
     const id = card.dataset.workerId;
@@ -840,6 +871,7 @@ document.getElementById('save-worker-details-btn').addEventListener('click', ()=
     const address = card.querySelector('.ws-address').value.trim() || '';
     const designation = card.querySelector('.ws-designation').value.trim() || '';
     const rate = parseFloat(card.querySelector('.ws-rate').value) || 0;
+    const pounds = parseFloat(card.querySelector('.ws-pounds').value) || 0;
     const adjustment = parseFloat(card.querySelector('.ws-adjust').value) || 0;
     const bonus = parseFloat(card.querySelector('.ws-bonus').value) || 0;
     const w = appState.workers.find(x=>x.id===id);
@@ -847,27 +879,26 @@ document.getElementById('save-worker-details-btn').addEventListener('click', ()=
       w.name = name; w.phone = phone; w.address = address; w.designation = designation;
       w.rate = rate; w.adjustment = adjustment; w.bonus = bonus;
     }
+    appState.productionInputs[id] = pounds;
   });
+
+  applyCompanyHeader();
   saveState();
-  alert('Worker data set. Production values update throughout the app.');
+  alert('Data saved.');
 });
 
-/* Reset worker settings to defaults */
-document.getElementById('reset-worker-details-btn').addEventListener('click', ()=>{
-  if(!confirm('Reset worker data to defaults?')) return;
-  const defaults = defaultState().workers;
-  appState.workers.forEach((w, idx) => {
-    w.name = defaults[idx].name;
-    w.phone = ''; w.address=''; w.designation = defaults[idx].designation; w.rate=0; w.adjustment=0; w.bonus=0;
-  });
+/* Reset Data: full app reset to defaults (single button) */
+document.getElementById('reset-data-btn').addEventListener('click', ()=>{
+  if(!confirm('Reset all data to defaults? This will remove saved summaries and settings.')) return;
+  appState = defaultState();
   saveState();
+  location.reload();
 });
 
-/* Reset entire app */
-document.getElementById('reset-defaults-btn').addEventListener('click', resetStateToDefaults);
-
-/* Switch to bill summary from production */
-document.getElementById('switch-to-billsummary').addEventListener('click', ()=>{ document.querySelector('[data-page="bill-summary"]').click(); });
+/* ---------------------------
+   Save Summary, invoices, printing functions
+   (kept mostly unchanged; small tweaks to spacing/print helper)
+   --------------------------- */
 
 /* Save Bill Summary (creates summary + invoice + billing history) */
 document.getElementById('save-summary-btn').addEventListener('click', ()=>{
@@ -933,13 +964,12 @@ document.getElementById('save-summary-btn').addEventListener('click', ()=>{
 });
 
 /* ---------------------------
-   Printing functions (updated per request)
+   Printing functions
    --------------------------- */
 
-/* Helper to generate company header HTML (logo beside details) */
 function companyHeaderHtml(company){
   return `
-    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
       <div style="display:flex;gap:12px;align-items:center">
         <img src="${escapeHtml(company.logo||'assets/favicon.png')}" alt="logo" style="width:72px;height:72px;object-fit:contain;border-radius:8px" onerror="this.style.display='none'"/>
         <div>
@@ -956,7 +986,6 @@ function companyHeaderHtml(company){
   `;
 }
 
-/* small helper for single-page footer signature (text only "Signature") */
 function footerSignatureHtml(){
   return `
     <div class="footer-signature">
@@ -965,10 +994,11 @@ function footerSignatureHtml(){
         <div class="sig-caption">Signature</div>
       </div>
     </div>
+    <div class="after-sign-space"></div>
   `;
 }
 
-/* Print a single invoice (one page) — signature footer only (no Received/Authorized blocks) */
+/* print helpers (unchanged but ensure spacing) */
 function printInvoice(invoiceIndex){
   const inv = appState.invoices && appState.invoices[invoiceIndex];
   if(!inv) return alert('Invoice not found.');
@@ -1031,7 +1061,6 @@ function printInvoice(invoiceIndex){
   setTimeout(()=>{ try{ win.print(); win.close(); }catch(e){} }, 300);
 }
 
-/* Print combined file: one page per worker for a single invoice — each page gets a single footer signature */
 function printAllWorkersForInvoice(invoiceIndex){
   const inv = appState.invoices && appState.invoices[invoiceIndex];
   if(!inv) return alert('Invoice not found.');
@@ -1093,7 +1122,6 @@ function printAllWorkersForInvoice(invoiceIndex){
   setTimeout(()=>{ try{ win.print(); win.close(); }catch(e){} }, 300);
 }
 
-/* Print Mohajon receipt for an invoice (signature footer only) */
 function printMohajonReceipt(invoiceIndex){
   const inv = appState.invoices && appState.invoices[invoiceIndex];
   if(!inv) return alert('Invoice not found.');
@@ -1112,15 +1140,15 @@ function printMohajonReceipt(invoiceIndex){
         <div style="font-size:12px">Receipt No: <strong>${receiptNo}</strong></div>
       </div>
 
-      <div style="display:flex;gap:24px">
-        <div style="flex:1">
+      <div style="display:flex;gap:24px;flex-wrap:wrap">
+        <div style="flex:1;min-width:180px">
           <strong>Paid By (Mohajon)</strong><br/>
           <div style="margin-top:6px">${escapeHtml(mo.company||'')} ${mo.name ? ('— '+escapeHtml(mo.name)) : ''}</div>
           <div style="font-size:12px;margin-top:6px">${escapeHtml(mo.address||'')}</div>
           <div style="font-size:12px">${escapeHtml(mo.phone||'')}</div>
           ${mo.email ? `<div style="font-size:12px">${escapeHtml(mo.email)}</div>` : ''}
         </div>
-        <div style="flex:1;text-align:right">
+        <div style="flex:1;min-width:180px;text-align:right">
           <strong>Received By (Company)</strong><br/>
           <div style="margin-top:6px">${escapeHtml(company.name||'')}</div>
           <div style="font-size:12px;margin-top:6px">${escapeHtml(company.address||'')}</div>
@@ -1204,7 +1232,7 @@ function printSavedSummary(index){
   `).join('');
 
   const html = `
-    <div class="print-page">
+    <div class="print-page printable">
       ${companyHeaderHtml(company)}
       <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
@@ -1218,8 +1246,6 @@ function printSavedSummary(index){
       </div>
 
       <div style="height:12px"></div>
-
-      <!-- Mohajon block removed from the printed summary as requested -->
 
       <h4>Workers</h4>
       <table style="width:100%;border-collapse:collapse">
@@ -1262,8 +1288,6 @@ function printSavedSummary(index){
           </tr>
         </tbody>
       </table>
-
-      <!-- Bill Summary: no signature footer per request -->
     </div>
   `;
 
@@ -1323,36 +1347,11 @@ function confirmDeleteWorkerHistory(workerId, histIndex){
 }
 
 /* ---------------------------
-   Helpers & startup
+   Startup
    --------------------------- */
-function escapeHtml(str){ if(str===null||str===undefined) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-
-/* wire up confirm modal cancel */
-document.getElementById('confirm-cancel').addEventListener('click', ()=>{ document.getElementById('confirm-modal').style.display = 'none'; });
-document.getElementById('confirm-ok').addEventListener('click', ()=>{ /* handled inside showDeleteConfirm */ });
-
-/* Populate settings form with current state (company & mohajon fields) */
-function populateSettingsForm(){
-  const c = appState.company || {};
-  document.getElementById('setting-company-name').value = c.name || '';
-  document.getElementById('setting-company-address').value = c.address || '';
-  document.getElementById('setting-company-phone').value = c.phone || '';
-  document.getElementById('setting-company-email').value = c.email || '';
-
-  const m = appState.mohajon || {};
-  document.getElementById('setting-mohajon-company').value = m.company || '';
-  document.getElementById('setting-mohajon-name').value = m.name || '';
-  document.getElementById('setting-mohajon-address').value = m.address || '';
-  document.getElementById('setting-mohajon-phone').value = m.phone || '';
-  document.getElementById('setting-mohajon-email').value = m.email || '';
-  document.getElementById('setting-mohajon-rate').value = Number(m.rate || 0) !== 0 ? Number(m.rate).toFixed(2) : '';
-  document.getElementById('setting-mohajon-moneygiven').value = Number(m.moneyGiven || 0) !== 0 ? Number(m.moneyGiven).toFixed(2) : '';
-
-  populateWorkerSettingsList();
-}
-
-/* initial rendering */
 renderAll();
+applyCompanyHeader();
+
 </script>
 </body>
 </html>
