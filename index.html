@@ -103,8 +103,7 @@
 
   <nav class="nav" role="navigation" aria-label="Main">
     <button class="nav-btn active" data-page="dashboard">Dashboard</button>
-    <!-- Workers menu removed as requested -->
-    <button class="nav-btn" data-page="production">Production</button>
+    <!-- Production menu removed -->
     <button class="nav-btn" data-page="bill-summary">Bill Summary</button>
     <button class="nav-btn" data-page="settings">Settings</button>
   </nav>
@@ -130,6 +129,36 @@
       <div class="card">
         <div class="small">Weekly Profit</div>
         <div id="summary-profit" style="font-weight:700;font-size:20px">৳0.00</div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px" class="grid cols-2">
+      <!-- Mohajon table in Dashboard (live values) -->
+      <div class="card">
+        <h4 style="margin:0 0 8px 0">Mohajon</h4>
+        <table>
+          <thead><tr><th>Rate (৳/pound)</th><th>Total Production (pounds)</th><th>Bill (৳)</th><th>Money Given (৳)</th><th>Due (৳)</th></tr></thead>
+          <tbody>
+            <tr>
+              <td id="dash-mohajon-rate">৳0.00</td>
+              <td id="dash-total-production">0.00</td>
+              <td id="dash-total-bill">৳0.00</td>
+              <td id="dash-total-given">৳0.00</td>
+              <td id="dash-total-due">৳0.00</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="small" style="margin-top:8px">This is a live view — update values in <strong>Settings</strong> then click <strong>Save Data</strong>.</div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="card">
+        <h4 style="margin:0 0 8px 0">Quick Actions</h4>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="btn" id="dashboard-print-billsummary">Print Bill Summary</button>
+          <button class="btn secondary" id="dashboard-go-settings">Go to Settings</button>
+          <div class="small">Tip: Save data in Settings to update all values used in the printed bill summary.</div>
+        </div>
       </div>
     </div>
 
@@ -159,47 +188,7 @@
 
   </section>
 
-  <!-- PRODUCTION (read-only display) -->
-  <section id="production" class="page">
-    <h2>Production</h2>
-    <p class="lead">Weekly summaries (read-only). All editable data lives in <strong>Settings → Set Data</strong>.</p>
-
-    <div class="grid cols-2">
-      <div class="card">
-        <h4 id="prod-mohajon-title" style="margin:0 0 8px 0"></h4>
-        <table>
-          <thead><tr><th>Rate (৳/pound)</th><th>Total Production (pounds)</th><th>Bill (৳)</th><th>Money Given (৳)</th><th>Due (৳)</th></tr></thead>
-          <tbody>
-            <tr>
-              <td id="prod-mohajon-rate">৳0.00</td>
-              <td id="prod-mohajon-production">0.00</td>
-              <td id="prod-mohajon-bill">৳0.00</td>
-              <td id="prod-mohajon-given">৳0.00</td>
-              <td id="prod-mohajon-due">৳0.00</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="small" style="margin-top:8px">Note: calculations use <strong>Money Given</strong> as the effective income.</div>
-      </div>
-
-      <div class="card">
-        <h4 id="prod-workers-title" style="margin:0 0 8px 0"></h4>
-        <table>
-          <thead><tr><th>Worker</th><th>Designation</th><th>Rate</th><th>Production</th><th>Bill</th><th>Adjustment</th><th>Bonus</th><th>Total</th></tr></thead>
-          <tbody id="prod-workers-body"></tbody>
-          <tfoot>
-            <tr><th colspan="7" style="text-align:right">This Week Total</th><th id="prod-workers-total">৳0.00</th></tr>
-          </tfoot>
-        </table>
-      </div>
-    </div>
-
-    <div style="margin-top:12px">
-      <button class="btn" id="switch-to-billsummary">Go to Bill Summary</button>
-    </div>
-  </section>
-
-  <!-- BILL SUMMARY -->
+  <!-- BILL SUMMARY (unchanged) -->
   <section id="bill-summary" class="page">
     <h2>Bill Summary</h2>
     <p class="lead">A printable summary that includes Mohajon, worker production, expenses and net revenue.</p>
@@ -273,7 +262,7 @@
     </div>
   </section>
 
-  <!-- SETTINGS (expenses inputs kept here; worker settings allow editing per-worker data) -->
+  <!-- SETTINGS (unchanged, still where workers data lives) -->
   <section id="settings" class="page">
     <h2>Settings</h2>
     <p class="lead">Update company details, worker details, mohajon info (rate, total production, money given) and expenses. Save or reset from below.</p>
@@ -445,7 +434,6 @@ document.querySelectorAll('.nav-btn').forEach(btn=>{
     if(el) el.classList.add('active');
     if(page === 'bill-summary') renderBillSummary();
     if(page === 'settings') populateSettingsForm();
-    if(page === 'production') renderProductionView();
   });
 });
 
@@ -480,7 +468,6 @@ function applyCompanyHeader(){
    --------------------------- */
 function renderAll(){
   renderDashboard();
-  renderProductionView();
   renderBillSummary();
   renderWeeklyInvoicesTable();
   renderSavedSummariesTable();
@@ -499,56 +486,17 @@ function renderDashboard(){
   document.getElementById('summary-workers').textContent = formatMoney(totalWorkersPaid);
   document.getElementById('summary-expenses').textContent = formatMoney(expensesTotal);
   document.getElementById('summary-profit').textContent = formatMoney(profit);
-}
 
-/* PRODUCTION (read-only display) */
-function renderProductionView(){
-  const nowTitle = new Date().toLocaleDateString();
-  document.getElementById('prod-mohajon-title').textContent = `Mohajon — Week ending ${nowTitle}`;
-  document.getElementById('prod-workers-title').textContent = `Workers — Week ending ${nowTitle}`;
-
-  const mo = appState.mohajon || {rate:0,totalProduction:0,moneyGiven:0};
+  // dashboard mohajon table (live)
+  const mo = appState.mohajon || {};
   const bill = Number(mo.rate || 0) * Number(mo.totalProduction || 0);
   const given = Number(mo.moneyGiven || 0);
   const due = bill - given;
-  document.getElementById('prod-mohajon-rate').textContent = formatMoney(mo.rate);
-  document.getElementById('prod-mohajon-production').textContent = Number(mo.totalProduction||0).toFixed(2);
-  document.getElementById('prod-mohajon-bill').textContent = formatMoney(bill);
-  document.getElementById('prod-mohajon-given').textContent = formatMoney(given);
-  document.getElementById('prod-mohajon-due').textContent = formatMoney(due);
-
-  const tbody = document.getElementById('prod-workers-body');
-  tbody.innerHTML = '';
-  let total = 0;
-  appState.workers.forEach(w=>{
-    const prod = Number(appState.productionInputs[w.id] || 0);
-    const rate = Number(w.rate || 0);
-    const billW = prod * rate;
-    const adj = Number(w.adjustment || 0);
-    const bonus = Number(w.bonus || 0);
-    const totalW = billW - adj + bonus;
-    total += totalW;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${escapeHtml(w.name)}</td><td>${escapeHtml(w.designation)}</td><td>${formatMoney(rate)}</td><td>${prod.toFixed(2)}</td><td>${formatMoney(billW)}</td><td>${formatMoney(adj)}</td><td>${formatMoney(bonus)}</td><td>${formatMoney(totalW)}</td>`;
-    tbody.appendChild(tr);
-  });
-  document.getElementById('prod-workers-total').textContent = formatMoney(total);
-}
-
-/* EXPENSES */
-function renderExpenses(){
-  // inputs moved to Settings; keep them synchronized
-  const ele = document.getElementById('expense-electricity');
-  const maint = document.getElementById('expense-maintenance');
-  const other = document.getElementById('expense-other');
-  if(ele) ele.value = Number(appState.expenses.electricity || 0).toFixed(2);
-  if(maint) maint.value = Number(appState.expenses.maintenance || 0).toFixed(2);
-  if(other) other.value = Number(appState.expenses.other || 0).toFixed(2);
-  const totalExp = (appState.expenses.electricity||0) + (appState.expenses.maintenance||0) + (appState.expenses.other||0);
-  const expTotalEl = document.getElementById('expenses-total');
-  if(expTotalEl) expTotalEl.textContent = formatMoney(totalExp);
-  const summaryExpEl = document.getElementById('summary-expenses');
-  if(summaryExpEl) summaryExpEl.textContent = formatMoney(totalExp);
+  document.getElementById('dash-mohajon-rate').textContent = formatMoney(mo.rate || 0);
+  document.getElementById('dash-total-production').textContent = Number(mo.totalProduction || 0).toFixed(2);
+  document.getElementById('dash-total-bill').textContent = formatMoney(bill);
+  document.getElementById('dash-total-given').textContent = formatMoney(given);
+  document.getElementById('dash-total-due').textContent = formatMoney(due);
 }
 
 /* BILL SUMMARY rendering */
@@ -572,7 +520,7 @@ function renderBillSummary(){
     const finalAmount = earnings - adjustment + bonus;
     workersSubtotal += finalAmount;
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${escapeHtml(w.name)}</td><td>${escapeHtml(w.designation)}</td><td>${pounds.toFixed(2)}</td><td>${formatMoney(w.rate)}</td><td>${formatMoney(earnings)}</td><td>${formatMoney(adjustment)}</td><td>${formatMoney(bonus)}</td><td>${formatMoney(finalAmount)}</td>`;
+    tr.innerHTML = `<td>${escapeHtml(w.name)}</td><td>${escapeHtml(w.designation)}</td><td style="text-align:right">${pounds.toFixed(2)}</td><td style="text-align:right">${formatMoney(w.rate)}</td><td style="text-align:right">${formatMoney(earnings)}</td><td style="text-align:right">${formatMoney(adjustment)}</td><td style="text-align:right">${formatMoney(bonus)}</td><td style="text-align:right">${formatMoney(finalAmount)}</td>`;
     tbody.appendChild(tr);
   });
   document.getElementById('bs-workers-subtotal').textContent = formatMoney(workersSubtotal);
@@ -870,7 +818,7 @@ document.getElementById('save-summary-btn').addEventListener('click', ()=>{
 });
 
 /* ---------------------------
-   Printing functions
+   Printing functions (current live bill summary)
    --------------------------- */
 
 function companyHeaderHtml(company){
@@ -904,7 +852,111 @@ function footerSignatureHtml(){
   `;
 }
 
-/* print helpers */
+/* Print current live bill summary (used by Dashboard "Print Bill Summary") */
+function printCurrentBillSummary(){
+  const company = appState.company || {};
+  const mo = appState.mohajon || {};
+  const workersRows = appState.workers.map(w=>{
+    const pounds = Number(appState.productionInputs[w.id] || 0);
+    const earnings = pounds * Number(w.rate || 0);
+    const adjustment = Number(w.adjustment || 0);
+    const bonus = Number(w.bonus || 0);
+    const finalAmount = earnings - adjustment + bonus;
+    return `<tr>
+      <td>${escapeHtml(w.name)}</td>
+      <td>${escapeHtml(w.designation)}</td>
+      <td style="text-align:right">${pounds.toFixed(2)}</td>
+      <td style="text-align:right">${formatMoney(w.rate)}</td>
+      <td style="text-align:right">${formatMoney(earnings)}</td>
+      <td style="text-align:right">${formatMoney(adjustment)}</td>
+      <td style="text-align:right">${formatMoney(bonus)}</td>
+      <td style="text-align:right">${formatMoney(finalAmount)}</td>
+    </tr>`;
+  }).join('');
+
+  const expElec = Number(appState.expenses.electricity || 0);
+  const expMaint = Number(appState.expenses.maintenance || 0);
+  const expOther = Number(appState.expenses.other || 0);
+  const expTotal = expElec + expMaint + expOther;
+
+  const workersSubtotal = appState.workers.reduce((s,w)=>{
+    const pounds = Number(appState.productionInputs[w.id] || 0);
+    const earnings = pounds * Number(w.rate || 0);
+    return s + (earnings - Number(w.adjustment || 0) + Number(w.bonus || 0));
+  },0);
+
+  const income = Number(mo.moneyGiven || 0);
+  const net = income - workersSubtotal - expTotal;
+
+  const html = `
+    <div class="print-page printable">
+      ${companyHeaderHtml(company)}
+      <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
+
+      <h3>Mohajon</h3>
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr><th>Rate</th><th>Production</th><th>Bill</th><th>Money Given</th><th>Due</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="text-align:right">${formatMoney(mo.rate||0)}</td>
+            <td style="text-align:right">${Number(mo.totalProduction||0).toFixed(2)}</td>
+            <td style="text-align:right">${formatMoney(Number(mo.rate||0)*Number(mo.totalProduction||0))}</td>
+            <td style="text-align:right">${formatMoney(mo.moneyGiven||0)}</td>
+            <td style="text-align:right">${formatMoney((Number(mo.rate||0)*Number(mo.totalProduction||0)) - Number(mo.moneyGiven||0))}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Workers</h3>
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr><th>Worker</th><th>Role</th><th>Pounds</th><th>Rate</th><th>Bill</th><th>Adjustment</th><th>Bonus</th><th>Final Amount</th></tr></thead>
+        <tbody>${workersRows}</tbody>
+        <tfoot>
+          <tr>
+            <th colspan="7" style="text-align:right">Workers Subtotal</th>
+            <th style="text-align:right">${formatMoney(workersSubtotal)}</th>
+          </tr>
+        </tfoot>
+      </table>
+
+      <h3>Expenses</h3>
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr><th>Electricity</th><th>Maintenance</th><th>Other</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="text-align:right">${formatMoney(expElec)}</td>
+            <td style="text-align:right">${formatMoney(expMaint)}</td>
+            <td style="text-align:right">${formatMoney(expOther)}</td>
+            <td style="text-align:right">${formatMoney(expTotal)}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Summary</h3>
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr><th>Income (Money Given)</th><th>Payments</th><th>Expenses</th><th>Net</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="text-align:right">${formatMoney(income)}</td>
+            <td style="text-align:right">${formatMoney(workersSubtotal)}</td>
+            <td style="text-align:right">${formatMoney(expTotal)}</td>
+            <td style="text-align:right">${formatMoney(net)}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      ${footerSignatureHtml()}
+    </div>
+  `;
+
+  const win = window.open('','_blank');
+  win.document.write('<html><head><title>Bill Summary</title><style>body{font-family:Arial, Helvetica, sans-serif;color:#000}table{border-collapse:collapse}table,th,td{border:1px solid #ddd;padding:8px}</style></head><body>'+html+'</body></html>');
+  win.document.close();
+  win.focus();
+  setTimeout(()=>{ try{ win.print(); win.close(); }catch(e){} }, 300);
+}
+
+/* existing printing helpers (used elsewhere) */
 function printInvoice(invoiceIndex){
   const inv = appState.invoices && appState.invoices[invoiceIndex];
   if(!inv) return alert('Invoice not found.');
@@ -1225,9 +1277,10 @@ function confirmDeleteWorkerHistory(workerId, histIndex){
 renderAll();
 applyCompanyHeader();
 
-/* Quick nav helper for "Go to Bill Summary" button */
-document.getElementById('switch-to-billsummary')?.addEventListener('click', ()=>{
-  const btn = [...document.querySelectorAll('.nav-btn')].find(b=>b.dataset.page==='bill-summary');
+/* Dashboard quick buttons */
+document.getElementById('dashboard-print-billsummary')?.addEventListener('click', printCurrentBillSummary);
+document.getElementById('dashboard-go-settings')?.addEventListener('click', ()=>{
+  const btn = [...document.querySelectorAll('.nav-btn')].find(b=>b.dataset.page==='settings');
   if(btn) btn.click();
 });
 
