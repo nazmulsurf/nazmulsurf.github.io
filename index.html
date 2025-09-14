@@ -78,14 +78,9 @@
   }
 
   .print-page{background:#fff;color:#000;max-width:780px;margin:0 auto;padding:18px;border-radius:6px}
-  .print-page table{margin-bottom:18px} /* extra space between table and signature */
+  .print-page table{margin-bottom:18px}
   .page-break{page-break-after:always}
   .invoice-total{font-weight:800;font-size:18px}
-  .signature-line{margin-top:28px;border-top:1px solid #000;width:260px;padding-top:8px;text-align:center}
-  .footer-signature{display:flex;justify-content:center;margin-top:28px}
-  .footer-signature .sig-box{width:260px;border-bottom:1px solid #000;height:48px}
-  .footer-signature .sig-caption{font-size:13px;text-align:center;margin-top:6px}
-  .after-sign-space{height:18px}
 </style>
 </head>
 <body>
@@ -103,7 +98,6 @@
 
   <nav class="nav" role="navigation" aria-label="Main">
     <button class="nav-btn active" data-page="dashboard">Dashboard</button>
-    <!-- Production menu removed -->
     <button class="nav-btn" data-page="bill-summary">Bill Summary</button>
     <button class="nav-btn" data-page="settings">Settings</button>
   </nav>
@@ -132,37 +126,7 @@
       </div>
     </div>
 
-    <div style="margin-top:14px" class="grid cols-2">
-      <!-- Mohajon table in Dashboard (live values) -->
-      <div class="card">
-        <h4 style="margin:0 0 8px 0">Mohajon</h4>
-        <table>
-          <thead><tr><th>Rate (৳/pound)</th><th>Total Production (pounds)</th><th>Bill (৳)</th><th>Money Given (৳)</th><th>Due (৳)</th></tr></thead>
-          <tbody>
-            <tr>
-              <td id="dash-mohajon-rate">৳0.00</td>
-              <td id="dash-total-production">0.00</td>
-              <td id="dash-total-bill">৳0.00</td>
-              <td id="dash-total-given">৳0.00</td>
-              <td id="dash-total-due">৳0.00</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="small" style="margin-top:8px">This is a live view — update values in <strong>Settings</strong> then click <strong>Save Data</strong>.</div>
-      </div>
-
-      <!-- Quick actions -->
-      <div class="card">
-        <h4 style="margin:0 0 8px 0">Quick Actions</h4>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <button class="btn" id="dashboard-print-billsummary">Print Bill Summary</button>
-          <button class="btn secondary" id="dashboard-go-settings">Go to Settings</button>
-          <div class="small">Tip: Save data in Settings to update all values used in the printed bill summary.</div>
-        </div>
-      </div>
-    </div>
-
-    <div style="margin-top:14px">
+    <div style="margin-top:18px">
       <h3 style="margin-bottom:10px">Weekly Invoice History</h3>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <div class="small">Saved invoices from saved summaries</div>
@@ -188,7 +152,7 @@
 
   </section>
 
-  <!-- BILL SUMMARY (unchanged) -->
+  <!-- BILL SUMMARY -->
   <section id="bill-summary" class="page">
     <h2>Bill Summary</h2>
     <p class="lead">A printable summary that includes Mohajon, worker production, expenses and net revenue.</p>
@@ -258,11 +222,12 @@
 
       <div class="actions" style="margin-top:12px">
         <button class="btn" id="save-summary-btn">Save Summary</button>
+        <button class="btn secondary" id="print-billsummary-btn">Print Bill Summary</button>
       </div>
     </div>
   </section>
 
-  <!-- SETTINGS (unchanged, still where workers data lives) -->
+  <!-- SETTINGS -->
   <section id="settings" class="page">
     <h2>Settings</h2>
     <p class="lead">Update company details, worker details, mohajon info (rate, total production, money given) and expenses. Save or reset from below.</p>
@@ -486,17 +451,6 @@ function renderDashboard(){
   document.getElementById('summary-workers').textContent = formatMoney(totalWorkersPaid);
   document.getElementById('summary-expenses').textContent = formatMoney(expensesTotal);
   document.getElementById('summary-profit').textContent = formatMoney(profit);
-
-  // dashboard mohajon table (live)
-  const mo = appState.mohajon || {};
-  const bill = Number(mo.rate || 0) * Number(mo.totalProduction || 0);
-  const given = Number(mo.moneyGiven || 0);
-  const due = bill - given;
-  document.getElementById('dash-mohajon-rate').textContent = formatMoney(mo.rate || 0);
-  document.getElementById('dash-total-production').textContent = Number(mo.totalProduction || 0).toFixed(2);
-  document.getElementById('dash-total-bill').textContent = formatMoney(bill);
-  document.getElementById('dash-total-given').textContent = formatMoney(given);
-  document.getElementById('dash-total-due').textContent = formatMoney(due);
 }
 
 /* BILL SUMMARY rendering */
@@ -635,7 +589,7 @@ function populateSettingsForm(){
   document.getElementById('setting-company-phone').value = c.phone || '';
   document.getElementById('setting-company-email').value = c.email || '';
 
-  // mohajon (note: email replaced by totalProduction)
+  // mohajon
   const m = appState.mohajon || {};
   document.getElementById('setting-mohajon-company').value = m.company || '';
   document.getElementById('setting-mohajon-name').value = m.name || '';
@@ -652,7 +606,7 @@ function populateSettingsForm(){
   renderExpenses();
 }
 
-/* Populate worker settings list (name on first row; address, phone, designation, rate, production, adjustment, bonus on second row) */
+/* Populate worker settings list */
 function populateWorkerSettingsList(){
   const container = document.getElementById('worker-settings-list');
   container.innerHTML = '';
@@ -818,7 +772,7 @@ document.getElementById('save-summary-btn').addEventListener('click', ()=>{
 });
 
 /* ---------------------------
-   Printing functions (current live bill summary)
+   Printing functions (signature removed from all print outputs)
    --------------------------- */
 
 function companyHeaderHtml(company){
@@ -840,19 +794,7 @@ function companyHeaderHtml(company){
   `;
 }
 
-function footerSignatureHtml(){
-  return `
-    <div class="footer-signature">
-      <div>
-        <div class="sig-box"></div>
-        <div class="sig-caption">Signature</div>
-      </div>
-    </div>
-    <div class="after-sign-space"></div>
-  `;
-}
-
-/* Print current live bill summary (used by Dashboard "Print Bill Summary") */
+/* Print current live bill summary (used by Bill Summary "Print Bill Summary" button) */
 function printCurrentBillSummary(){
   const company = appState.company || {};
   const mo = appState.mohajon || {};
@@ -944,8 +886,6 @@ function printCurrentBillSummary(){
           </tr>
         </tbody>
       </table>
-
-      ${footerSignatureHtml()}
     </div>
   `;
 
@@ -956,7 +896,7 @@ function printCurrentBillSummary(){
   setTimeout(()=>{ try{ win.print(); win.close(); }catch(e){} }, 300);
 }
 
-/* existing printing helpers (used elsewhere) */
+/* existing printing helpers (signature removed) */
 function printInvoice(invoiceIndex){
   const inv = appState.invoices && appState.invoices[invoiceIndex];
   if(!inv) return alert('Invoice not found.');
@@ -1007,8 +947,6 @@ function printInvoice(invoiceIndex){
           </tr>
         </tfoot>
       </table>
-
-      ${footerSignatureHtml()}
     </div>
   `;
 
@@ -1065,8 +1003,6 @@ function printAllWorkersForInvoice(invoiceIndex){
             </tr>
           </tbody>
         </table>
-
-        ${footerSignatureHtml()}
       </div>
       ${idx < inv.workers.length-1 ? '<div class="page-break"></div>' : ''}
     `;
@@ -1127,8 +1063,6 @@ function printMohajonReceipt(invoiceIndex){
           </tr>
         </tbody>
       </table>
-
-      ${footerSignatureHtml()}
     </div>
   `;
 
@@ -1277,12 +1211,8 @@ function confirmDeleteWorkerHistory(workerId, histIndex){
 renderAll();
 applyCompanyHeader();
 
-/* Dashboard quick buttons */
-document.getElementById('dashboard-print-billsummary')?.addEventListener('click', printCurrentBillSummary);
-document.getElementById('dashboard-go-settings')?.addEventListener('click', ()=>{
-  const btn = [...document.querySelectorAll('.nav-btn')].find(b=>b.dataset.page==='settings');
-  if(btn) btn.click();
-});
+/* Bill Summary print button (now in Bill Summary page) */
+document.getElementById('print-billsummary-btn')?.addEventListener('click', printCurrentBillSummary);
 
 </script>
 </body>
