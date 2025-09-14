@@ -34,7 +34,7 @@
   label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
   input[type="number"], input[type="text"], textarea, select{width:100%;padding:8px 10px;border-radius:6px;border:1px solid #ddd;font-size:14px}
   input[type="number"]::-webkit-inner-spin-button,
-  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; } /* nicer mobile look */
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   .small{font-size:13px;color:var(--muted)}
   table{width:100%;border-collapse:collapse;margin-top:10px}
   th,td{padding:10px;border:1px solid #eee;text-align:left;font-size:14px}
@@ -57,7 +57,6 @@
   .company-header img{width:72px;height:72px;border-radius:8px;object-fit:contain}
   .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   @media (max-width:860px){.settings-grid{grid-template-columns:1fr}}
-  /* Worker settings layout updates */
   .worker-settings-list .worker-card{background:#fafafa;border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid #eee}
   .worker-settings-list .ws-row-top{margin-bottom:8px}
   .worker-settings-list .ws-row-bottom{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
@@ -69,11 +68,9 @@
   .page-break{page-break-after:always}
   .invoice-total{font-weight:800;font-size:18px}
   .signature-line{margin-top:28px;border-top:1px solid #000;width:260px;padding-top:8px;text-align:center}
-  /* nicer signature layout for prints */
-  .signatures{display:flex;justify-content:space-between;align-items:center;margin-top:24px;gap:18px}
-  .sign-block{flex:1;display:flex;flex-direction:column;align-items:center}
-  .sign-space{height:70px;width:100%;border-bottom:1px solid #000;margin-bottom:8px}
-  .sign-caption{font-size:12px;color:#333}
+  .footer-signature{display:flex;justify-content:center;margin-top:24px}
+  .footer-signature .sig-box{width:260px;border-bottom:1px solid #000;height:48px}
+  .footer-signature .sig-caption{font-size:13px;text-align:center;margin-top:6px}
 </style>
 </head>
 <body>
@@ -127,7 +124,7 @@
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <div class="small">Saved invoices from saved summaries</div>
         <div>
-          <button class="btn small" id="print-all-invoices-btn">Print All Invoices (one page each)</button>
+          <!-- NOTE: Print All Invoices button removed as requested -->
         </div>
       </div>
       <div id="weekly-invoices-list">
@@ -585,12 +582,10 @@ function showWorkerDetails(workerId){
 
 /* PRODUCTION (read-only display) */
 function renderProductionView(){
-  // title dates
   const nowTitle = new Date().toLocaleDateString();
   document.getElementById('prod-mohajon-title').textContent = `Mohajon — Week ending ${nowTitle}`;
   document.getElementById('prod-workers-title').textContent = `Workers — Week ending ${nowTitle}`;
 
-  // mohajon data
   const mo = appState.mohajon || {rate:0,totalProduction:0,moneyGiven:0};
   const bill = Number(mo.rate || 0) * Number(mo.totalProduction || 0);
   const given = Number(mo.moneyGiven || 0);
@@ -601,7 +596,6 @@ function renderProductionView(){
   document.getElementById('prod-mohajon-given').textContent = formatMoney(given);
   document.getElementById('prod-mohajon-due').textContent = formatMoney(due);
 
-  // workers data
   const tbody = document.getElementById('prod-workers-body');
   tbody.innerHTML = '';
   let total = 0;
@@ -674,7 +668,7 @@ function renderBillSummary(){
   document.getElementById('bs-net').textContent = formatMoney(net);
 }
 
-/* Weekly invoices table on dashboard (single print-all + receipt + delete) */
+/* Weekly invoices table on dashboard (single print + receipt + delete) */
 function renderWeeklyInvoicesTable(){
   const tbody = document.querySelector('#weekly-invoices-table tbody');
   tbody.innerHTML = '';
@@ -690,7 +684,7 @@ function renderWeeklyInvoicesTable(){
     printBtn.addEventListener('click', ()=> printInvoice(idx));
     actionsTd.appendChild(printBtn);
 
-    // Print All Workers (one page per worker if needed)
+    // Print Per-Worker (one page per worker)
     const printWorkersBtn = document.createElement('button');
     printWorkersBtn.className = 'btn small';
     printWorkersBtn.style.marginLeft='8px';
@@ -811,13 +805,10 @@ function populateWorkerSettingsList(){
     card.className = 'worker-card';
     card.dataset.workerId = w.id;
 
-    // Top row: name (full width)
     const rowTop = document.createElement('div');
     rowTop.className = 'ws-row-top';
     rowTop.innerHTML = `<input class="ws-name" placeholder="Name" value="${escapeHtml(w.name)}" />`;
 
-    // Bottom row: address, phone, designation, rate, adjustment, bonus
-    // Show placeholders for numeric guidance; if stored value is >0 show it, otherwise leave empty so placeholder is visible
     const rateValue = Number(w.rate || 0) !== 0 ? Number(w.rate).toFixed(2) : '';
     const adjustValue = Number(w.adjustment || 0) !== 0 ? Number(w.adjustment).toFixed(2) : '';
     const bonusValue = Number(w.bonus || 0) !== 0 ? Number(w.bonus).toFixed(2) : '';
@@ -942,7 +933,7 @@ document.getElementById('save-summary-btn').addEventListener('click', ()=>{
 });
 
 /* ---------------------------
-   Printing functions (no preview modal)
+   Printing functions (updated per request)
    --------------------------- */
 
 /* Helper to generate company header HTML (logo beside details) */
@@ -965,16 +956,26 @@ function companyHeaderHtml(company){
   `;
 }
 
-/* Print a single invoice (one page) */
+/* small helper for single-page footer signature (text only "Signature") */
+function footerSignatureHtml(){
+  return `
+    <div class="footer-signature">
+      <div>
+        <div class="sig-box"></div>
+        <div class="sig-caption">Signature</div>
+      </div>
+    </div>
+  `;
+}
+
+/* Print a single invoice (one page) — signature footer only (no Received/Authorized blocks) */
 function printInvoice(invoiceIndex){
   const inv = appState.invoices && appState.invoices[invoiceIndex];
   if(!inv) return alert('Invoice not found.');
   const company = appState.company || {};
-  // find matching summary for the invoice if available
   const summary = (appState.summaries || []).find(s => s.date === inv.date && s.period === inv.period) || null;
   const mohajon = summary ? (summary.mohajon || appState.mohajon) : appState.mohajon;
 
-  // worker rows
   const workerRows = inv.workers.map(w => `
     <tr>
       <td>${escapeHtml(w.name)}</td>
@@ -1019,16 +1020,7 @@ function printInvoice(invoiceIndex){
         </tfoot>
       </table>
 
-      <div class="signatures">
-        <div class="sign-block">
-          <div class="sign-space"></div>
-          <div class="sign-caption">Received By (Mohajon)</div>
-        </div>
-        <div class="sign-block">
-          <div class="sign-space"></div>
-          <div class="sign-caption">Authorized Signature (Company)</div>
-        </div>
-      </div>
+      ${footerSignatureHtml()}
     </div>
   `;
 
@@ -1036,17 +1028,14 @@ function printInvoice(invoiceIndex){
   win.document.write('<html><head><title>Invoice '+escapeHtml(inv.id)+'</title><style>body{font-family:Arial, Helvetica, sans-serif;color:#000}table{border-collapse:collapse}table,th,td{border:1px solid #ddd;padding:8px}</style></head><body>'+html+'</body></html>');
   win.document.close();
   win.focus();
-  setTimeout(()=>{ try{ win.print(); win.close(); }catch(e){ /* ignore */ } }, 300);
+  setTimeout(()=>{ try{ win.print(); win.close(); }catch(e){} }, 300);
 }
 
-/* Print combined file: one page per worker for a single invoice (keeps per-worker layout) */
+/* Print combined file: one page per worker for a single invoice — each page gets a single footer signature */
 function printAllWorkersForInvoice(invoiceIndex){
   const inv = appState.invoices && appState.invoices[invoiceIndex];
   if(!inv) return alert('Invoice not found.');
   const company = appState.company || {};
-  const matchingSummary = (appState.summaries || []).find(s => s.date === inv.date && s.period === inv.period) || null;
-  const mohajon = matchingSummary ? (matchingSummary.mohajon || appState.mohajon) : appState.mohajon;
-
   const pages = inv.workers.map((w, idx) => {
     return `
       <div class="print-page">
@@ -1090,16 +1079,7 @@ function printAllWorkersForInvoice(invoiceIndex){
           </tbody>
         </table>
 
-        <div class="signatures">
-          <div class="sign-block">
-            <div class="sign-space"></div>
-            <div class="sign-caption">Received By (Mohajon)</div>
-          </div>
-          <div class="sign-block">
-            <div class="sign-space"></div>
-            <div class="sign-caption">Authorized Signature (Company)</div>
-          </div>
-        </div>
+        ${footerSignatureHtml()}
       </div>
       ${idx < inv.workers.length-1 ? '<div class="page-break"></div>' : ''}
     `;
@@ -1110,10 +1090,10 @@ function printAllWorkersForInvoice(invoiceIndex){
   win.document.write('<html><head><title>Invoices</title><style>body{font-family:Arial, Helvetica, sans-serif;color:#000}table{border-collapse:collapse}table,th,td{border:1px solid #ddd;padding:8px}</style></head><body>'+combined+'</body></html>');
   win.document.close();
   win.focus();
-  setTimeout(()=>{ try{ win.print(); win.close(); }catch(e){ /* ignore */ } }, 300);
+  setTimeout(()=>{ try{ win.print(); win.close(); }catch(e){} }, 300);
 }
 
-/* Print Mohajon receipt for an invoice (arranged so receipt "comes from Mohajon") */
+/* Print Mohajon receipt for an invoice (signature footer only) */
 function printMohajonReceipt(invoiceIndex){
   const inv = appState.invoices && appState.invoices[invoiceIndex];
   if(!inv) return alert('Invoice not found.');
@@ -1163,16 +1143,7 @@ function printMohajonReceipt(invoiceIndex){
         </tbody>
       </table>
 
-      <div class="signatures">
-        <div class="sign-block">
-          <div class="sign-space"></div>
-          <div class="sign-caption">Signature (Mohajon)</div>
-        </div>
-        <div class="sign-block">
-          <div class="sign-space"></div>
-          <div class="sign-caption">Signature (Company)</div>
-        </div>
-      </div>
+      ${footerSignatureHtml()}
     </div>
   `;
 
@@ -1183,7 +1154,7 @@ function printMohajonReceipt(invoiceIndex){
   setTimeout(()=>{ try{ win.print(); win.close(); }catch(e){} }, 300);
 }
 
-/* Print a single worker's history entry (from Workers tab) */
+/* Print a single worker's history entry (from Workers tab) — signature footer only */
 function printSingleWorkerHistory(workerId, historyIndex){
   const hist = (appState.billingHistory[workerId] || [])[historyIndex];
   if(!hist) return;
@@ -1205,16 +1176,7 @@ function printSingleWorkerHistory(workerId, historyIndex){
         </tbody>
       </table>
 
-      <div class="signatures">
-        <div class="sign-block">
-          <div class="sign-space"></div>
-          <div class="sign-caption">Received By (Mohajon)</div>
-        </div>
-        <div class="sign-block">
-          <div class="sign-space"></div>
-          <div class="sign-caption">Authorized Signature (Company)</div>
-        </div>
-      </div>
+      ${footerSignatureHtml()}
     </div>
   `;
   const win = window.open('','_blank');
@@ -1224,12 +1186,11 @@ function printSingleWorkerHistory(workerId, historyIndex){
   setTimeout(()=>{ try{ win.print(); win.close(); }catch(e){} }, 300);
 }
 
-/* Print saved summary — FULL details (company logo + mohajon + workers + expenses + totals + signatures) */
+/* Print saved summary — FULL details but per request: remove Mohajon section and remove signature blocks (Bill summary has NO footer signature) */
 function printSavedSummary(index){
   const s = appState.summaries && appState.summaries[index];
   if(!s) return;
   const company = s.company || {};
-  const mohajon = s.mohajon || {};
   let workersHtml = s.workers.map(w => `
     <tr>
       <td>${escapeHtml(w.name)}</td>
@@ -1258,13 +1219,7 @@ function printSavedSummary(index){
 
       <div style="height:12px"></div>
 
-      <h4>Mohajon</h4>
-      <div style="margin-bottom:8px">
-        <strong>${escapeHtml(mohajon.company||mohajon.name||'')}</strong><br/>
-        <div style="font-size:12px">${escapeHtml(mohajon.address||'')}</div>
-        <div style="font-size:12px">${escapeHtml(mohajon.phone||'')}</div>
-        ${mohajon.email ? `<div style="font-size:12px">${escapeHtml(mohajon.email)}</div>` : ''}
-      </div>
+      <!-- Mohajon block removed from the printed summary as requested -->
 
       <h4>Workers</h4>
       <table style="width:100%;border-collapse:collapse">
@@ -1308,90 +1263,12 @@ function printSavedSummary(index){
         </tbody>
       </table>
 
-      <div class="signatures">
-        <div class="sign-block">
-          <div class="sign-space"></div>
-          <div class="sign-caption">Received By (Mohajon)</div>
-        </div>
-        <div class="sign-block">
-          <div class="sign-space"></div>
-          <div class="sign-caption">Authorized Signature (Company)</div>
-        </div>
-      </div>
+      <!-- Bill Summary: no signature footer per request -->
     </div>
   `;
 
   const win = window.open('','_blank');
   win.document.write('<html><head><title>Summary '+escapeHtml(s.id)+'</title><style>body{font-family:Arial, Helvetica, sans-serif;color:#000}table{border-collapse:collapse}table,th,td{border:1px solid #ddd;padding:8px}</style></head><body>'+html+'</body></html>');
-  win.document.close();
-  win.focus();
-  setTimeout(()=>{ try{ win.print(); win.close(); }catch(e){} }, 300);
-}
-
-/* Print all invoices (each invoice occupies one page) */
-document.getElementById('print-all-invoices-btn').addEventListener('click', ()=> printAllInvoices());
-
-function printAllInvoices(){
-  const company = appState.company || {};
-  const invoices = appState.invoices || [];
-  if(!invoices.length) return alert('No invoices to print.');
-  const pages = invoices.map((inv, idx) => {
-    // worker rows for this invoice
-    const workerRows = (inv.workers || []).map(w => `
-      <tr>
-        <td>${escapeHtml(w.name)}</td>
-        <td>${escapeHtml(w.designation)}</td>
-        <td style="text-align:right">${Number(w.pounds).toFixed(2)}</td>
-        <td style="text-align:right">${formatMoney(w.rate)}</td>
-        <td style="text-align:right">${formatMoney(w.bill)}</td>
-        <td style="text-align:right">${formatMoney(w.adjustment)}</td>
-        <td style="text-align:right">${formatMoney(w.bonus)}</td>
-        <td style="text-align:right">${formatMoney(w.total)}</td>
-      </tr>
-    `).join('');
-
-    return `
-      <div class="print-page">
-        ${companyHeaderHtml(company)}
-        <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div>
-            <div style="font-weight:700">Invoice: ${escapeHtml(inv.id)}</div>
-            <div style="font-size:12px">${escapeHtml(inv.period)}</div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-size:12px">${escapeHtml(inv.date)}</div>
-          </div>
-        </div>
-
-        <table style="width:100%;border-collapse:collapse;margin-top:10px">
-          <thead><tr><th>Worker</th><th>Role</th><th>Pounds</th><th>Rate</th><th>Bill</th><th>Adjustment</th><th>Bonus</th><th>Total</th></tr></thead>
-          <tbody>${workerRows}</tbody>
-          <tfoot>
-            <tr>
-              <th colspan="7" style="text-align:right">Total Payments</th>
-              <th style="text-align:right">${formatMoney(inv.total)}</th>
-            </tr>
-          </tfoot>
-        </table>
-
-        <div class="signatures">
-          <div class="sign-block">
-            <div class="sign-space"></div>
-            <div class="sign-caption">Received By (Mohajon)</div>
-          </div>
-          <div class="sign-block">
-            <div class="sign-space"></div>
-            <div class="sign-caption">Authorized Signature (Company)</div>
-          </div>
-        </div>
-      </div>
-      ${idx < invoices.length-1 ? '<div class="page-break"></div>' : ''}
-    `;
-  }).join('');
-
-  const win = window.open('','_blank');
-  win.document.write('<html><head><title>All Invoices</title><style>body{font-family:Arial, Helvetica, sans-serif;color:#000}table{border-collapse:collapse}table,th,td{border:1px solid #ddd;padding:8px}</style></head><body>'+pages+'</body></html>');
   win.document.close();
   win.focus();
   setTimeout(()=>{ try{ win.print(); win.close(); }catch(e){} }, 300);
@@ -1471,7 +1348,7 @@ function populateSettingsForm(){
   document.getElementById('setting-mohajon-rate').value = Number(m.rate || 0) !== 0 ? Number(m.rate).toFixed(2) : '';
   document.getElementById('setting-mohajon-moneygiven').value = Number(m.moneyGiven || 0) !== 0 ? Number(m.moneyGiven).toFixed(2) : '';
 
-  populateWorkerSettingsList(); // repopulate worker list (makes placeholders appear)
+  populateWorkerSettingsList();
 }
 
 /* initial rendering */
