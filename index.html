@@ -46,9 +46,6 @@
   .btn.small{padding:6px 8px;font-size:13px}
   .btn.delete{background:#000;color:#fff;border:1px solid #000;padding:6px 8px;border-radius:6px}
   .muted{color:var(--muted)}
-  .worker-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-  .pill{padding:8px 12px;border-radius:40px;background:#fff;border:1px solid #ddd;cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600}
-  .pill.active{background:var(--accent);color:#fff;border-color:var(--accent)}
   .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
   .modal{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:40}
   .modal .box{background:#fff;padding:18px;border-radius:10px;width:96%;max-width:980px;box-shadow:0 8px 30px rgba(0,0,0,0.12)}
@@ -106,9 +103,8 @@
 
   <nav class="nav" role="navigation" aria-label="Main">
     <button class="nav-btn active" data-page="dashboard">Dashboard</button>
-    <button class="nav-btn" data-page="workers">Workers</button>
+    <!-- Workers menu removed as requested -->
     <button class="nav-btn" data-page="production">Production</button>
-    <button class="nav-btn" data-page="expenses">Expenses</button>
     <button class="nav-btn" data-page="bill-summary">Bill Summary</button>
     <button class="nav-btn" data-page="settings">Settings</button>
   </nav>
@@ -141,9 +137,7 @@
       <h3 style="margin-bottom:10px">Weekly Invoice History</h3>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <div class="small">Saved invoices from saved summaries</div>
-        <div>
-          <!-- NOTE: Print All Invoices button removed as requested -->
-        </div>
+        <div></div>
       </div>
       <div id="weekly-invoices-list">
         <table id="weekly-invoices-table">
@@ -165,28 +159,6 @@
 
   </section>
 
-  <!-- WORKERS -->
-  <section id="workers" class="page">
-    <h2>Workers</h2>
-    <p class="lead">Workers list and billing history. To edit details open <strong>Settings → Worker Details</strong>.</p>
-
-    <div class="card">
-      <div class="worker-pills" id="worker-pills"></div>
-
-      <div style="margin-top:12px">
-        <table>
-          <thead><tr><th>#</th><th>Worker</th><th>Role</th></tr></thead>
-          <tbody id="workers-list-table"></tbody>
-        </table>
-      </div>
-
-      <div style="margin-top:14px">
-        <h4 style="margin:0 0 8px 0">Selected Worker Billing History</h4>
-        <div id="worker-details-area" class="card"></div>
-      </div>
-    </div>
-  </section>
-
   <!-- PRODUCTION (read-only display) -->
   <section id="production" class="page">
     <h2>Production</h2>
@@ -196,7 +168,7 @@
       <div class="card">
         <h4 id="prod-mohajon-title" style="margin:0 0 8px 0"></h4>
         <table>
-          <thead><tr><th>Rate (৳/pound)</th><th>Production (pounds)</th><th>Bill (৳)</th><th>Money Given (৳)</th><th>Due (৳)</th></tr></thead>
+          <thead><tr><th>Rate (৳/pound)</th><th>Total Production (pounds)</th><th>Bill (৳)</th><th>Money Given (৳)</th><th>Due (৳)</th></tr></thead>
           <tbody>
             <tr>
               <td id="prod-mohajon-rate">৳0.00</td>
@@ -224,41 +196,6 @@
 
     <div style="margin-top:12px">
       <button class="btn" id="switch-to-billsummary">Go to Bill Summary</button>
-    </div>
-  </section>
-
-  <!-- EXPENSES -->
-  <section id="expenses" class="page">
-    <h2>Expenses</h2>
-    <p class="lead">Expenses update only when you press <strong>Update Expenses</strong>.</p>
-
-    <div class="card">
-      <div class="grid cols-2">
-        <div>
-          <label>Electricity (৳)</label>
-          <input type="number" id="expense-electricity" value="0" min="0" step="0.01" />
-        </div>
-        <div>
-          <label>Maintenance (৳)</label>
-          <input type="number" id="expense-maintenance" value="0" min="0" step="0.01" />
-        </div>
-        <div>
-          <label>Other (৳)</label>
-          <input type="number" id="expense-other" value="0" min="0" step="0.01" />
-        </div>
-        <div>
-          <label>&nbsp;</label>
-          <div class="actions">
-            <button class="btn" id="update-expenses-btn">Update Expenses</button>
-            <button class="btn secondary" id="restore-expenses-btn">Restore Expenses</button>
-          </div>
-        </div>
-      </div>
-
-      <div style="margin-top:12px">
-        <div class="small">Total Expenses</div>
-        <div id="expenses-total" style="font-weight:700;font-size:18px">৳0.00</div>
-      </div>
     </div>
   </section>
 
@@ -336,10 +273,10 @@
     </div>
   </section>
 
-  <!-- SETTINGS -->
+  <!-- SETTINGS (expenses inputs kept here; worker settings allow editing per-worker data) -->
   <section id="settings" class="page">
     <h2>Settings</h2>
-    <p class="lead">Update company details, worker details, mohajon info (money given) and set/reset data.</p>
+    <p class="lead">Update company details, worker details, mohajon info (rate, total production, money given) and expenses. Save or reset from below.</p>
 
     <div class="card">
       <div class="settings-grid">
@@ -370,14 +307,41 @@
           <label style="margin-top:8px">Mohajon Phone</label>
           <input type="text" id="setting-mohajon-phone" />
 
-          <label style="margin-top:8px">Mohajon Email</label>
-          <input type="text" id="setting-mohajon-email" />
-
           <label style="margin-top:8px">Mohajon Rate (৳/pound)</label>
           <input type="number" id="setting-mohajon-rate" step="0.01" min="0" placeholder="Rate (e.g. 120.00)" />
 
+          <label style="margin-top:8px">Total Production (pounds)</label>
+          <input type="number" id="setting-mohajon-totalproduction" step="0.01" min="0" placeholder="Total production (pounds)" />
+
           <label style="margin-top:8px">Mohajon Money Given (৳)</label>
           <input type="number" id="setting-mohajon-moneygiven" step="0.01" min="0" placeholder="Money given (e.g. 5000.00)" />
+        </div>
+      </div>
+
+      <hr style="margin:12px 0;border-top:1px solid #eee" />
+
+      <!-- Expenses -->
+      <div style="margin-bottom:12px">
+        <h3 style="margin:6px 0">Expenses</h3>
+        <div class="small">Set expenses below. Expenses are saved when you click <strong>Save Data</strong>.</div>
+        <div style="margin-top:8px" class="grid cols-2">
+          <div>
+            <label>Electricity (৳)</label>
+            <input type="number" id="expense-electricity" value="0" min="0" step="0.01" />
+          </div>
+          <div>
+            <label>Maintenance (৳)</label>
+            <input type="number" id="expense-maintenance" value="0" min="0" step="0.01" />
+          </div>
+          <div>
+            <label>Other (৳)</label>
+            <input type="number" id="expense-other" value="0" min="0" step="0.01" />
+          </div>
+          <div style="display:flex;align-items:end;gap:8px">
+            <div style="width:100%">
+              <div class="small" style="color:var(--muted)">Note: To revert expenses to zero, use the Reset Data button below.</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -435,7 +399,6 @@ const defaultState = () => ({
     name: '',
     address: '',
     phone: '',
-    email: '',
     rate: 0,
     totalProduction: 0,
     moneyGiven: 0
@@ -517,14 +480,13 @@ function applyCompanyHeader(){
    --------------------------- */
 function renderAll(){
   renderDashboard();
-  renderWorkers();
   renderProductionView();
-  renderExpenses();
   renderBillSummary();
   renderWeeklyInvoicesTable();
   renderSavedSummariesTable();
   populateWorkerSettingsList();
   applyCompanyHeader();
+  renderExpenses(); // keeps inputs synchronized
 }
 
 /* DASHBOARD */
@@ -537,61 +499,6 @@ function renderDashboard(){
   document.getElementById('summary-workers').textContent = formatMoney(totalWorkersPaid);
   document.getElementById('summary-expenses').textContent = formatMoney(expensesTotal);
   document.getElementById('summary-profit').textContent = formatMoney(profit);
-}
-
-/* WORKERS */
-function renderWorkers(){
-  const pillContainer = document.getElementById('worker-pills');
-  pillContainer.innerHTML = '';
-  appState.workers.forEach((w, idx) => {
-    const div = document.createElement('div');
-    div.className = 'pill' + (idx===0 ? ' active' : '');
-    div.dataset.workerId = w.id;
-    div.innerHTML = `<span class="pill-name">${escapeHtml(w.name)}</span>`;
-    div.addEventListener('click', () => {
-      document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
-      div.classList.add('active');
-      showWorkerDetails(w.id);
-    });
-    pillContainer.appendChild(div);
-  });
-
-  const tbody = document.getElementById('workers-list-table');
-  tbody.innerHTML = '';
-  appState.workers.forEach((w, idx) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="width:60px">${idx+1}</td><td>${escapeHtml(w.name)}</td><td>${escapeHtml(w.designation)}</td>`;
-    tbody.appendChild(tr);
-  });
-
-  showWorkerDetails(appState.workers[0] && appState.workers[0].id);
-}
-
-function showWorkerDetails(workerId){
-  const history = appState.billingHistory[workerId] || [];
-  const area = document.getElementById('worker-details-area');
-  let html = `<div style="margin-top:4px"><h4 style="margin:6px 0">Billing History</h4>`;
-  if(history.length === 0) html += '<div class="small">No history yet</div>';
-  else {
-    html += `<table><thead><tr><th>Date</th><th>Pounds</th><th>Bill</th><th>Adjustment</th><th>Bonus</th><th>Total</th><th>Actions</th></tr></thead><tbody>`;
-    history.forEach((rec, idx) => {
-      html += `<tr>
-        <td>${escapeHtml(rec.date)}</td>
-        <td>${rec.pounds}</td>
-        <td>${formatMoney(rec.bill)}</td>
-        <td>${formatMoney(rec.adjustment)}</td>
-        <td>${formatMoney(rec.bonus)}</td>
-        <td>${formatMoney(rec.total)}</td>
-        <td>
-          <button class="btn small" onclick="printSingleWorkerHistory('${workerId}', ${idx})">Print</button>
-          <button class="btn small delete" onclick="confirmDeleteWorkerHistory('${workerId}', ${idx})">Delete</button>
-        </td>
-      </tr>`;
-    });
-    html += '</tbody></table>';
-  }
-  html += '</div>';
-  area.innerHTML = html;
 }
 
 /* PRODUCTION (read-only display) */
@@ -630,12 +537,18 @@ function renderProductionView(){
 
 /* EXPENSES */
 function renderExpenses(){
-  document.getElementById('expense-electricity').value = Number(appState.expenses.electricity || 0).toFixed(2);
-  document.getElementById('expense-maintenance').value = Number(appState.expenses.maintenance || 0).toFixed(2);
-  document.getElementById('expense-other').value = Number(appState.expenses.other || 0).toFixed(2);
+  // inputs moved to Settings; keep them synchronized
+  const ele = document.getElementById('expense-electricity');
+  const maint = document.getElementById('expense-maintenance');
+  const other = document.getElementById('expense-other');
+  if(ele) ele.value = Number(appState.expenses.electricity || 0).toFixed(2);
+  if(maint) maint.value = Number(appState.expenses.maintenance || 0).toFixed(2);
+  if(other) other.value = Number(appState.expenses.other || 0).toFixed(2);
   const totalExp = (appState.expenses.electricity||0) + (appState.expenses.maintenance||0) + (appState.expenses.other||0);
-  document.getElementById('expenses-total').textContent = formatMoney(totalExp);
-  document.getElementById('summary-expenses').textContent = formatMoney(totalExp);
+  const expTotalEl = document.getElementById('expenses-total');
+  if(expTotalEl) expTotalEl.textContent = formatMoney(totalExp);
+  const summaryExpEl = document.getElementById('summary-expenses');
+  if(summaryExpEl) summaryExpEl.textContent = formatMoney(totalExp);
 }
 
 /* BILL SUMMARY rendering */
@@ -762,20 +675,6 @@ function computeWorkersTotalPaid(){
   return total;
 }
 
-/* Expenses update */
-document.getElementById('update-expenses-btn').addEventListener('click', ()=>{
-  appState.expenses.electricity = parseFloat(document.getElementById('expense-electricity').value) || 0;
-  appState.expenses.maintenance = parseFloat(document.getElementById('expense-maintenance').value) || 0;
-  appState.expenses.other = parseFloat(document.getElementById('expense-other').value) || 0;
-  saveState();
-});
-
-/* Restore Expenses */
-document.getElementById('restore-expenses-btn').addEventListener('click', ()=>{
-  appState.expenses = { electricity: 0, maintenance: 0, other: 0 };
-  saveState();
-});
-
 /* ---------------------------
    Settings: populate, worker list, save, reset (combined)
    --------------------------- */
@@ -788,18 +687,21 @@ function populateSettingsForm(){
   document.getElementById('setting-company-phone').value = c.phone || '';
   document.getElementById('setting-company-email').value = c.email || '';
 
-  // mohajon
+  // mohajon (note: email replaced by totalProduction)
   const m = appState.mohajon || {};
   document.getElementById('setting-mohajon-company').value = m.company || '';
   document.getElementById('setting-mohajon-name').value = m.name || '';
   document.getElementById('setting-mohajon-address').value = m.address || '';
   document.getElementById('setting-mohajon-phone').value = m.phone || '';
-  document.getElementById('setting-mohajon-email').value = m.email || '';
   document.getElementById('setting-mohajon-rate').value = Number(m.rate||0) !== 0 ? Number(m.rate).toFixed(2) : '';
+  document.getElementById('setting-mohajon-totalproduction').value = Number(m.totalProduction||0) !== 0 ? Number(m.totalProduction).toFixed(2) : '';
   document.getElementById('setting-mohajon-moneygiven').value = Number(m.moneyGiven||0) !== 0 ? Number(m.moneyGiven).toFixed(2) : '';
 
   // worker list (and production inputs)
   populateWorkerSettingsList();
+
+  // expenses (moved to settings)
+  renderExpenses();
 }
 
 /* Populate worker settings list (name on first row; address, phone, designation, rate, production, adjustment, bonus on second row) */
@@ -838,7 +740,7 @@ function populateWorkerSettingsList(){
   });
 }
 
-/* Combined save: company + mohajon + workers (Save Data) */
+/* Combined save: company + mohajon + workers + expenses (Save Data) */
 document.getElementById('save-data-btn').addEventListener('click', ()=>{
   // Company
   const name = document.getElementById('setting-company-name').value || '';
@@ -858,8 +760,8 @@ document.getElementById('save-data-btn').addEventListener('click', ()=>{
   appState.mohajon.name = document.getElementById('setting-mohajon-name').value || '';
   appState.mohajon.address = document.getElementById('setting-mohajon-address').value || '';
   appState.mohajon.phone = document.getElementById('setting-mohajon-phone').value || '';
-  appState.mohajon.email = document.getElementById('setting-mohajon-email').value || '';
   appState.mohajon.rate = parseFloat(document.getElementById('setting-mohajon-rate').value) || 0;
+  appState.mohajon.totalProduction = parseFloat(document.getElementById('setting-mohajon-totalproduction').value) || 0;
   appState.mohajon.moneyGiven = parseFloat(document.getElementById('setting-mohajon-moneygiven').value) || 0;
 
   // Workers + production input
@@ -882,6 +784,11 @@ document.getElementById('save-data-btn').addEventListener('click', ()=>{
     appState.productionInputs[id] = pounds;
   });
 
+  // expenses (settings area)
+  appState.expenses.electricity = parseFloat(document.getElementById('expense-electricity').value) || 0;
+  appState.expenses.maintenance = parseFloat(document.getElementById('expense-maintenance').value) || 0;
+  appState.expenses.other = parseFloat(document.getElementById('expense-other').value) || 0;
+
   applyCompanyHeader();
   saveState();
   alert('Data saved.');
@@ -897,7 +804,6 @@ document.getElementById('reset-data-btn').addEventListener('click', ()=>{
 
 /* ---------------------------
    Save Summary, invoices, printing functions
-   (kept mostly unchanged; small tweaks to spacing/print helper)
    --------------------------- */
 
 /* Save Bill Summary (creates summary + invoice + billing history) */
@@ -998,7 +904,7 @@ function footerSignatureHtml(){
   `;
 }
 
-/* print helpers (unchanged but ensure spacing) */
+/* print helpers */
 function printInvoice(invoiceIndex){
   const inv = appState.invoices && appState.invoices[invoiceIndex];
   if(!inv) return alert('Invoice not found.');
@@ -1146,7 +1052,6 @@ function printMohajonReceipt(invoiceIndex){
           <div style="margin-top:6px">${escapeHtml(mo.company||'')} ${mo.name ? ('— '+escapeHtml(mo.name)) : ''}</div>
           <div style="font-size:12px;margin-top:6px">${escapeHtml(mo.address||'')}</div>
           <div style="font-size:12px">${escapeHtml(mo.phone||'')}</div>
-          ${mo.email ? `<div style="font-size:12px">${escapeHtml(mo.email)}</div>` : ''}
         </div>
         <div style="flex:1;min-width:180px;text-align:right">
           <strong>Received By (Company)</strong><br/>
@@ -1182,39 +1087,7 @@ function printMohajonReceipt(invoiceIndex){
   setTimeout(()=>{ try{ win.print(); win.close(); }catch(e){} }, 300);
 }
 
-/* Print a single worker's history entry (from Workers tab) — signature footer only */
-function printSingleWorkerHistory(workerId, historyIndex){
-  const hist = (appState.billingHistory[workerId] || [])[historyIndex];
-  if(!hist) return;
-  const worker = appState.workers.find(w => w.id === workerId) || { name: 'Worker' };
-  const invoiceId = hist.invoiceId || ('INV-' + Math.floor(100000 + Math.random()*900000));
-  const company = appState.company || {};
-  const html = `
-    <div class="print-page">
-      ${companyHeaderHtml(company)}
-      <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
-      <h4 style="margin:6px 0 8px 0">${escapeHtml(worker.name)}</h4>
-      <table style="width:100%;border-collapse:collapse">
-        <tbody>
-          <tr><td style="padding:6px">Pounds</td><td style="padding:6px;text-align:right">${hist.pounds}</td></tr>
-          <tr><td style="padding:6px">Bill</td><td style="padding:6px;text-align:right">${formatMoney(hist.bill)}</td></tr>
-          <tr><td style="padding:6px">Adjustment</td><td style="padding:6px;text-align:right">${formatMoney(hist.adjustment)}</td></tr>
-          <tr><td style="padding:6px">Bonus</td><td style="padding:6px;text-align:right">${formatMoney(hist.bonus)}</td></tr>
-          <tr><th style="padding:6px;text-align:left">Total</th><th style="padding:6px;text-align:right">${formatMoney(hist.total)}</th></tr>
-        </tbody>
-      </table>
-
-      ${footerSignatureHtml()}
-    </div>
-  `;
-  const win = window.open('','_blank');
-  win.document.write('<html><head><title>Invoice</title><style>body{font-family:Arial, Helvetica, sans-serif;color:#000}table{border-collapse:collapse}table,th,td{border:1px solid #ddd;padding:8px}</style></head><body>'+html+'</body></html>');
-  win.document.close();
-  win.focus();
-  setTimeout(()=>{ try{ win.print(); win.close(); }catch(e){} }, 300);
-}
-
-/* Print saved summary — FULL details but per request: remove Mohajon section and remove signature blocks (Bill summary has NO footer signature) */
+/* Print saved summary */
 function printSavedSummary(index){
   const s = appState.summaries && appState.summaries[index];
   if(!s) return;
@@ -1351,6 +1224,12 @@ function confirmDeleteWorkerHistory(workerId, histIndex){
    --------------------------- */
 renderAll();
 applyCompanyHeader();
+
+/* Quick nav helper for "Go to Bill Summary" button */
+document.getElementById('switch-to-billsummary')?.addEventListener('click', ()=>{
+  const btn = [...document.querySelectorAll('.nav-btn')].find(b=>b.dataset.page==='bill-summary');
+  if(btn) btn.click();
+});
 
 </script>
 </body>
