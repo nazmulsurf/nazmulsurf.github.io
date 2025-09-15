@@ -86,6 +86,11 @@
   .worker-card input{width:100%}
   .setting-section-title{font-weight:700;margin-bottom:6px}
   .hidden {display:none !important}
+
+  /* signature area printing friendly */
+  .signature-block{margin-top:26px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .signature-line{border-top:1px solid #000;width:45%;padding-top:8px}
+  .signature-caption{font-size:12px;color:#333;margin-top:6px}
 </style>
 </head>
 <body>
@@ -134,10 +139,14 @@
     <div style="margin-top:18px">
       <h3 style="margin-bottom:10px">Weekly Production Summary</h3>
       <div class="small">Saved weekly production summaries (will appear here after you press <strong>Save Summary</strong> in Bill Summary).</div>
+
       <div id="weekly-invoices-wrapper" style="margin-top:8px" class="card hidden">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <div class="small">Saved invoices from saved summaries</div>
-          <div></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <!-- Moved Bill Summary PDF button from Bill Summary menu into Dashboard area -->
+            <button class="btn small" id="dashboard-preview-billsummary-btn" title="Preview latest bill summary">Bill Summary PDF</button>
+          </div>
         </div>
         <div id="weekly-invoices-list">
           <table id="weekly-invoices-table">
@@ -148,15 +157,7 @@
       </div>
     </div>
 
-    <div style="margin-top:18px">
-      <div id="saved-summaries-wrapper" class="card hidden">
-        <h3 style="margin-bottom:10px">Saved Bill Summaries</h3>
-        <table id="saved-summaries-table">
-          <thead><tr><th>Summary ID</th><th>Date</th><th>Period</th><th>Total Payments</th><th>Actions</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
+    <!-- Note: Saved Bill Summaries block intentionally removed -->
 
   </section>
 
@@ -230,7 +231,7 @@
 
       <div class="actions" style="margin-top:12px">
         <button class="btn" id="save-summary-btn">Save Summary</button>
-        <button class="btn secondary" id="preview-billsummary-btn">Bill Summary PDF</button>
+        <!-- Bill Summary PDF button removed from here (moved to Dashboard) -->
       </div>
     </div>
   </section>
@@ -331,15 +332,15 @@
 
 </div>
 
-<!-- Modal: typed-delete confirm -->
+<!-- Modal: typed-delete / generic confirm -->
 <div class="modal" id="confirm-modal">
   <div class="box">
-    <div id="confirm-text" style="font-weight:700">Confirm delete</div>
+    <div id="confirm-text" style="font-weight:700">Confirm action</div>
     <div id="confirm-subtext" class="muted-small" style="margin-top:8px">Type <strong>delete</strong> below to confirm.</div>
     <input type="text" id="confirm-input" placeholder="Type delete to confirm" style="margin-top:12px;padding:8px;border-radius:6px;border:1px solid #ddd;width:100%" />
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
       <button class="btn secondary" id="confirm-cancel">Cancel</button>
-      <button class="btn" id="confirm-ok">Delete</button>
+      <button class="btn" id="confirm-ok">OK</button>
     </div>
   </div>
 </div>
@@ -388,7 +389,6 @@ let appState = loadState() || defaultState();
    --------------------------- */
 function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); renderAll(); }
 function loadState(){ try{ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null }catch(e){ console.error(e); return null } }
-function resetStateToDefaults(){ if(!confirm('Reset the entire app to defaults? This will remove saved summaries and settings.')) return; appState = defaultState(); saveState(); location.reload(); }
 function updateFavicon(url){ const link = document.getElementById('favico') || document.querySelector('link[rel="icon"]'); if(link){ link.href = url; } else { const l=document.createElement('link'); l.id='favico'; l.rel='icon'; l.href=url; l.type='image/png'; document.head.appendChild(l); } }
 function formatMoney(n){ return '৳' + Number(n || 0).toFixed(2); }
 function formatDateISO(d=new Date()){ return d.toLocaleDateString() + ' ' + d.toLocaleTimeString(); }
@@ -445,10 +445,9 @@ function renderAll(){
   renderDashboard();
   renderBillSummary();
   renderWeeklyInvoicesTable();
-  renderSavedSummariesTable();
   populateWorkerSettingsList();
   applyCompanyHeader();
-  renderExpenses(); // keeps inputs synchronized
+  renderExpenses();
 }
 
 /* DASHBOARD */
@@ -507,7 +506,7 @@ function renderBillSummary(){
   document.getElementById('bs-net').textContent = formatMoney(net);
 }
 
-/* Weekly invoices table on dashboard (single print + receipt + delete) */
+/* Weekly invoices table on dashboard (single preview + receipt + delete) */
 function renderWeeklyInvoicesTable(){
   const tbody = document.querySelector('#weekly-invoices-table tbody');
   tbody.innerHTML = '';
@@ -550,40 +549,6 @@ function renderWeeklyInvoicesTable(){
     del.textContent = 'Delete';
     del.addEventListener('click', ()=> confirmDeleteInvoice(idx));
     actionsTd.appendChild(del);
-
-    tbody.appendChild(tr);
-  });
-}
-
-/* Saved summaries table */
-function renderSavedSummariesTable(){
-  const tbody = document.querySelector('#saved-summaries-table tbody');
-  tbody.innerHTML = '';
-  const wrapper = document.getElementById('saved-summaries-wrapper');
-  const sums = appState.summaries || [];
-  if(!sums.length){
-    wrapper.classList.add('hidden');
-    return;
-  }
-  wrapper.classList.remove('hidden');
-
-  sums.forEach((s, idx) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${escapeHtml(s.id)}</td><td>${escapeHtml(s.date)}</td><td>${escapeHtml(s.period)}</td><td>${formatMoney(s.totals && s.totals.payments)}</td><td></td>`;
-    const td = tr.querySelector('td:last-child');
-
-    const previewBtn = document.createElement('button');
-    previewBtn.className='btn small';
-    previewBtn.textContent='Bill Summary (Preview)';
-    previewBtn.addEventListener('click', ()=> previewSavedSummary(idx));
-    td.appendChild(previewBtn);
-
-    const del = document.createElement('button');
-    del.className='btn delete';
-    del.style.marginLeft='8px';
-    del.textContent='Delete';
-    del.addEventListener('click', ()=> confirmDeleteSavedSummary(idx));
-    td.appendChild(del);
 
     tbody.appendChild(tr);
   });
@@ -722,20 +687,26 @@ document.getElementById('save-data-btn').addEventListener('click', ()=>{
   alert('Data saved.');
 });
 
-/* Reset Data: full app reset to defaults (single button) */
+/* Reset Data: use typed delete confirm (same dialog as delete) */
 document.getElementById('reset-data-btn').addEventListener('click', ()=>{
-  if(!confirm('Reset all data to defaults? This will remove saved summaries and settings.')) return;
-  appState = defaultState();
-  saveState();
-  location.reload();
+  showTypedConfirm({
+    message: 'Reset all data to defaults? This will remove saved summaries and settings. Type "delete" to confirm.',
+    confirmWord: 'delete',
+    okLabel: 'Reset',
+    onConfirm: ()=>{
+      appState = defaultState();
+      saveState();
+      location.reload();
+    }
+  });
 });
 
 /* ---------------------------
    Save Summary, invoices, preview functions
    --------------------------- */
 
-/* Save Bill Summary (creates summary + invoice + billing history) */
-document.getElementById('save-summary-btn').addEventListener('click', ()=>{
+/* helper: perform the actual save-summary logic (extracted) */
+function performSaveSummaryAndNavigateDashboard(){
   const summary = {
     id: 'BS-' + Math.floor(100000 + Math.random()*900000),
     date: formatDateISO(),
@@ -796,10 +767,76 @@ document.getElementById('save-summary-btn').addEventListener('click', ()=>{
   saveState();
   // After saving summary show dashboard where the new summary appears and action buttons are visible
   document.querySelector('[data-page="dashboard"]').click();
+}
+
+/* Save Summary button: show simple OK/Cancel confirmation (no typing) */
+document.getElementById('save-summary-btn').addEventListener('click', ()=>{
+  showSimpleConfirm({
+    message: 'Save this summary? Click OK to confirm.',
+    okLabel: 'OK',
+    onConfirm: performSaveSummaryAndNavigateDashboard
+  });
 });
 
 /* ---------------------------
-   PREVIEW: helper to open preview window with Print / Download controls
+   Confirmation modal utilities
+   - showTypedConfirm: typed-word confirmation (used for delete/reset)
+   - showSimpleConfirm: OK / Cancel (used for save-summary)
+   --------------------------- */
+
+function showTypedConfirm({message='Type delete to confirm', confirmWord='delete', okLabel='OK', onConfirm=null} = {}){
+  const modal = document.getElementById('confirm-modal');
+  const txt = document.getElementById('confirm-text');
+  const sub = document.getElementById('confirm-subtext');
+  const input = document.getElementById('confirm-input');
+  const ok = document.getElementById('confirm-ok');
+  const cancel = document.getElementById('confirm-cancel');
+
+  txt.textContent = message;
+  sub.innerHTML = `Type <strong>${escapeHtml(confirmWord)}</strong> below to confirm.`;
+  input.value = '';
+  input.style.display = '';
+  modal.style.display = 'flex';
+  input.focus();
+
+  function cleanup(){ modal.style.display = 'none'; ok.removeEventListener('click', okHandler); cancel.removeEventListener('click', cancelHandler); }
+  function okHandler(){ if((input.value||'').trim().toLowerCase()===String(confirmWord).toLowerCase()){ cleanup(); onConfirm && onConfirm(); } else { alert(`Type "${confirmWord}" exactly to confirm.`); input.focus(); } }
+  function cancelHandler(){ cleanup(); }
+  ok.textContent = okLabel || 'OK';
+  ok.addEventListener('click', okHandler);
+  cancel.addEventListener('click', cancelHandler);
+}
+
+function showSimpleConfirm({message='Are you sure?', okLabel='OK', onConfirm=null} = {}){
+  const modal = document.getElementById('confirm-modal');
+  const txt = document.getElementById('confirm-text');
+  const sub = document.getElementById('confirm-subtext');
+  const input = document.getElementById('confirm-input');
+  const ok = document.getElementById('confirm-ok');
+  const cancel = document.getElementById('confirm-cancel');
+
+  txt.textContent = message;
+  sub.innerHTML = '';
+  input.value = '';
+  input.style.display = 'none';
+  modal.style.display = 'flex';
+
+  function cleanup(){ modal.style.display = 'none'; ok.removeEventListener('click', okHandler); cancel.removeEventListener('click', cancelHandler); }
+  function okHandler(){ cleanup(); onConfirm && onConfirm(); }
+  function cancelHandler(){ cleanup(); }
+  ok.textContent = okLabel || 'OK';
+  ok.addEventListener('click', okHandler);
+  cancel.addEventListener('click', cancelHandler);
+}
+
+/* Reusable delete confirmation wrapper (keeps previous API) */
+function showDeleteConfirm(message, onConfirm){
+  showTypedConfirm({ message: message || 'Confirm delete', confirmWord: 'delete', okLabel: 'Delete', onConfirm });
+}
+
+/* ---------------------------
+   PREVIEW: helper to open preview window with Print / Close controls
+   (Download button removed) 
    --------------------------- */
 function openPreviewWindow(innerHtml, title = 'Preview'){
   const win = window.open('','_blank');
@@ -817,6 +854,9 @@ function openPreviewWindow(innerHtml, title = 'Preview'){
       table,th,td{border:1px solid #ddd;padding:8px}
       th{background:#f6f6f6}
       .page-break{page-break-after:always; break-after:page}
+      .signature-block{margin-top:26px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+      .signature-line{border-top:1px solid #000;width:45%;padding-top:8px}
+      .signature-caption{font-size:12px;color:#333;margin-top:6px}
       @media print{
         .no-print{display:none !important}
         @page { size: A4; margin: 12mm; }
@@ -834,7 +874,6 @@ function openPreviewWindow(innerHtml, title = 'Preview'){
           <div class="title">${escapeHtml(title)}</div>
           <div style="display:flex;gap:6px">
             <button id="doPrint">Print / Save as PDF</button>
-            <button id="doDownload" class="secondary">Download (Print-to-PDF)</button>
             <button id="closeWin" class="secondary">Close</button>
           </div>
         </div>
@@ -843,9 +882,7 @@ function openPreviewWindow(innerHtml, title = 'Preview'){
 
         <script>
           document.getElementById('doPrint').addEventListener('click', function(){ window.focus(); window.print(); });
-          document.getElementById('doDownload').addEventListener('click', function(){ window.focus(); window.print(); });
           document.getElementById('closeWin').addEventListener('click', function(){ window.close(); });
-          // ensure focus to allow print dialog on some browsers
           window.addEventListener('load', function(){ try{ window.focus(); }catch(e){} });
         <\/script>
       </body>
@@ -876,7 +913,23 @@ function companyHeaderHtml(company){
   `;
 }
 
-/* Build preview HTML for current live bill summary */
+/* signature block html (used on every page) */
+function signatureBlockHtml(){
+  return `
+    <div class="signature-block">
+      <div>
+        <div class="signature-line"></div>
+        <div class="signature-caption">Authorized Signature</div>
+      </div>
+      <div>
+        <div class="signature-line"></div>
+        <div class="signature-caption">Received By / Mohajon</div>
+      </div>
+    </div>
+  `;
+}
+
+/* Build preview HTML for current live bill summary (includes signature block) */
 function buildCurrentBillSummaryHtml(){
   const company = appState.company || {};
   const mo = appState.mohajon || {};
@@ -968,186 +1021,27 @@ function buildCurrentBillSummaryHtml(){
           </tr>
         </tbody>
       </table>
+
+      ${signatureBlockHtml()}
     </div>
   `;
   return html;
 }
 
-/* Preview current live bill summary */
-document.getElementById('preview-billsummary-btn')?.addEventListener('click', ()=>{
+/* Preview current live bill summary (used when no saved summary exists) */
+function previewCurrentLiveBillSummary(){
   const html = buildCurrentBillSummaryHtml();
   openPreviewWindow(html, 'Bill Summary Preview');
-});
-
-/* Preview functions for saved/invoice items */
-function previewInvoiceSummary(invoiceIndex){
-  const inv = appState.invoices && appState.invoices[invoiceIndex];
-  if(!inv) return alert('Invoice not found.');
-  const company = appState.company || {};
-  const summary = (appState.summaries || []).find(s => s.date === inv.date && s.period === inv.period) || null;
-  const mohajon = summary ? (summary.mohajon || appState.mohajon) : appState.mohajon;
-
-  const workerRows = inv.workers.map(w => `
-    <tr>
-      <td>${escapeHtml(w.name)}</td>
-      <td>${escapeHtml(w.designation)}</td>
-      <td style="text-align:right">${Number(w.pounds).toFixed(2)}</td>
-      <td style="text-align:right">${formatMoney(w.rate)}</td>
-      <td style="text-align:right">${formatMoney(w.bill)}</td>
-      <td style="text-align:right">${formatMoney(w.adjustment)}</td>
-      <td style="text-align:right">${formatMoney(w.bonus)}</td>
-      <td style="text-align:right">${formatMoney(w.total)}</td>
-    </tr>
-  `).join('');
-
-  const html = `
-    <div class="print-page">
-      ${companyHeaderHtml(company)}
-      <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div>
-          <div style="font-weight:700">Invoice: ${escapeHtml(inv.id)}</div>
-          <div style="font-size:12px">${escapeHtml(inv.period)}</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:12px">Mohajon: <strong>${escapeHtml(mohajon.company||mohajon.name||'')}</strong></div>
-          <div style="font-size:12px">${escapeHtml(mohajon.address||'')}</div>
-          <div style="font-size:12px">${escapeHtml(mohajon.phone||'')}</div>
-        </div>
-      </div>
-
-      <div style="height:12px"></div>
-
-      <table>
-        <thead><tr>
-          <th>Worker</th><th>Role</th><th>Pounds</th><th>Rate</th><th>Bill</th><th>Adjustment</th><th>Bonus</th><th>Total</th>
-        </tr></thead>
-        <tbody>${workerRows}</tbody>
-        <tfoot>
-          <tr>
-            <th colspan="7" style="text-align:right">Total Payments</th>
-            <th style="text-align:right">${formatMoney(inv.total)}</th>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-  `;
-  openPreviewWindow(html, 'Invoice '+inv.id);
 }
 
-/* Preview combined per-worker pages (one page per worker) */
-function previewAllWorkersForInvoice(invoiceIndex){
-  const inv = appState.invoices && appState.invoices[invoiceIndex];
-  if(!inv) return alert('Invoice not found.');
-  const company = appState.company || {};
-
-  const pages = inv.workers.map((w, idx) => {
-    return `
-      <div class="print-page">
-        ${companyHeaderHtml(company)}
-        <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
-        <div style="display:flex;gap:12px;align-items:center">
-          <div>
-            <div style="font-weight:700;font-size:16px">${escapeHtml(w.name)}</div>
-            <div style="font-size:12px">${escapeHtml(w.designation || '')}</div>
-          </div>
-          <div style="margin-left:auto;text-align:right">
-            <div style="font-size:12px">Invoice: <strong>${escapeHtml(inv.id)}</strong></div>
-            <div style="font-size:12px">${escapeHtml(inv.date)}</div>
-            <div style="font-size:12px">${escapeHtml(inv.period)}</div>
-          </div>
-        </div>
-
-        <div style="height:12px"></div>
-
-        <table>
-          <thead><tr><th>Designation</th><th>Rate</th><th>Production</th><th>Bill</th></tr></thead>
-          <tbody>
-            <tr>
-              <td>${escapeHtml(w.designation || '')}</td>
-              <td style="text-align:right">${formatMoney(w.rate)}</td>
-              <td style="text-align:right">${Number(w.pounds||0).toFixed(2)}</td>
-              <td style="text-align:right">${formatMoney(w.bill)}</td>
-            </tr>
-            <tr>
-              <td colspan="3">Adjustment</td>
-              <td style="text-align:right">${formatMoney(w.adjustment)}</td>
-            </tr>
-            <tr>
-              <td colspan="3">Bonus</td>
-              <td style="text-align:right">${formatMoney(w.bonus)}</td>
-            </tr>
-            <tr>
-              <th colspan="3" style="text-align:right">Total</th>
-              <th class="invoice-total" style="text-align:right">${formatMoney(w.total)}</th>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      ${idx < inv.workers.length-1 ? '<div class="page-break"></div>' : ''}
-    `;
-  }).join('');
-
-  openPreviewWindow(pages, 'Per-Worker Invoices (Combined)');
-}
-
-/* Preview mohajon receipt */
-function previewMohajonReceipt(invoiceIndex){
-  const inv = appState.invoices && appState.invoices[invoiceIndex];
-  if(!inv) return alert('Invoice not found.');
-  const company = appState.company || {};
-  const summary = (appState.summaries || []).find(s => s.date === inv.date && s.period === inv.period) || null;
-  const mo = summary ? (summary.mohajon || appState.mohajon) : appState.mohajon;
-  const receiptNo = onlyDigits('RCPT-' + inv.id);
-
-  const html = `
-    <div class="print-page">
-      ${companyHeaderHtml(company)}
-      <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
-
-      <div style="text-align:center;margin-bottom:8px">
-        <h3 style="margin:0">Receipt</h3>
-        <div style="font-size:12px">Receipt No: <strong>${receiptNo}</strong></div>
-      </div>
-
-      <div style="display:flex;gap:24px;flex-wrap:wrap">
-        <div style="flex:1;min-width:180px">
-          <strong>Paid By (Mohajon)</strong><br/>
-          <div style="margin-top:6px">${escapeHtml(mo.company||'')} ${mo.name ? ('— '+escapeHtml(mo.name)) : ''}</div>
-          <div style="font-size:12px;margin-top:6px">${escapeHtml(mo.address||'')}</div>
-          <div style="font-size:12px">${escapeHtml(mo.phone||'')}</div>
-        </div>
-        <div style="flex:1;min-width:180px;text-align:right">
-          <strong>Received By (Company)</strong><br/>
-          <div style="margin-top:6px">${escapeHtml(company.name||'')}</div>
-          <div style="font-size:12px;margin-top:6px">${escapeHtml(company.address||'')}</div>
-          <div style="font-size:12px">${escapeHtml(company.phone||'')}</div>
-        </div>
-      </div>
-
-      <div style="height:12px"></div>
-
-      <table>
-        <thead><tr><th>Rate</th><th>Production</th><th>Bill</th><th>Money Given</th><th>Due</th></tr></thead>
-        <tbody>
-          <tr>
-            <td style="text-align:right">${formatMoney(mo.rate)}</td>
-            <td style="text-align:right">${Number(mo.totalProduction||0).toFixed(2)}</td>
-            <td style="text-align:right">${formatMoney(Number(mo.rate||0)*Number(mo.totalProduction||0))}</td>
-            <td style="text-align:right">${formatMoney(mo.moneyGiven||0)}</td>
-            <td style="text-align:right">${formatMoney((Number(mo.rate||0)*Number(mo.totalProduction||0)) - Number(mo.moneyGiven||0))}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  `;
-  openPreviewWindow(html, 'Mohajon Receipt');
-}
-
-/* Preview saved summary */
+/* Preview saved summary by index (0 is latest) */
 function previewSavedSummary(index){
   const s = appState.summaries && appState.summaries[index];
-  if(!s) return;
+  if(!s) {
+    // fallback to live preview
+    previewCurrentLiveBillSummary();
+    return;
+  }
   const company = s.company || {};
   let workersHtml = s.workers.map(w => `
     <tr>
@@ -1218,39 +1112,187 @@ function previewSavedSummary(index){
           </tr>
         </tbody>
       </table>
+
+      ${signatureBlockHtml()}
     </div>
   `;
   openPreviewWindow(html, 'Saved Summary '+s.id);
 }
 
+/* Preview functions for saved/invoice items */
+function previewInvoiceSummary(invoiceIndex){
+  const inv = appState.invoices && appState.invoices[invoiceIndex];
+  if(!inv) return alert('Invoice not found.');
+  const company = appState.company || {};
+  const summary = (appState.summaries || []).find(s => s.date === inv.date && s.period === inv.period) || null;
+  const mohajon = summary ? (summary.mohajon || appState.mohajon) : appState.mohajon;
+
+  const workerRows = inv.workers.map(w => `
+    <tr>
+      <td>${escapeHtml(w.name)}</td>
+      <td>${escapeHtml(w.designation)}</td>
+      <td style="text-align:right">${Number(w.pounds).toFixed(2)}</td>
+      <td style="text-align:right">${formatMoney(w.rate)}</td>
+      <td style="text-align:right">${formatMoney(w.bill)}</td>
+      <td style="text-align:right">${formatMoney(w.adjustment)}</td>
+      <td style="text-align:right">${formatMoney(w.bonus)}</td>
+      <td style="text-align:right">${formatMoney(w.total)}</td>
+    </tr>
+  `).join('');
+
+  const html = `
+    <div class="print-page">
+      ${companyHeaderHtml(company)}
+      <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-weight:700">Invoice: ${escapeHtml(inv.id)}</div>
+          <div style="font-size:12px">${escapeHtml(inv.period)}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:12px">Mohajon: <strong>${escapeHtml(mohajon.company||mohajon.name||'')}</strong></div>
+          <div style="font-size:12px">${escapeHtml(mohajon.address||'')}</div>
+          <div style="font-size:12px">${escapeHtml(mohajon.phone||'')}</div>
+        </div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <table>
+        <thead><tr>
+          <th>Worker</th><th>Role</th><th>Pounds</th><th>Rate</th><th>Bill</th><th>Adjustment</th><th>Bonus</th><th>Total</th>
+        </tr></thead>
+        <tbody>${workerRows}</tbody>
+        <tfoot>
+          <tr>
+            <th colspan="7" style="text-align:right">Total Payments</th>
+            <th style="text-align:right">${formatMoney(inv.total)}</th>
+          </tr>
+        </tfoot>
+      </table>
+
+      ${signatureBlockHtml()}
+    </div>
+  `;
+  openPreviewWindow(html, 'Invoice '+inv.id);
+}
+
+/* Preview combined per-worker pages (one page per worker) */
+function previewAllWorkersForInvoice(invoiceIndex){
+  const inv = appState.invoices && appState.invoices[invoiceIndex];
+  if(!inv) return alert('Invoice not found.');
+  const company = appState.company || {};
+
+  const pages = inv.workers.map((w, idx) => {
+    return `
+      <div class="print-page">
+        ${companyHeaderHtml(company)}
+        <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
+        <div style="display:flex;gap:12px;align-items:center">
+          <div>
+            <div style="font-weight:700;font-size:16px">${escapeHtml(w.name)}</div>
+            <div style="font-size:12px">${escapeHtml(w.designation || '')}</div>
+          </div>
+          <div style="margin-left:auto;text-align:right">
+            <div style="font-size:12px">Invoice: <strong>${escapeHtml(inv.id)}</strong></div>
+            <div style="font-size:12px">${escapeHtml(inv.date)}</div>
+            <div style="font-size:12px">${escapeHtml(inv.period)}</div>
+          </div>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <table>
+          <thead><tr><th>Designation</th><th>Rate</th><th>Production</th><th>Bill</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>${escapeHtml(w.designation || '')}</td>
+              <td style="text-align:right">${formatMoney(w.rate)}</td>
+              <td style="text-align:right">${Number(w.pounds||0).toFixed(2)}</td>
+              <td style="text-align:right">${formatMoney(w.bill)}</td>
+            </tr>
+            <tr>
+              <td colspan="3">Adjustment</td>
+              <td style="text-align:right">${formatMoney(w.adjustment)}</td>
+            </tr>
+            <tr>
+              <td colspan="3">Bonus</td>
+              <td style="text-align:right">${formatMoney(w.bonus)}</td>
+            </tr>
+            <tr>
+              <th colspan="3" style="text-align:right">Total</th>
+              <th class="invoice-total" style="text-align:right">${formatMoney(w.total)}</th>
+            </tr>
+          </tbody>
+        </table>
+
+        ${signatureBlockHtml()}
+      </div>
+      ${idx < inv.workers.length-1 ? '<div class="page-break"></div>' : ''}
+    `;
+  }).join('');
+
+  openPreviewWindow(pages, 'Per-Worker Invoices (Combined)');
+}
+
+/* Preview mohajon receipt */
+function previewMohajonReceipt(invoiceIndex){
+  const inv = appState.invoices && appState.invoices[invoiceIndex];
+  if(!inv) return alert('Invoice not found.');
+  const company = appState.company || {};
+  const summary = (appState.summaries || []).find(s => s.date === inv.date && s.period === inv.period) || null;
+  const mo = summary ? (summary.mohajon || appState.mohajon) : appState.mohajon;
+  const receiptNo = onlyDigits('RCPT-' + inv.id);
+
+  const html = `
+    <div class="print-page">
+      ${companyHeaderHtml(company)}
+      <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
+
+      <div style="text-align:center;margin-bottom:8px">
+        <h3 style="margin:0">Receipt</h3>
+        <div style="font-size:12px">Receipt No: <strong>${receiptNo}</strong></div>
+      </div>
+
+      <div style="display:flex;gap:24px;flex-wrap:wrap">
+        <div style="flex:1;min-width:180px">
+          <strong>Paid By (Mohajon)</strong><br/>
+          <div style="margin-top:6px">${escapeHtml(mo.company||'')} ${mo.name ? ('— '+escapeHtml(mo.name)) : ''}</div>
+          <div style="font-size:12px;margin-top:6px">${escapeHtml(mo.address||'')}</div>
+          <div style="font-size:12px">${escapeHtml(mo.phone||'')}</div>
+        </div>
+        <div style="flex:1;min-width:180px;text-align:right">
+          <strong>Received By (Company)</strong><br/>
+          <div style="margin-top:6px">${escapeHtml(company.name||'')}</div>
+          <div style="font-size:12px;margin-top:6px">${escapeHtml(company.address||'')}</div>
+          <div style="font-size:12px">${escapeHtml(company.phone||'')}</div>
+        </div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <table>
+        <thead><tr><th>Rate</th><th>Production</th><th>Bill</th><th>Money Given</th><th>Due</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="text-align:right">${formatMoney(mo.rate)}</td>
+            <td style="text-align:right">${Number(mo.totalProduction||0).toFixed(2)}</td>
+            <td style="text-align:right">${formatMoney(Number(mo.rate||0)*Number(mo.totalProduction||0))}</td>
+            <td style="text-align:right">${formatMoney(mo.moneyGiven||0)}</td>
+            <td style="text-align:right">${formatMoney((Number(mo.rate||0)*Number(mo.totalProduction||0)) - Number(mo.moneyGiven||0))}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      ${signatureBlockHtml()}
+    </div>
+  `;
+  openPreviewWindow(html, 'Mohajon Receipt');
+}
+
 /* ---------------------------
    Delete helpers (typed-confirm)
    --------------------------- */
-function showDeleteConfirm(message, onConfirm){
-  const modal = document.getElementById('confirm-modal');
-  const txt = document.getElementById('confirm-text');
-  const sub = document.getElementById('confirm-subtext');
-  const input = document.getElementById('confirm-input');
-  const ok = document.getElementById('confirm-ok');
-  const cancel = document.getElementById('confirm-cancel');
-
-  txt.textContent = message || 'Confirm delete';
-  sub.innerHTML = 'Type <strong>delete</strong> below to confirm.';
-  input.value = '';
-  modal.style.display = 'flex';
-  input.focus();
-
-  function cleanup(){ modal.style.display = 'none'; ok.removeEventListener('click', okHandler); cancel.removeEventListener('click', cancelHandler); }
-  function okHandler(){ if((input.value||'').trim().toLowerCase()==='delete'){ cleanup(); onConfirm && onConfirm(); } else { alert('Type \"delete\" exactly to confirm.'); input.focus(); } }
-  function cancelHandler(){ cleanup(); }
-  ok.addEventListener('click', okHandler);
-  cancel.addEventListener('click', cancelHandler);
-}
-
-/* Delete saved summary */
-function confirmDeleteSavedSummary(index){ showDeleteConfirm('Delete saved summary?', ()=>{ appState.summaries.splice(index,1); saveState(); }); }
-
-/* Delete invoice */
 function confirmDeleteInvoice(index){
   showDeleteConfirm('Delete this weekly invoice and its worker history entries?', ()=>{
     const inv = appState.invoices[index];
@@ -1266,7 +1308,7 @@ function confirmDeleteInvoice(index){
   });
 }
 
-/* Delete worker history entry */
+/* Delete worker history entry (left for future) */
 function confirmDeleteWorkerHistory(workerId, histIndex){
   showDeleteConfirm('Delete this worker history entry?', ()=>{
     if(appState.billingHistory[workerId] && appState.billingHistory[workerId][histIndex]){ appState.billingHistory[workerId].splice(histIndex,1); saveState(); }
@@ -1281,6 +1323,18 @@ function renderExpenses(){
   document.getElementById('expense-maintenance').value = Number(appState.expenses.maintenance||0).toFixed(2);
   document.getElementById('expense-other').value = Number(appState.expenses.other||0).toFixed(2);
 }
+
+/* ---------------------------
+   Dashboard Bill Summary PDF button wiring
+   - Preview latest saved summary if exists, otherwise preview current live summary
+   --------------------------- */
+document.getElementById('dashboard-preview-billsummary-btn').addEventListener('click', ()=>{
+  if(appState.summaries && appState.summaries.length > 0){
+    previewSavedSummary(0);
+  } else {
+    previewCurrentLiveBillSummary();
+  }
+});
 
 /* ---------------------------
    Startup
