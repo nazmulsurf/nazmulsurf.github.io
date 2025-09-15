@@ -143,7 +143,6 @@
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <div class="small">Saved invoices from saved summaries</div>
           <div style="display:flex;gap:8px;align-items:center">
-            <!-- Moved Bill Summary PDF button from Bill Summary menu into Dashboard area -->
             <button class="btn small" id="dashboard-preview-billsummary-btn" title="Preview latest bill summary">Bill Summary PDF</button>
           </div>
         </div>
@@ -176,6 +175,7 @@
 
       <h3 style="margin-top:0">Mohajon (Details)</h3>
       <table>
+        <!-- In-app Bill Summary table still shows full Mohajon fields for editing/visual confirmation -->
         <thead><tr><th>Company / Name</th><th>Address</th><th>Phone</th><th>Rate (৳/pound)</th><th>Total Production</th><th>Money Given</th><th>Due</th></tr></thead>
         <tbody>
           <tr>
@@ -311,7 +311,7 @@
       <hr style="margin:12px 0;border-top:1px solid #eee" />
 
       <div>
-        <h3 style="margin:6px 0">Worker Details</h3>
+        <h3 style="margin:6px 0">Worker Details (5 Workers)</h3>
         <div class="small">Edit worker information and financial defaults. After saving, values update throughout the app.</div>
         <div id="worker-settings-list" class="worker-settings-list" style="margin-top:12px"></div>
 
@@ -346,7 +346,7 @@
 /* ---------------------------
    App data model + persistence
    --------------------------- */
-const STORAGE_KEY = 'ntm_app_v6_full';
+const STORAGE_KEY = 'ntm_app_v7_5workers';
 
 const defaultState = () => ({
   company: {
@@ -365,12 +365,15 @@ const defaultState = () => ({
     totalProduction: 0,
     moneyGiven: 0
   },
+  // five workers: 2 machine, 2 drum machine, 1 kun machine
   workers: [
-    { id: 'w1', name: 'Worker 1', designation: 'Machine', rate: 0, adjustment: 0, bonus: 0, phone:'', address:'' },
-    { id: 'w2', name: 'Worker 2', designation: 'Machine', rate: 0, adjustment: 0, bonus: 0, phone:'', address:'' },
-    { id: 'w3', name: 'Worker 3', designation: 'Drum', rate: 0, adjustment: 0, bonus: 0, phone:'', address:'' }
+    { id: 'w1', name: 'Machine 1', designation: 'Machine', rate: 0, adjustment: 0, bonus: 0, phone:'', address:'' },
+    { id: 'w2', name: 'Machine 2', designation: 'Machine', rate: 0, adjustment: 0, bonus: 0, phone:'', address:'' },
+    { id: 'w3', name: 'Drum 1', designation: 'Drum Machine', rate: 0, adjustment: 0, bonus: 0, phone:'', address:'' },
+    { id: 'w4', name: 'Drum 2', designation: 'Drum Machine', rate: 0, adjustment: 0, bonus: 0, phone:'', address:'' },
+    { id: 'w5', name: 'Kun 1', designation: 'Kun Machine', rate: 0, adjustment: 0, bonus: 0, phone:'', address:'' }
   ],
-  productionInputs: { 'w1': 0, 'w2': 0, 'w3': 0 },
+  productionInputs: { 'w1': 0, 'w2': 0, 'w3': 0, 'w4': 0, 'w5': 0 },
   expenses: { electricity: 0, maintenance: 0, other: 0 },
   invoices: [],
   billingHistory: {},
@@ -604,6 +607,7 @@ function populateWorkerSettingsList(){
   appState.workers.forEach(w => {
     const card = document.createElement('div');
     card.className = 'worker-card';
+    card.style.marginBottom = '10px';
     card.dataset.workerId = w.id;
 
     const rowTop = document.createElement('div');
@@ -617,6 +621,9 @@ function populateWorkerSettingsList(){
 
     const rowBottom = document.createElement('div');
     rowBottom.className = 'ws-row-bottom';
+    rowBottom.style.display = 'grid';
+    rowBottom.style.gridTemplateColumns = 'repeat(7,1fr)';
+    rowBottom.style.gap = '8px';
     rowBottom.innerHTML = `
       <input class="ws-address" placeholder="Address" value="${escapeHtml(w.address||'')}" />
       <input class="ws-phone" placeholder="Phone" value="${escapeHtml(w.phone||'')}" />
@@ -789,10 +796,7 @@ document.getElementById('save-summary-btn').addEventListener('click', ()=>{
 
 /* ---------------------------
    Confirmation modal utilities
-   - showTypedConfirm: typed-word confirmation (used for delete/reset)
-   - showSimpleConfirm: OK / Cancel (used for save-summary and save-data)
    --------------------------- */
-
 function showTypedConfirm({message='Type delete to confirm', confirmWord='delete', okLabel='OK', onConfirm=null} = {}){
   const modal = document.getElementById('confirm-modal');
   const txt = document.getElementById('confirm-text');
@@ -845,7 +849,7 @@ function showDeleteConfirm(message, onConfirm){
 
 /* ---------------------------
    PREVIEW: helper to open preview window with Print / Close controls
-   (Download button removed) 
+   All PDFs now remove Mohajon company/address/phone columns (only Rate/Production/MoneyGiven/Due appear).
    --------------------------- */
 function openPreviewWindow(innerHtml, title = 'Preview'){
   const win = window.open('','_blank');
@@ -934,7 +938,10 @@ function signatureRightHtml(){
   `;
 }
 
-/* Build preview HTML for current live bill summary (includes mohajon table and single signature) */
+/* Build preview HTML for current live bill summary
+   IMPORTANT: Mohajon table in ALL PDFs now excludes Company/Name/Address/Phone columns
+   and only prints Rate / Production / Money Given / Due as requested.
+*/
 function buildCurrentBillSummaryHtml(){
   const company = appState.company || {};
   const mo = appState.mohajon || {};
@@ -976,13 +983,11 @@ function buildCurrentBillSummaryHtml(){
       <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
 
       <h3>Mohajon</h3>
+      <!-- Reduced columns: Rate / Production / Money Given / Due -->
       <table>
-        <thead><tr><th>Company / Name</th><th>Address</th><th>Phone</th><th>Rate</th><th>Production</th><th>Money Given</th><th>Due</th></tr></thead>
+        <thead><tr><th style="text-align:right">Rate</th><th style="text-align:right">Production</th><th style="text-align:right">Money Given</th><th style="text-align:right">Due</th></tr></thead>
         <tbody>
           <tr>
-            <td>${escapeHtml(mo.company || '')}${mo.name ? ' — ' + escapeHtml(mo.name) : ''}</td>
-            <td>${escapeHtml(mo.address || '')}</td>
-            <td>${escapeHtml(mo.phone || '')}</td>
             <td style="text-align:right">${formatMoney(mo.rate||0)}</td>
             <td style="text-align:right">${Number(mo.totalProduction||0).toFixed(2)}</td>
             <td style="text-align:right">${formatMoney(mo.moneyGiven||0)}</td>
@@ -1041,7 +1046,9 @@ function previewCurrentLiveBillSummary(){
   openPreviewWindow(html, 'Bill Summary Preview');
 }
 
-/* Preview saved summary by index (0 is latest) */
+/* Preview saved summary by index (0 is latest)
+   Saved summaries' Mohajon section will use reduced columns as well.
+*/
 function previewSavedSummary(index){
   const s = appState.summaries && appState.summaries[index];
   if(!s) {
@@ -1061,6 +1068,8 @@ function previewSavedSummary(index){
     </tr>
   `).join('');
 
+  const expTotal = (s.expenses.electricity||0) + (s.expenses.maintenance||0) + (s.expenses.other||0);
+
   const html = `
     <div class="print-page">
       ${companyHeaderHtml(company)}
@@ -1079,12 +1088,9 @@ function previewSavedSummary(index){
 
       <h4>Mohajon</h4>
       <table>
-        <thead><tr><th>Company / Name</th><th>Address</th><th>Phone</th><th>Rate</th><th>Production</th><th>Money Given</th><th>Due</th></tr></thead>
+        <thead><tr><th style="text-align:right">Rate</th><th style="text-align:right">Production</th><th style="text-align:right">Money Given</th><th style="text-align:right">Due</th></tr></thead>
         <tbody>
           <tr>
-            <td>${escapeHtml(s.mohajon.company || '')}${s.mohajon.name ? ' — ' + escapeHtml(s.mohajon.name) : ''}</td>
-            <td>${escapeHtml(s.mohajon.address || '')}</td>
-            <td>${escapeHtml(s.mohajon.phone || '')}</td>
             <td style="text-align:right">${formatMoney(s.mohajon.rate||0)}</td>
             <td style="text-align:right">${Number(s.mohajon.totalProduction||0).toFixed(2)}</td>
             <td style="text-align:right">${formatMoney(s.mohajon.moneyGiven||0)}</td>
@@ -1115,7 +1121,7 @@ function previewSavedSummary(index){
             <td style="text-align:right">${formatMoney(s.expenses.electricity||0)}</td>
             <td style="text-align:right">${formatMoney(s.expenses.maintenance||0)}</td>
             <td style="text-align:right">${formatMoney(s.expenses.other||0)}</td>
-            <td style="text-align:right">${formatMoney(s.totals.expenses||0)}</td>
+            <td style="text-align:right">${formatMoney(expTotal)}</td>
           </tr>
         </tbody>
       </table>
@@ -1141,7 +1147,9 @@ function previewSavedSummary(index){
   openPreviewWindow(html, 'Saved Summary '+s.id);
 }
 
-/* Preview functions for saved/invoice items (invoice, per-worker, receipt) */
+/* Preview functions for saved/invoice items (invoice, per-worker, receipt)
+   All PDF versions use reduced Mohajon columns.
+*/
 function previewInvoiceSummary(invoiceIndex){
   const inv = appState.invoices && appState.invoices[invoiceIndex];
   if(!inv) return alert('Invoice not found.');
@@ -1172,9 +1180,8 @@ function previewInvoiceSummary(invoiceIndex){
           <div style="font-size:12px">${escapeHtml(inv.period)}</div>
         </div>
         <div style="text-align:right">
-          <div style="font-size:12px">Mohajon: <strong>${escapeHtml(mohajon.company||mohajon.name||'')}</strong></div>
-          <div style="font-size:12px">${escapeHtml(mohajon.address||'')}</div>
-          <div style="font-size:12px">${escapeHtml(mohajon.phone||'')}</div>
+          <div style="font-size:12px">Mohajon Rate / Production / Given / Due</div>
+          <div style="font-size:12px">${formatMoney(mohajon.rate)} / ${Number(mohajon.totalProduction||0).toFixed(2)} / ${formatMoney(mohajon.moneyGiven||0)} / ${formatMoney((Number(mohajon.rate||0)*Number(mohajon.totalProduction||0)) - Number(mohajon.moneyGiven||0))}</div>
         </div>
       </div>
 
@@ -1293,8 +1300,9 @@ function previewMohajonReceipt(invoiceIndex){
 
       <div style="height:12px"></div>
 
+      <!-- Reduced Mohajon columns -->
       <table>
-        <thead><tr><th>Rate</th><th>Production</th><th>Bill</th><th>Money Given</th><th>Due</th></tr></thead>
+        <thead><tr><th style="text-align:right">Rate</th><th style="text-align:right">Production</th><th style="text-align:right">Bill</th><th style="text-align:right">Money Given</th><th style="text-align:right">Due</th></tr></thead>
         <tbody>
           <tr>
             <td style="text-align:right">${formatMoney(mo.rate)}</td>
@@ -1330,13 +1338,6 @@ function confirmDeleteInvoice(index){
   });
 }
 
-/* Delete worker history entry (left for future) */
-function confirmDeleteWorkerHistory(workerId, histIndex){
-  showDeleteConfirm('Delete this worker history entry?', ()=>{
-    if(appState.billingHistory[workerId] && appState.billingHistory[workerId][histIndex]){ appState.billingHistory[workerId].splice(histIndex,1); saveState(); }
-  });
-}
-
 /* ---------------------------
    Expenses sync
    --------------------------- */
@@ -1368,3 +1369,4 @@ populateSettingsForm();
 </script>
 </body>
 </html>
+
