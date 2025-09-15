@@ -143,7 +143,8 @@
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <div class="small">Saved invoices from saved summaries</div>
           <div style="display:flex;gap:8px;align-items:center">
-            <button class="btn small" id="dashboard-preview-billsummary-btn" title="Preview latest bill summary">Workers (Preview)</button>
+            <!-- Top dashboard button: renamed to Weekly Summary (removed "(Preview)") -->
+            <button class="btn small" id="dashboard-preview-billsummary-btn" title="Open latest weekly summary">Weekly Summary</button>
           </div>
         </div>
         <div id="weekly-invoices-list">
@@ -521,23 +522,26 @@ function renderWeeklyInvoicesTable(){
     tr.innerHTML = `<td>${escapeHtml(inv.id)}</td><td>${escapeHtml(inv.date)}</td><td>${escapeHtml(inv.period)}</td><td>${formatMoney(inv.total)}</td><td></td>`;
     const actionsTd = tr.querySelector('td:last-child');
 
+    // keep this one as "Workers (Preview)" per your instruction
     const previewBtn = document.createElement('button');
     previewBtn.className = 'btn small';
     previewBtn.textContent = 'Workers (Preview)';
     previewBtn.addEventListener('click', ()=> previewInvoiceSummary(idx));
     actionsTd.appendChild(previewBtn);
 
+    // removed "(Preview)" from the Per-Worker button text
     const printWorkersBtn = document.createElement('button');
     printWorkersBtn.className = 'btn small';
     printWorkersBtn.style.marginLeft='8px';
-    printWorkersBtn.textContent = 'Per-Worker (Preview)';
+    printWorkersBtn.textContent = 'Per-Worker';
     printWorkersBtn.addEventListener('click', ()=> previewAllWorkersForInvoice(idx));
     actionsTd.appendChild(printWorkersBtn);
 
+    // removed "(Preview)" from the Receipt button text
     const receiptBtn = document.createElement('button');
     receiptBtn.className = 'btn small';
     receiptBtn.style.marginLeft='8px';
-    receiptBtn.textContent = 'Receipt (Preview)';
+    receiptBtn.textContent = 'Receipt';
     receiptBtn.addEventListener('click', ()=> previewMohajonReceipt(idx));
     actionsTd.appendChild(receiptBtn);
 
@@ -845,8 +849,6 @@ function showDeleteConfirm(message, onConfirm){
 
 /* ---------------------------
    PREVIEW: helper to open preview window with Print / Close controls
-   All PDFs now remove Mohajon company/address/phone columns (only Rate/Production/Bill/MoneyGiven/Due appear),
-   and we added an explicit Bill column (Rate * Production).
    --------------------------- */
 function openPreviewWindow(innerHtml, title = 'Preview'){
   const win = window.open('','_blank');
@@ -1172,8 +1174,6 @@ function previewInvoiceSummary(invoiceIndex){
     </tr>
   `).join('');
 
-  // NOTE: removed the small "Mohajon Rate / Production / Bill / Given / Due" info block as requested
-
   const html = `
     <div class="print-page">
       ${companyHeaderHtml(company)}
@@ -1351,7 +1351,7 @@ function renderExpenses(){
 }
 
 /* ---------------------------
-   Dashboard Workers Preview button wiring
+   Dashboard Weekly Summary button wiring
    - Preview latest saved summary if exists, otherwise preview current live summary
    --------------------------- */
 document.getElementById('dashboard-preview-billsummary-btn').addEventListener('click', ()=>{
