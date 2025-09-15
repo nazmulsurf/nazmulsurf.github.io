@@ -60,7 +60,7 @@
   @media (max-width:860px){ .worker-settings-list .ws-row-bottom{grid-template-columns:repeat(2,1fr)} }
   .worker-settings-row input, .worker-settings-row select{padding:6px;font-size:13px}
 
-  /* make tables scrollable on small screens */
+  /* responsive table on narrow screens */
   @media (max-width:640px){
     table{display:block;overflow:auto;white-space:nowrap}
     header{flex-direction:column;align-items:flex-start;gap:8px}
@@ -70,27 +70,26 @@
     .grid.cols-2{grid-template-columns:1fr}
   }
 
-  /* improved print for preview pages (applied in preview window as well) */
+  /* print */
   @media print{
     body *{visibility:visible}
     .no-print{display:none !important}
     @page { size: A4; margin: 12mm; }
   }
 
-  .print-page{background:#fff;color:#000;max-width:780px;margin:0 auto;padding:18px;border-radius:6px}
+  .print-page{background:#fff;color:#000;max-width:780px;margin:0 auto;padding:18px;border-radius:6px;min-height:280px;display:block}
   .print-page table{margin-bottom:18px}
   .page-break{page-break-after:always; break-after:page}
   .invoice-total{font-weight:800;font-size:18px}
 
-  /* small UI improvements for settings */
   .worker-card input{width:100%}
   .setting-section-title{font-weight:700;margin-bottom:6px}
   .hidden {display:none !important}
 
-  /* signature area printing friendly */
-  .signature-block{margin-top:26px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-  .signature-line{border-top:1px solid #000;width:45%;padding-top:8px}
-  .signature-caption{font-size:12px;color:#333;margin-top:6px}
+  /* signature CSS: now single authorised signature on RIGHT side */
+  .signature-right{margin-top:26px;display:flex;justify-content:flex-end;align-items:flex-end}
+  .signature-line{border-top:1px solid #000;width:40%;padding-top:8px}
+  .signature-caption{font-size:12px;color:#333;margin-top:6px;text-align:center}
 </style>
 </head>
 <body>
@@ -157,8 +156,6 @@
       </div>
     </div>
 
-    <!-- Note: Saved Bill Summaries block intentionally removed -->
-
   </section>
 
   <!-- BILL SUMMARY -->
@@ -177,14 +174,16 @@
         </div>
       </div>
 
-      <h3 style="margin-top:0">Mohajon</h3>
+      <h3 style="margin-top:0">Mohajon (Details)</h3>
       <table>
-        <thead><tr><th>Rate (৳/pound)</th><th>Total Production (pounds)</th><th>Bill (৳)</th><th>Money Given (৳)</th><th>Due (৳)</th></tr></thead>
+        <thead><tr><th>Company / Name</th><th>Address</th><th>Phone</th><th>Rate (৳/pound)</th><th>Total Production</th><th>Money Given</th><th>Due</th></tr></thead>
         <tbody>
           <tr>
+            <td id="bs-mohajon-company">-</td>
+            <td id="bs-mohajon-address">-</td>
+            <td id="bs-mohajon-phone">-</td>
             <td id="bs-mohajon-rate">৳0.00</td>
             <td id="bs-total-production">0.00</td>
-            <td id="bs-total-bill">৳0.00</td>
             <td id="bs-total-given">৳0.00</td>
             <td id="bs-total-due">৳0.00</td>
           </tr>
@@ -231,7 +230,6 @@
 
       <div class="actions" style="margin-top:12px">
         <button class="btn" id="save-summary-btn">Save Summary</button>
-        <!-- Bill Summary PDF button removed from here (moved to Dashboard) -->
       </div>
     </div>
   </section>
@@ -320,7 +318,6 @@
         <div style="margin-top:14px">
           <div class="small" style="margin-top:8px">Note: Deletions require typing <code>delete</code> in the confirmation box.</div>
 
-          <!-- SINGLE Save & Reset buttons as requested -->
           <div class="actions" style="margin-top:12px">
             <button class="btn" id="save-data-btn">Save Data</button>
             <button class="btn secondary" id="reset-data-btn">Reset Data</button>
@@ -349,7 +346,7 @@
 /* ---------------------------
    App data model + persistence
    --------------------------- */
-const STORAGE_KEY = 'ntm_app_v6';
+const STORAGE_KEY = 'ntm_app_v6_full';
 
 const defaultState = () => ({
   company: {
@@ -369,13 +366,11 @@ const defaultState = () => ({
     moneyGiven: 0
   },
   workers: [
-    { id: 'w1', name: 'Name_1', designation: 'Machine', rate: 0, adjustment: 0, bonus: 0, phone:'', address:'' },
-    { id: 'w2', name: 'Name_2', designation: 'Machine', rate: 0, adjustment: 0, bonus: 0, phone:'', address:'' },
-    { id: 'w3', name: 'Name_3', designation: 'Drum', rate: 0, adjustment: 0, bonus: 0, phone:'', address:'' },
-    { id: 'w4', name: 'Name_4', designation: 'Drum', rate: 0, adjustment: 0, bonus: 0, phone:'', address:'' },
-    { id: 'w5', name: 'Name_5', designation: 'Kun', rate: 0, adjustment: 0, bonus: 0, phone:'', address:'' }
+    { id: 'w1', name: 'Worker 1', designation: 'Machine', rate: 0, adjustment: 0, bonus: 0, phone:'', address:'' },
+    { id: 'w2', name: 'Worker 2', designation: 'Machine', rate: 0, adjustment: 0, bonus: 0, phone:'', address:'' },
+    { id: 'w3', name: 'Worker 3', designation: 'Drum', rate: 0, adjustment: 0, bonus: 0, phone:'', address:'' }
   ],
-  productionInputs: { 'w1': 0, 'w2': 0, 'w3': 0, 'w4': 0, 'w5': 0 },
+  productionInputs: { 'w1': 0, 'w2': 0, 'w3': 0 },
   expenses: { electricity: 0, maintenance: 0, other: 0 },
   invoices: [],
   billingHistory: {},
@@ -466,11 +461,14 @@ function renderDashboard(){
 function renderBillSummary(){
   const mo = appState.mohajon || {};
   const bill = Number(mo.rate || 0) * Number(mo.totalProduction || 0);
+  document.getElementById('bs-mohajon-company').textContent = (mo.company || '') + (mo.name ? (' — ' + mo.name) : '');
+  document.getElementById('bs-mohajon-address').textContent = mo.address || '';
+  document.getElementById('bs-mohajon-phone').textContent = mo.phone || '';
   document.getElementById('bs-mohajon-rate').textContent = formatMoney(mo.rate || 0);
   document.getElementById('bs-total-production').textContent = Number(mo.totalProduction || 0).toFixed(2);
-  document.getElementById('bs-total-bill').textContent = formatMoney(bill);
   document.getElementById('bs-total-given').textContent = formatMoney(mo.moneyGiven || 0);
   document.getElementById('bs-total-due').textContent = formatMoney(bill - (mo.moneyGiven || 0));
+  document.getElementById('bs-total-bill') && (document.getElementById('bs-total-bill').textContent = formatMoney(bill));
 
   const tbody = document.getElementById('bill-summary-workers-body');
   tbody.innerHTML = '';
@@ -509,6 +507,7 @@ function renderBillSummary(){
 /* Weekly invoices table on dashboard (single preview + receipt + delete) */
 function renderWeeklyInvoicesTable(){
   const tbody = document.querySelector('#weekly-invoices-table tbody');
+  if(!tbody) return;
   tbody.innerHTML = '';
   const wrapper = document.getElementById('weekly-invoices-wrapper');
   const invoices = appState.invoices || [];
@@ -600,6 +599,7 @@ function populateSettingsForm(){
 /* Populate worker settings list */
 function populateWorkerSettingsList(){
   const container = document.getElementById('worker-settings-list');
+  if(!container) return;
   container.innerHTML = '';
   appState.workers.forEach(w => {
     const card = document.createElement('div');
@@ -633,8 +633,8 @@ function populateWorkerSettingsList(){
   });
 }
 
-/* Combined save: company + mohajon + workers + expenses (Save Data) */
-document.getElementById('save-data-btn').addEventListener('click', ()=>{
+/* perform Save Data action (actual save logic) */
+function performSaveData(){
   // Company
   const name = document.getElementById('setting-company-name').value || '';
   const address = document.getElementById('setting-company-address').value || '';
@@ -685,12 +685,21 @@ document.getElementById('save-data-btn').addEventListener('click', ()=>{
   applyCompanyHeader();
   saveState();
   alert('Data saved.');
+}
+
+/* Save Data: show simple OK/Cancel confirmation before saving */
+document.getElementById('save-data-btn').addEventListener('click', ()=>{
+  showSimpleConfirm({
+    message: 'Save settings and data? Click OK to confirm.',
+    okLabel: 'OK',
+    onConfirm: performSaveData
+  });
 });
 
-/* Reset Data: use typed delete confirm (same dialog as delete) */
+/* Reset Data: typed delete confirm (unchanged) */
 document.getElementById('reset-data-btn').addEventListener('click', ()=>{
   showTypedConfirm({
-    message: 'Reset all data to defaults? This will remove saved summaries and settings. Type "delete" to confirm.',
+    message: 'Reset all data to defaults? This will remove saved summaries and settings.',
     confirmWord: 'delete',
     okLabel: 'Reset',
     onConfirm: ()=>{
@@ -781,7 +790,7 @@ document.getElementById('save-summary-btn').addEventListener('click', ()=>{
 /* ---------------------------
    Confirmation modal utilities
    - showTypedConfirm: typed-word confirmation (used for delete/reset)
-   - showSimpleConfirm: OK / Cancel (used for save-summary)
+   - showSimpleConfirm: OK / Cancel (used for save-summary and save-data)
    --------------------------- */
 
 function showTypedConfirm({message='Type delete to confirm', confirmWord='delete', okLabel='OK', onConfirm=null} = {}){
@@ -829,7 +838,7 @@ function showSimpleConfirm({message='Are you sure?', okLabel='OK', onConfirm=nul
   cancel.addEventListener('click', cancelHandler);
 }
 
-/* Reusable delete confirmation wrapper (keeps previous API) */
+/* Reusable delete confirmation wrapper */
 function showDeleteConfirm(message, onConfirm){
   showTypedConfirm({ message: message || 'Confirm delete', confirmWord: 'delete', okLabel: 'Delete', onConfirm });
 }
@@ -849,14 +858,14 @@ function openPreviewWindow(innerHtml, title = 'Preview'){
       .topbar .title{font-weight:700;flex:1}
       .topbar button{padding:8px 12px;border-radius:6px;border:1px solid #111;background:#111;color:#fff;cursor:pointer;font-weight:600}
       .topbar button.secondary{background:#fff;color:#111}
-      .print-page{max-width:780px;margin:0 auto;padding:18px;border-radius:6px;background:#fff}
+      .print-page{max-width:780px;margin:0 auto;padding:18px;border-radius:6px;background:#fff;min-height:280px}
       table{width:100%;border-collapse:collapse;margin-top:8px}
       table,th,td{border:1px solid #ddd;padding:8px}
       th{background:#f6f6f6}
       .page-break{page-break-after:always; break-after:page}
-      .signature-block{margin-top:26px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-      .signature-line{border-top:1px solid #000;width:45%;padding-top:8px}
-      .signature-caption{font-size:12px;color:#333;margin-top:6px}
+      .signature-right{margin-top:26px;display:flex;justify-content:flex-end;align-items:flex-end}
+      .signature-line{border-top:1px solid #000;width:40%;padding-top:8px}
+      .signature-caption{font-size:12px;color:#333;margin-top:6px;text-align:center}
       @media print{
         .no-print{display:none !important}
         @page { size: A4; margin: 12mm; }
@@ -913,23 +922,19 @@ function companyHeaderHtml(company){
   `;
 }
 
-/* signature block html (used on every page) */
-function signatureBlockHtml(){
+/* signature block html (single authorised signature on RIGHT) */
+function signatureRightHtml(){
   return `
-    <div class="signature-block">
+    <div class="signature-right">
       <div>
         <div class="signature-line"></div>
         <div class="signature-caption">Authorized Signature</div>
-      </div>
-      <div>
-        <div class="signature-line"></div>
-        <div class="signature-caption">Received By / Mohajon</div>
       </div>
     </div>
   `;
 }
 
-/* Build preview HTML for current live bill summary (includes signature block) */
+/* Build preview HTML for current live bill summary (includes mohajon table and single signature) */
 function buildCurrentBillSummaryHtml(){
   const company = appState.company || {};
   const mo = appState.mohajon || {};
@@ -972,12 +977,14 @@ function buildCurrentBillSummaryHtml(){
 
       <h3>Mohajon</h3>
       <table>
-        <thead><tr><th>Rate</th><th>Production</th><th>Bill</th><th>Money Given</th><th>Due</th></tr></thead>
+        <thead><tr><th>Company / Name</th><th>Address</th><th>Phone</th><th>Rate</th><th>Production</th><th>Money Given</th><th>Due</th></tr></thead>
         <tbody>
           <tr>
+            <td>${escapeHtml(mo.company || '')}${mo.name ? ' — ' + escapeHtml(mo.name) : ''}</td>
+            <td>${escapeHtml(mo.address || '')}</td>
+            <td>${escapeHtml(mo.phone || '')}</td>
             <td style="text-align:right">${formatMoney(mo.rate||0)}</td>
             <td style="text-align:right">${Number(mo.totalProduction||0).toFixed(2)}</td>
-            <td style="text-align:right">${formatMoney(Number(mo.rate||0)*Number(mo.totalProduction||0))}</td>
             <td style="text-align:right">${formatMoney(mo.moneyGiven||0)}</td>
             <td style="text-align:right">${formatMoney((Number(mo.rate||0)*Number(mo.totalProduction||0)) - Number(mo.moneyGiven||0))}</td>
           </tr>
@@ -1022,13 +1029,13 @@ function buildCurrentBillSummaryHtml(){
         </tbody>
       </table>
 
-      ${signatureBlockHtml()}
+      ${signatureRightHtml()}
     </div>
   `;
   return html;
 }
 
-/* Preview current live bill summary (used when no saved summary exists) */
+/* Preview current live bill summary */
 function previewCurrentLiveBillSummary(){
   const html = buildCurrentBillSummaryHtml();
   openPreviewWindow(html, 'Bill Summary Preview');
@@ -1038,7 +1045,6 @@ function previewCurrentLiveBillSummary(){
 function previewSavedSummary(index){
   const s = appState.summaries && appState.summaries[index];
   if(!s) {
-    // fallback to live preview
     previewCurrentLiveBillSummary();
     return;
   }
@@ -1070,6 +1076,22 @@ function previewSavedSummary(index){
       </div>
 
       <div style="height:12px"></div>
+
+      <h4>Mohajon</h4>
+      <table>
+        <thead><tr><th>Company / Name</th><th>Address</th><th>Phone</th><th>Rate</th><th>Production</th><th>Money Given</th><th>Due</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>${escapeHtml(s.mohajon.company || '')}${s.mohajon.name ? ' — ' + escapeHtml(s.mohajon.name) : ''}</td>
+            <td>${escapeHtml(s.mohajon.address || '')}</td>
+            <td>${escapeHtml(s.mohajon.phone || '')}</td>
+            <td style="text-align:right">${formatMoney(s.mohajon.rate||0)}</td>
+            <td style="text-align:right">${Number(s.mohajon.totalProduction||0).toFixed(2)}</td>
+            <td style="text-align:right">${formatMoney(s.mohajon.moneyGiven||0)}</td>
+            <td style="text-align:right">${formatMoney((Number(s.mohajon.rate||0)*Number(s.mohajon.totalProduction||0)) - Number(s.mohajon.moneyGiven||0))}</td>
+          </tr>
+        </tbody>
+      </table>
 
       <h4>Workers</h4>
       <table>
@@ -1113,13 +1135,13 @@ function previewSavedSummary(index){
         </tbody>
       </table>
 
-      ${signatureBlockHtml()}
+      ${signatureRightHtml()}
     </div>
   `;
   openPreviewWindow(html, 'Saved Summary '+s.id);
 }
 
-/* Preview functions for saved/invoice items */
+/* Preview functions for saved/invoice items (invoice, per-worker, receipt) */
 function previewInvoiceSummary(invoiceIndex){
   const inv = appState.invoices && appState.invoices[invoiceIndex];
   if(!inv) return alert('Invoice not found.');
@@ -1171,7 +1193,7 @@ function previewInvoiceSummary(invoiceIndex){
         </tfoot>
       </table>
 
-      ${signatureBlockHtml()}
+      ${signatureRightHtml()}
     </div>
   `;
   openPreviewWindow(html, 'Invoice '+inv.id);
@@ -1226,7 +1248,7 @@ function previewAllWorkersForInvoice(invoiceIndex){
           </tbody>
         </table>
 
-        ${signatureBlockHtml()}
+        ${signatureRightHtml()}
       </div>
       ${idx < inv.workers.length-1 ? '<div class="page-break"></div>' : ''}
     `;
@@ -1284,7 +1306,7 @@ function previewMohajonReceipt(invoiceIndex){
         </tbody>
       </table>
 
-      ${signatureBlockHtml()}
+      ${signatureRightHtml()}
     </div>
   `;
   openPreviewWindow(html, 'Mohajon Receipt');
