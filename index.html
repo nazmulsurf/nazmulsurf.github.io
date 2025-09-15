@@ -5,82 +5,102 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Billing & Production — Nazmul Twisting Mill</title>
 <link id="favico" rel="icon" href="assets/favicon.png" type="image/png" />
+<!-- html2pdf bundle (contains html2canvas + jsPDF) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
 <style>
-  :root{
-    --bg: #ffffff; --panel:#f7f7f7; --text:#0b0b0b; --muted:#6b6b6b; --accent:#000;
-    --radius:10px; --btn-radius:8px;
-  }
+  /* --------------------------
+     Base layout & typography
+     -------------------------- */
+  :root{ --black:#000; --white:#fff; --muted:#6b6b6b; --panel:#f7f7f7; --radius:12px; --pad:14px; }
   *{box-sizing:border-box}
-  body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text);padding:18px}
-  .container{max-width:1150px;margin:0 auto}
-  header{background:var(--accent);color:#fff;padding:18px;border-radius:var(--radius);margin-bottom:16px;display:flex;gap:12px;align-items:center;justify-content:flex-start}
-  header h1{margin:0;font-size:20px;font-weight:600}
-  header p{margin:2px 0;font-size:13px;opacity:.95}
-  header .logo{width:56px;height:56px;border-radius:8px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center}
-  header .logo img{max-width:48px;max-height:48px;display:block}
+  body{margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;color:var(--black);background:var(--white);padding:18px}
+  .container{max-width:1180px;margin:0 auto}
+
+  header{display:flex;gap:12px;align-items:center;margin-bottom:18px}
+  .logo{width:60px;height:60px;border-radius:12px;overflow:hidden;background:var(--black);display:flex;align-items:center;justify-content:center}
+  .logo img{max-width:44px;max-height:44px;display:block}
+  header h1{margin:0;font-size:20px;font-weight:700}
+  header p{margin:0;color:var(--muted);font-size:13px}
 
   .nav{display:flex;gap:8px;margin:14px 0 20px;flex-wrap:wrap}
-  .nav button{background:#fff;color:var(--text);border:1px solid #dcdcdc;padding:8px 12px;border-radius:var(--btn-radius);cursor:pointer;font-weight:600;font-size:13px}
-  .nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .nav button{background:var(--white);color:var(--black);border:1px solid var(--black);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px}
+  .nav button.active{background:var(--black);color:var(--white)}
 
-  .page{display:none;background:var(--panel);padding:16px;border-radius:var(--radius);margin-bottom:18px}
+  /* --------------------------
+     Page / cards
+     -------------------------- */
+  .page{display:none;padding:18px;border-radius:12px;border:1px solid #e6e6e6;background:var(--panel)}
   .page.active{display:block}
-  h2{margin-top:0;margin-bottom:8px;font-size:18px}
+  h2{margin-top:0;margin-bottom:6px;font-size:18px}
   p.lead{margin-top:0;margin-bottom:12px;color:var(--muted)}
   .grid{display:grid;gap:12px}
-  .grid.cols-2{grid-template-columns:repeat(2,1fr)}
   .grid.cols-4{grid-template-columns:repeat(4,1fr)}
-  .card{background:#fff;border-radius:8px;padding:12px;border:1px solid #eee}
-  label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
-  input[type="number"], input[type="text"], textarea, select{width:100%;padding:8px 10px;border-radius:6px;border:1px solid #ddd;font-size:14px}
-  input[type="number"]::-webkit-inner-spin-button,
-  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  .grid.cols-2{grid-template-columns:repeat(2,1fr)}
+  @media (max-width:900px){ .grid.cols-4{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:640px){ .grid.cols-4{grid-template-columns:1fr} .grid.cols-2{grid-template-columns:1fr} }
+
+  .card{background:var(--white);border-radius:12px;padding:12px;border:1px solid #dcdcdc}
   .small{font-size:13px;color:var(--muted)}
+  .muted{color:var(--muted)}
   table{width:100%;border-collapse:collapse;margin-top:10px}
   th,td{padding:10px;border:1px solid #eee;text-align:left;font-size:14px}
-  th{background:#fafafa;font-weight:700;color:var(--muted);text-transform:uppercase;font-size:12px}
-  .btn{display:inline-block;padding:8px 12px;border-radius:var(--btn-radius);border:1px solid #111;background:#111;color:#fff;cursor:pointer;font-weight:600;font-size:13px}
-  .btn.secondary{background:#fff;color:#111;border:1px solid #111}
-  .btn.ghost{background:transparent;color:#111;border:1px solid #ccc}
-  .btn.restore{background:#fff;color:#111;border:1px dashed #bbb}
-  .btn.small{padding:6px 8px;font-size:13px}
-  .btn.delete{background:#000;color:#fff;border:1px solid #000;padding:6px 8px;border-radius:6px}
-  .muted{color:var(--muted)}
-  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  .modal{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:40}
-  .modal .box{background:#fff;padding:18px;border-radius:10px;width:96%;max-width:980px;box-shadow:0 8px 30px rgba(0,0,0,0.12)}
+  th{background:#fafafa;font-weight:700;color:var(--muted);font-size:12px}
+  .btn{display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid var(--black);background:var(--black);color:var(--white);cursor:pointer;font-weight:700;font-size:13px}
+  .btn.secondary{background:var(--white);color:var(--black)}
+  .btn.small{padding:6px 8px;font-size:13px;border-radius:8px}
+  .btn.ghost{background:transparent;border:1px dashed #bbb;color:var(--black)}
+
+  /* --------------------------
+     Dashboard today PDF options area
+     -------------------------- */
+  #dashboard-today-pdf-options .card{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:12px}
+  #dashboard-today-pdf-options .pdf-actions{display:flex;gap:10px;flex-wrap:wrap}
+  #dashboard-today-pdf-options h4{margin:0;font-size:16px}
+
+  /* --------------------------
+     SETTINGS black & white design
+     -------------------------- */
+  /* Make the settings card purely black/white, clean & responsive (no animation) */
+  #settings { background: var(--white); border: 1px solid var(--black); }
+  .settings-shell{display:grid;grid-template-columns:1fr 420px;gap:18px}
+  @media (max-width:980px){ .settings-shell{grid-template-columns:1fr} }
+
+  .settings-panel{
+    border:2px solid var(--black);
+    background:var(--white);
+    padding:18px;border-radius:14px;
+    box-shadow:none;
+  }
+  .settings-panel h3{margin:0 0 8px 0;font-size:16px;color:var(--black)}
+  .settings-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  @media (max-width:640px){ .settings-row{grid-template-columns:1fr} }
+
+  label{display:block;font-weight:700;color:var(--black);margin-bottom:6px;font-size:13px}
+  input[type="text"], input[type="number"], textarea, select{
+    width:100%;padding:10px;border-radius:8px;border:1px solid var(--black);font-size:14px;background:transparent;color:var(--black);
+  }
+  textarea{min-height:64px;resize:vertical}
+  .field-help{font-size:12px;color:var(--muted);margin-top:6px}
+  .worker-card{
+    border:1px solid var(--black);padding:12px;border-radius:10px;margin-bottom:12px;background:#fff;
+  }
+  .worker-grid{display:grid;grid-template-columns:1fr 120px 120px;gap:8px;align-items:center}
+  @media (max-width:760px){ .worker-grid{grid-template-columns:1fr 1fr 1fr} }
+  @media (max-width:480px){ .worker-grid{grid-template-columns:1fr} }
+
+  .settings-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
   .muted-small{color:var(--muted);font-size:13px}
-  .company-header{display:flex;gap:12px;align-items:center;margin-bottom:8px}
-  .company-header img{width:72px;height:72px;border-radius:8px;object-fit:contain}
-  .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  @media (max-width:860px){.settings-grid{grid-template-columns:1fr}}
-  .worker-settings-list .worker-card{background:#fafafa;border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid #eee}
-  .worker-settings-list .ws-row-top{margin-bottom:8px}
-  .worker-settings-list .ws-row-bottom{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-  @media (max-width:860px){ .worker-settings-list .ws-row-bottom{grid-template-columns:repeat(2,1fr)} }
-  .worker-settings-row input, .worker-settings-row select{padding:6px;font-size:13px}
-  /* make tables scrollable on small screens */
-  @media (max-width:640px){
-    table{display:block;overflow:auto;white-space:nowrap}
-    header{flex-direction:column;align-items:flex-start;gap:8px}
-    header .logo{width:48px;height:48px}
-    header h1{font-size:18px}
-    .grid.cols-4{grid-template-columns:repeat(2,1fr)}
-    .grid.cols-2{grid-template-columns:1fr}
-  }
 
-  /* improved print */
+  /* small helpers */
+  .right{text-align:right}
+  .bold{font-weight:700}
+
+  /* print styling (kept as fallback) */
   @media print{
-    body *{visibility:hidden !important}
-    .printable, .printable *{visibility:visible !important}
-    .printable{position:absolute;left:0;top:0;width:100%;padding:18px}
-    @page { size: auto; margin: 10mm; }
+    body *{visibility:hidden}
+    .printable, .printable *{visibility:visible}
   }
-
-  .print-page{background:#fff;color:#000;max-width:780px;margin:0 auto;padding:18px;border-radius:6px}
-  .print-page table{margin-bottom:18px}
-  .page-break{page-break-after:always}
-  .invoice-total{font-weight:800;font-size:18px}
 </style>
 </head>
 <body>
@@ -130,7 +150,6 @@
       <h3 style="margin-bottom:10px">Weekly Invoice History</h3>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <div class="small">Saved invoices from saved summaries</div>
-        <div></div>
       </div>
       <div id="weekly-invoices-list">
         <table id="weekly-invoices-table">
@@ -142,6 +161,9 @@
 
     <div style="margin-top:18px">
       <h3 style="margin-bottom:10px">Saved Bill Summaries</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="small">Saved summaries</div>
+      </div>
       <div id="saved-summaries-list" class="card">
         <table id="saved-summaries-table">
           <thead><tr><th>Summary ID</th><th>Date</th><th>Period</th><th>Total Payments</th><th>Actions</th></tr></thead>
@@ -149,6 +171,9 @@
         </table>
       </div>
     </div>
+
+    <!-- TODAY PDF OPTIONS (appears only after Bill Summary PDF is pressed on Bill Summary page) -->
+    <div style="margin-top:18px" id="dashboard-today-pdf-options"></div>
 
   </section>
 
@@ -158,8 +183,8 @@
     <p class="lead">A printable summary that includes Mohajon, worker production, expenses and net revenue.</p>
 
     <div class="card printable" id="bill-summary-card">
-      <div class="company-header">
-        <img id="bs-logo" src="assets/favicon.png" alt="logo" onerror="this.style.display='none'"/>
+      <div class="company-header" style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+        <img id="bs-logo" src="assets/favicon.png" alt="logo" style="width:72px;height:72px;border-radius:8px;object-fit:contain" onerror="this.style.display='none'"/>
         <div>
           <div style="font-weight:700" id="company-name-display">Nazmul Twisting Mill</div>
           <div class="muted-small" id="company-address-display">Old Bogura Road, Telkupi</div>
@@ -220,9 +245,9 @@
         </tbody>
       </table>
 
-      <div class="actions" style="margin-top:12px">
+      <div class="actions" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn" id="save-summary-btn">Save Summary</button>
-        <button class="btn secondary" id="print-billsummary-btn">Print Bill Summary</button>
+        <button class="btn secondary" id="print-billsummary-btn">Bill Summary PDF</button>
       </div>
     </div>
   </section>
@@ -232,101 +257,111 @@
     <h2>Settings</h2>
     <p class="lead">Update company details, worker details, mohajon info (rate, total production, money given) and expenses. Save or reset from below.</p>
 
-    <div class="card">
-      <div class="settings-grid">
-        <div>
+    <div class="settings-shell">
+      <!-- Left: Company + Mohajon + Expenses -->
+      <div class="settings-panel">
+        <h3>Company</h3>
+        <div style="margin-bottom:12px">
           <label>Company Name</label>
           <input type="text" id="setting-company-name" />
 
           <label style="margin-top:8px">Address</label>
           <textarea id="setting-company-address" rows="2"></textarea>
 
-          <label style="margin-top:8px">Phone</label>
-          <input type="text" id="setting-company-phone" />
-
-          <label style="margin-top:8px">Email</label>
-          <input type="text" id="setting-company-email" />
-        </div>
-
-        <div>
-          <label>Mohajon — Company Name</label>
-          <input type="text" id="setting-mohajon-company" />
-
-          <label style="margin-top:8px">Mohajon Contact Name</label>
-          <input type="text" id="setting-mohajon-name" />
-
-          <label style="margin-top:8px">Mohajon Address</label>
-          <input type="text" id="setting-mohajon-address" />
-
-          <label style="margin-top:8px">Mohajon Phone</label>
-          <input type="text" id="setting-mohajon-phone" />
-
-          <label style="margin-top:8px">Mohajon Rate (৳/pound)</label>
-          <input type="number" id="setting-mohajon-rate" step="0.01" min="0" placeholder="Rate (e.g. 120.00)" />
-
-          <label style="margin-top:8px">Total Production (pounds)</label>
-          <input type="number" id="setting-mohajon-totalproduction" step="0.01" min="0" placeholder="Total production (pounds)" />
-
-          <label style="margin-top:8px">Mohajon Money Given (৳)</label>
-          <input type="number" id="setting-mohajon-moneygiven" step="0.01" min="0" placeholder="Money given (e.g. 5000.00)" />
-        </div>
-      </div>
-
-      <hr style="margin:12px 0;border-top:1px solid #eee" />
-
-      <!-- Expenses -->
-      <div style="margin-bottom:12px">
-        <h3 style="margin:6px 0">Expenses</h3>
-        <div class="small">Set expenses below. Expenses are saved when you click <strong>Save Data</strong>.</div>
-        <div style="margin-top:8px" class="grid cols-2">
-          <div>
-            <label>Electricity (৳)</label>
-            <input type="number" id="expense-electricity" value="0" min="0" step="0.01" />
-          </div>
-          <div>
-            <label>Maintenance (৳)</label>
-            <input type="number" id="expense-maintenance" value="0" min="0" step="0.01" />
-          </div>
-          <div>
-            <label>Other (৳)</label>
-            <input type="number" id="expense-other" value="0" min="0" step="0.01" />
-          </div>
-          <div style="display:flex;align-items:end;gap:8px">
-            <div style="width:100%">
-              <div class="small" style="color:var(--muted)">Note: To revert expenses to zero, use the Reset Data button below.</div>
+          <div class="settings-row" style="margin-top:8px">
+            <div>
+              <label>Phone</label>
+              <input type="text" id="setting-company-phone" />
+            </div>
+            <div>
+              <label>Email</label>
+              <input type="text" id="setting-company-email" />
             </div>
           </div>
         </div>
-      </div>
 
-      <hr style="margin:12px 0;border-top:1px solid #eee" />
+        <hr style="border:none;border-top:1px solid var(--black);margin:12px 0" />
 
-      <div>
-        <h3 style="margin:6px 0">Worker Details (name, address, phone, designation, rate, production (pounds), adjustment, bonus)</h3>
-        <div class="small">Edit worker information and financial defaults. After saving, values update throughout the app.</div>
-        <div id="worker-settings-list" class="worker-settings-list" style="margin-top:12px"></div>
+        <h3>Mohajon</h3>
+        <div style="margin-bottom:12px">
+          <label>Mohajon — Company Name or Person</label>
+          <input type="text" id="setting-mohajon-company" />
 
-        <div style="margin-top:14px">
-          <div class="small" style="margin-top:8px">Note: Deletions require typing <code>delete</code> in the confirmation box.</div>
+          <div class="settings-row" style="margin-top:8px">
+            <div>
+              <label>Contact Name</label>
+              <input type="text" id="setting-mohajon-name" />
+            </div>
+            <div>
+              <label>Phone</label>
+              <input type="text" id="setting-mohajon-phone" />
+            </div>
+          </div>
 
-          <!-- SINGLE Save & Reset buttons as requested -->
-          <div class="actions" style="margin-top:12px">
-            <button class="btn" id="save-data-btn">Save Data</button>
-            <button class="btn secondary" id="reset-data-btn">Reset Data</button>
+          <label style="margin-top:8px">Address</label>
+          <input type="text" id="setting-mohajon-address" />
+
+          <div class="settings-row" style="margin-top:8px">
+            <div>
+              <label>Rate (৳/pound)</label>
+              <input type="number" id="setting-mohajon-rate" step="0.01" min="0" placeholder="120.00" />
+            </div>
+            <div>
+              <label>Total Production (pounds)</label>
+              <input type="number" id="setting-mohajon-totalproduction" step="0.01" min="0" placeholder="0.00" />
+            </div>
+          </div>
+
+          <label style="margin-top:8px">Mohajon Money Given (৳)</label>
+          <input type="number" id="setting-mohajon-moneygiven" step="0.01" min="0" placeholder="0.00" />
+        </div>
+
+        <hr style="border:none;border-top:1px solid var(--black);margin:12px 0" />
+
+        <h3>Expenses</h3>
+        <div style="margin-bottom:8px">
+          <div class="settings-row">
+            <div>
+              <label>Electricity (৳)</label>
+              <input type="number" id="expense-electricity" value="0" min="0" step="0.01" />
+            </div>
+            <div>
+              <label>Maintenance (৳)</label>
+              <input type="number" id="expense-maintenance" value="0" min="0" step="0.01" />
+            </div>
+          </div>
+          <div style="margin-top:8px">
+            <label>Other (৳)</label>
+            <input type="number" id="expense-other" value="0" min="0" step="0.01" />
+            <div class="field-help">Set expenses here. Click <strong>Save Data</strong> to persist.</div>
           </div>
         </div>
+      </div>
+
+      <!-- Right: Worker list & actions (black & white cards) -->
+      <div class="settings-panel">
+        <h3>Workers</h3>
+        <div class="muted-small" style="margin-bottom:10px">Edit worker details and production. Layout adapts to device size.</div>
+
+        <div id="worker-settings-list" style="margin-bottom:12px"></div>
+
+        <div class="settings-actions">
+          <button class="btn" id="save-data-btn">Save Data</button>
+          <button class="btn secondary" id="reset-data-btn">Reset Data</button>
+        </div>
+        <div style="margin-top:10px" class="muted-small">Note: To delete items, use delete functions in the app (typing <code>delete</code> where requested).</div>
       </div>
     </div>
   </section>
 
 </div>
 
-<!-- Modal: typed-delete confirm -->
-<div class="modal" id="confirm-modal">
-  <div class="box">
-    <div id="confirm-text" style="font-weight:700">Confirm delete</div>
+<!-- Modal for delete confirmation -->
+<div class="modal" id="confirm-modal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:50">
+  <div style="background:#fff;padding:16px;border-radius:10px;width:92%;max-width:520px;border:2px solid var(--black)">
+    <div id="confirm-text" style="font-weight:800">Confirm delete</div>
     <div id="confirm-subtext" class="muted-small" style="margin-top:8px">Type <strong>delete</strong> below to confirm.</div>
-    <input type="text" id="confirm-input" placeholder="Type delete to confirm" style="margin-top:12px;padding:8px;border-radius:6px;border:1px solid #ddd;width:100%" />
+    <input type="text" id="confirm-input" placeholder="Type delete to confirm" style="margin-top:12px;padding:10px;border-radius:8px;border:1px solid #ddd;width:100%" />
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
       <button class="btn secondary" id="confirm-cancel">Cancel</button>
       <button class="btn" id="confirm-ok">Delete</button>
@@ -336,27 +371,13 @@
 
 <script>
 /* ---------------------------
-   App data model + persistence
+   Persistence & initial state
    --------------------------- */
-const STORAGE_KEY = 'ntm_app_v5';
+const STORAGE_KEY = 'ntm_app_v6';
 
 const defaultState = () => ({
-  company: {
-    name: 'Nazmul Twisting Mill',
-    address: 'Old Bogura Road, Telkupi',
-    phone: '(+880) 1766759293',
-    email: 'nazmul.fig@gmail.com',
-    logo: 'assets/favicon.png'
-  },
-  mohajon: {
-    company: 'Mohajon Co',
-    name: '',
-    address: '',
-    phone: '',
-    rate: 0,
-    totalProduction: 0,
-    moneyGiven: 0
-  },
+  company: { name: 'Nazmul Twisting Mill', address: 'Old Bogura Road, Telkupi', phone: '(+880) 1766759293', email: 'nazmul.fig@gmail.com', logo: 'assets/favicon.png' },
+  mohajon: { company: 'Mohajon Co', name: '', address: '', phone: '', rate: 0, totalProduction: 0, moneyGiven: 0 },
   workers: [
     { id: 'w1', name: 'Name_1', designation: 'Machine', rate: 0, adjustment: 0, bonus: 0, phone:'', address:'' },
     { id: 'w2', name: 'Name_2', designation: 'Machine', rate: 0, adjustment: 0, bonus: 0, phone:'', address:'' },
@@ -367,27 +388,27 @@ const defaultState = () => ({
   productionInputs: { 'w1': 0, 'w2': 0, 'w3': 0, 'w4': 0, 'w5': 0 },
   expenses: { electricity: 0, maintenance: 0, other: 0 },
   invoices: [],
-  billingHistory: {},
-  summaries: []
+  summaries: [],
+  billingHistory: {}
 });
 
 let appState = loadState() || defaultState();
+
+// NOTE: todaySummary is transient (not saved to localStorage) — it only appears in Dashboard after pressing Bill Summary PDF
+let todaySummary = null;
 
 /* ---------------------------
    Utilities
    --------------------------- */
 function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); renderAll(); }
 function loadState(){ try{ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null }catch(e){ console.error(e); return null } }
-function resetStateToDefaults(){ if(!confirm('Reset the entire app to defaults? This will remove saved summaries and settings.')) return; appState = defaultState(); saveState(); location.reload(); }
-function updateFavicon(url){ const link = document.getElementById('favico') || document.querySelector('link[rel="icon"]'); if(link){ link.href = url; } else { const l=document.createElement('link'); l.id='favico'; l.rel='icon'; l.href=url; l.type='image/png'; document.head.appendChild(l); } }
 function formatMoney(n){ return '৳' + Number(n || 0).toFixed(2); }
 function formatDateISO(d=new Date()){ return d.toLocaleDateString() + ' ' + d.toLocaleTimeString(); }
 function getWeekPeriodText(d=new Date()){ const end=new Date(d); const start=new Date(d); start.setDate(end.getDate()-6); return `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`; }
-function onlyDigits(str=''){ return (String(str||'').match(/\d+/g) || []).join('') || Math.floor(100000+Math.random()*900000); }
 function escapeHtml(str){ if(str===null||str===undefined) return ''; return String(str).replace(/[&<>"']/g, function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];}); }
 
 /* ---------------------------
-   Navigation wiring
+   Navigation
    --------------------------- */
 document.querySelectorAll('.nav-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -425,7 +446,10 @@ function applyCompanyHeader(){
   if(compPhone) compPhone.textContent = `Phone: ${c.phone || ''}`;
   if(compEmail) compEmail.textContent = `Email: ${c.email || ''}`;
 
-  if(c.logo) updateFavicon(c.logo);
+  if(c.logo){
+    const link = document.getElementById('favico');
+    if(link) link.href = c.logo;
+  }
 }
 
 /* ---------------------------
@@ -438,10 +462,11 @@ function renderAll(){
   renderSavedSummariesTable();
   populateWorkerSettingsList();
   applyCompanyHeader();
-  renderExpenses(); // keeps inputs synchronized
+  renderExpenses();
+  renderDashboardPdfOptions(); // show or hide today's PDF options
 }
 
-/* DASHBOARD */
+/* Dashboard stats */
 function renderDashboard(){
   const mohajonAmt = Number(appState.mohajon.moneyGiven || 0);
   const totalWorkersPaid = computeWorkersTotalPaid();
@@ -453,7 +478,7 @@ function renderDashboard(){
   document.getElementById('summary-profit').textContent = formatMoney(profit);
 }
 
-/* BILL SUMMARY rendering */
+/* Bill summary rendering */
 function renderBillSummary(){
   const mo = appState.mohajon || {};
   const bill = Number(mo.rate || 0) * Number(mo.totalProduction || 0);
@@ -497,7 +522,7 @@ function renderBillSummary(){
   document.getElementById('bs-net').textContent = formatMoney(net);
 }
 
-/* Weekly invoices table on dashboard (single print + receipt + delete) */
+/* Weekly invoices table on dashboard */
 function renderWeeklyInvoicesTable(){
   const tbody = document.querySelector('#weekly-invoices-table tbody');
   tbody.innerHTML = '';
@@ -508,26 +533,26 @@ function renderWeeklyInvoicesTable(){
 
     const printBtn = document.createElement('button');
     printBtn.className = 'btn small';
-    printBtn.textContent = 'Print Invoice';
+    printBtn.textContent = 'Invoice PDF';
     printBtn.addEventListener('click', ()=> printInvoice(idx));
     actionsTd.appendChild(printBtn);
 
     const printWorkersBtn = document.createElement('button');
     printWorkersBtn.className = 'btn small';
     printWorkersBtn.style.marginLeft='8px';
-    printWorkersBtn.textContent = 'Print Per-Worker';
+    printWorkersBtn.textContent = 'Per-Worker PDF';
     printWorkersBtn.addEventListener('click', ()=> printAllWorkersForInvoice(idx));
     actionsTd.appendChild(printWorkersBtn);
 
     const receiptBtn = document.createElement('button');
     receiptBtn.className = 'btn small';
     receiptBtn.style.marginLeft='8px';
-    receiptBtn.textContent = 'Receipt';
+    receiptBtn.textContent = 'Receipt PDF';
     receiptBtn.addEventListener('click', ()=> printMohajonReceipt(idx));
     actionsTd.appendChild(receiptBtn);
 
     const del = document.createElement('button');
-    del.className = 'btn delete';
+    del.className = 'btn small';
     del.style.marginLeft = '8px';
     del.textContent = 'Delete';
     del.addEventListener('click', ()=> confirmDeleteInvoice(idx));
@@ -548,12 +573,12 @@ function renderSavedSummariesTable(){
 
     const previewBtn = document.createElement('button');
     previewBtn.className='btn small';
-    previewBtn.textContent='Print Summary';
+    previewBtn.textContent='Bill Summary PDF';
     previewBtn.addEventListener('click', ()=> printSavedSummary(idx));
     td.appendChild(previewBtn);
 
     const del = document.createElement('button');
-    del.className='btn delete';
+    del.className='btn small';
     del.style.marginLeft='8px';
     del.textContent='Delete';
     del.addEventListener('click', ()=> confirmDeleteSavedSummary(idx));
@@ -564,7 +589,7 @@ function renderSavedSummariesTable(){
 }
 
 /* ---------------------------
-   Computations & interactions
+   Computations & helpers
    --------------------------- */
 function computeWorkersTotalPaid(){
   let total = 0;
@@ -578,18 +603,16 @@ function computeWorkersTotalPaid(){
 }
 
 /* ---------------------------
-   Settings: populate, worker list, save, reset (combined)
+   Settings: populate, worker list, save, reset
    --------------------------- */
 
 function populateSettingsForm(){
-  // company
   const c = appState.company || {};
   document.getElementById('setting-company-name').value = c.name || '';
   document.getElementById('setting-company-address').value = c.address || '';
   document.getElementById('setting-company-phone').value = c.phone || '';
   document.getElementById('setting-company-email').value = c.email || '';
 
-  // mohajon
   const m = appState.mohajon || {};
   document.getElementById('setting-mohajon-company').value = m.company || '';
   document.getElementById('setting-mohajon-name').value = m.name || '';
@@ -599,52 +622,67 @@ function populateSettingsForm(){
   document.getElementById('setting-mohajon-totalproduction').value = Number(m.totalProduction||0) !== 0 ? Number(m.totalProduction).toFixed(2) : '';
   document.getElementById('setting-mohajon-moneygiven').value = Number(m.moneyGiven||0) !== 0 ? Number(m.moneyGiven).toFixed(2) : '';
 
-  // worker list (and production inputs)
   populateWorkerSettingsList();
-
-  // expenses (moved to settings)
   renderExpenses();
 }
 
-/* Populate worker settings list */
+/* Populate worker list UI */
 function populateWorkerSettingsList(){
   const container = document.getElementById('worker-settings-list');
   container.innerHTML = '';
   appState.workers.forEach(w => {
-    const card = document.createElement('div');
-    card.className = 'worker-card';
-    card.dataset.workerId = w.id;
+    const div = document.createElement('div');
+    div.className = 'worker-card';
 
-    const rowTop = document.createElement('div');
-    rowTop.className = 'ws-row-top';
-    rowTop.innerHTML = `<input class="ws-name" placeholder="Name" value="${escapeHtml(w.name)}" />`;
+    const nameRow = document.createElement('div');
+    nameRow.style.marginBottom = '8px';
+    nameRow.innerHTML = `<label style="margin-bottom:6px;font-weight:800">Name</label><input class="ws-name" placeholder="Name" value="${escapeHtml(w.name)}" />`;
 
-    const rateValue = Number(w.rate || 0) !== 0 ? Number(w.rate).toFixed(2) : '';
-    const adjustValue = Number(w.adjustment || 0) !== 0 ? Number(w.adjustment).toFixed(2) : '';
-    const bonusValue = Number(w.bonus || 0) !== 0 ? Number(w.bonus).toFixed(2) : '';
-    const poundsValue = Number(appState.productionInputs[w.id] || 0) !== 0 ? Number(appState.productionInputs[w.id]).toFixed(2) : '';
-
-    const rowBottom = document.createElement('div');
-    rowBottom.className = 'ws-row-bottom';
-    rowBottom.innerHTML = `
-      <input class="ws-address" placeholder="Address" value="${escapeHtml(w.address||'')}" />
-      <input class="ws-phone" placeholder="Phone" value="${escapeHtml(w.phone||'')}" />
-      <input class="ws-designation" placeholder="Designation" value="${escapeHtml(w.designation||'')}" />
-      <input type="number" class="ws-rate" placeholder="Rate (e.g. 120.00)" step="0.01" min="0" value="${escapeHtml(rateValue)}" />
-      <input type="number" class="ws-pounds" placeholder="Production (pounds)" step="0.01" min="0" value="${escapeHtml(poundsValue)}" />
-      <input type="number" class="ws-adjust" placeholder="Adjustment (e.g. 5.00)" step="0.01" value="${escapeHtml(adjustValue)}" />
-      <input type="number" class="ws-bonus" placeholder="Bonus (e.g. 10.00)" step="0.01" value="${escapeHtml(bonusValue)}" />
+    const grid = document.createElement('div');
+    grid.className = 'worker-grid';
+    const rate = Number(w.rate||0) !== 0 ? Number(w.rate).toFixed(2) : '';
+    const pounds = Number(appState.productionInputs[w.id] || 0) !== 0 ? Number(appState.productionInputs[w.id]).toFixed(2) : '';
+    grid.innerHTML = `
+      <div>
+        <label>Designation</label>
+        <input class="ws-designation" value="${escapeHtml(w.designation||'')}" />
+      </div>
+      <div>
+        <label>Rate</label>
+        <input type="number" class="ws-rate" value="${escapeHtml(rate)}" step="0.01" />
+      </div>
+      <div>
+        <label>Production (pounds)</label>
+        <input type="number" class="ws-pounds" value="${escapeHtml(pounds)}" step="0.01" />
+      </div>
+    `;
+    const grid2 = document.createElement('div');
+    grid2.className = 'worker-grid';
+    grid2.style.marginTop = '8px';
+    grid2.innerHTML = `
+      <div>
+        <label>Adjustment</label>
+        <input type="number" class="ws-adjust" value="${escapeHtml(Number(w.adjustment||0).toFixed(2))}" step="0.01" />
+      </div>
+      <div>
+        <label>Bonus</label>
+        <input type="number" class="ws-bonus" value="${escapeHtml(Number(w.bonus||0).toFixed(2))}" step="0.01" />
+      </div>
+      <div>
+        <label>Phone</label>
+        <input class="ws-phone" value="${escapeHtml(w.phone||'')}" />
+      </div>
     `;
 
-    card.appendChild(rowTop);
-    card.appendChild(rowBottom);
-    container.appendChild(card);
+    div.appendChild(nameRow);
+    div.appendChild(grid);
+    div.appendChild(grid2);
+    container.appendChild(div);
   });
 }
 
-/* Combined save: company + mohajon + workers + expenses (Save Data) */
+/* Save company/mohajon/workers/expenses */
 document.getElementById('save-data-btn').addEventListener('click', ()=>{
-  // Company
   const name = document.getElementById('setting-company-name').value || '';
   const address = document.getElementById('setting-company-address').value || '';
   const phone = document.getElementById('setting-company-phone').value || '';
@@ -656,7 +694,6 @@ document.getElementById('save-data-btn').addEventListener('click', ()=>{
   appState.company.phone = phone;
   appState.company.email = email;
 
-  // Mohajon
   appState.mohajon = appState.mohajon || {};
   appState.mohajon.company = document.getElementById('setting-mohajon-company').value || '';
   appState.mohajon.name = document.getElementById('setting-mohajon-name').value || '';
@@ -666,27 +703,21 @@ document.getElementById('save-data-btn').addEventListener('click', ()=>{
   appState.mohajon.totalProduction = parseFloat(document.getElementById('setting-mohajon-totalproduction').value) || 0;
   appState.mohajon.moneyGiven = parseFloat(document.getElementById('setting-mohajon-moneygiven').value) || 0;
 
-  // Workers + production input
   const cards = document.querySelectorAll('.worker-card');
-  cards.forEach(card=>{
-    const id = card.dataset.workerId;
+  cards.forEach((card, i) => {
+    const id = appState.workers[i].id;
     const name = card.querySelector('.ws-name').value.trim() || 'Unnamed';
-    const phone = card.querySelector('.ws-phone').value.trim() || '';
-    const address = card.querySelector('.ws-address').value.trim() || '';
     const designation = card.querySelector('.ws-designation').value.trim() || '';
     const rate = parseFloat(card.querySelector('.ws-rate').value) || 0;
     const pounds = parseFloat(card.querySelector('.ws-pounds').value) || 0;
     const adjustment = parseFloat(card.querySelector('.ws-adjust').value) || 0;
     const bonus = parseFloat(card.querySelector('.ws-bonus').value) || 0;
+    const phone = card.querySelector('.ws-phone').value.trim() || '';
     const w = appState.workers.find(x=>x.id===id);
-    if(w){
-      w.name = name; w.phone = phone; w.address = address; w.designation = designation;
-      w.rate = rate; w.adjustment = adjustment; w.bonus = bonus;
-    }
+    if(w){ Object.assign(w, { name, designation, rate, adjustment, bonus, phone }) }
     appState.productionInputs[id] = pounds;
   });
 
-  // expenses (settings area)
   appState.expenses.electricity = parseFloat(document.getElementById('expense-electricity').value) || 0;
   appState.expenses.maintenance = parseFloat(document.getElementById('expense-maintenance').value) || 0;
   appState.expenses.other = parseFloat(document.getElementById('expense-other').value) || 0;
@@ -696,74 +727,42 @@ document.getElementById('save-data-btn').addEventListener('click', ()=>{
   alert('Data saved.');
 });
 
-/* Reset Data: full app reset to defaults (single button) */
+/* Reset Data entirely */
 document.getElementById('reset-data-btn').addEventListener('click', ()=>{
   if(!confirm('Reset all data to defaults? This will remove saved summaries and settings.')) return;
   appState = defaultState();
+  todaySummary = null;
   saveState();
   location.reload();
 });
 
 /* ---------------------------
-   Save Summary, invoices, printing functions
+   Save Summary & Invoices
    --------------------------- */
-
-/* Save Bill Summary (creates summary + invoice + billing history) */
 document.getElementById('save-summary-btn').addEventListener('click', ()=>{
-  const summary = {
-    id: 'BS-' + Math.floor(100000 + Math.random()*900000),
-    date: formatDateISO(),
-    period: getWeekPeriodText(),
-    company: {...(appState.company || {})},
-    mohajon: { ...appState.mohajon },
-    workers: [],
-    expenses: { ...appState.expenses },
-    totals: {}
-  };
-
-  let workersSubtotal = 0;
-  appState.workers.forEach(w=>{
-    const pounds = Number(appState.productionInputs[w.id] || 0);
-    const earnings = pounds * Number(w.rate || 0);
-    const adjustment = Number(w.adjustment || 0);
-    const bonus = Number(w.bonus || 0);
-    const finalAmount = earnings - adjustment + bonus;
-    workersSubtotal += finalAmount;
-    summary.workers.push({ id: w.id, name: w.name, designation: w.designation, pounds, rate: w.rate, earnings, adjustment, bonus, finalAmount, phone: w.phone || '', address: w.address || '' });
-  });
-
-  const expTotal = (summary.expenses.electricity||0) + (summary.expenses.maintenance||0) + (summary.expenses.other||0);
-  const income = Number(summary.mohajon.moneyGiven || 0); // use money given as income
-  const net = income - workersSubtotal - expTotal;
-
-  summary.totals = { income, payments: workersSubtotal, expenses: expTotal, net };
-
+  const summary = buildLiveSummaryObject();
+  summary.id = 'BS-' + Math.floor(100000 + Math.random()*900000);
+  summary.date = formatDateISO();
+  summary.period = getWeekPeriodText();
   appState.summaries = appState.summaries || [];
   appState.summaries.unshift(summary);
 
-  // Create invoice entry with per-worker items
+  // invoice
   const invoice = {
     id: 'INV-' + Math.floor(100000 + Math.random()*900000),
     date: summary.date,
     period: summary.period,
     total: summary.totals.payments,
-    workers: summary.workers.map(w => ({ id:w.id, name:w.name, designation:w.designation, pounds:w.pounds, rate:w.rate, bill:w.earnings, adjustment:w.adjustment, bonus:w.bonus, total:w.finalAmount }))
+    workers: summary.workers.map(w => ({ ...w }))
   };
-
   appState.invoices = appState.invoices || [];
   appState.invoices.unshift(invoice);
 
-  // add billing history entries
+  // billing history
   invoice.workers.forEach(w=>{
     appState.billingHistory[w.id] = appState.billingHistory[w.id] || [];
     appState.billingHistory[w.id].unshift({
-      date: invoice.date,
-      pounds: w.pounds,
-      bill: w.bill,
-      adjustment: w.adjustment,
-      bonus: w.bonus,
-      total: w.total,
-      invoiceId: invoice.id
+      date: invoice.date, pounds: w.pounds, bill: w.bill, adjustment: w.adjustment, bonus: w.bonus, total: w.total, invoiceId: invoice.id
     });
   });
 
@@ -771,20 +770,77 @@ document.getElementById('save-summary-btn').addEventListener('click', ()=>{
   document.querySelector('[data-page="dashboard"]').click();
 });
 
-/* ---------------------------
-   Printing functions (signature removed from all print outputs)
-   --------------------------- */
+/* Build a transient "live" summary object from current inputs */
+function buildLiveSummaryObject(){
+  const summary = {
+    company: {...(appState.company||{})},
+    mohajon: {...(appState.mohajon||{})},
+    workers: [],
+    expenses: {...(appState.expenses||{})},
+    totals: {}
+  };
+  let workersSubtotal = 0;
+  appState.workers.forEach(w=>{
+    const pounds = Number(appState.productionInputs[w.id] || 0);
+    const earnings = pounds * Number(w.rate || 0);
+    const adj = Number(w.adjustment || 0), bonus = Number(w.bonus || 0);
+    const finalAmount = earnings - adj + bonus;
+    workersSubtotal += finalAmount;
+    summary.workers.push({ id: w.id, name: w.name, designation: w.designation, pounds, rate: w.rate, bill: earnings, adjustment: adj, bonus: bonus, total: finalAmount, phone: w.phone||'', address: w.address||'' });
+  });
+  const expTotal = (summary.expenses.electricity||0) + (summary.expenses.maintenance||0) + (summary.expenses.other||0);
+  const income = Number(summary.mohajon.moneyGiven || 0);
+  summary.totals = { income, payments: workersSubtotal, expenses: expTotal, net: (income - workersSubtotal - expTotal) };
+  return summary;
+}
 
-function companyHeaderHtml(company){
+/* ---------------------------
+   PDF generator helper (reusable)
+   --------------------------- */
+function generatePdfFromHtml(htmlString, filename = 'document.pdf'){
+  const temp = document.createElement('div');
+  temp.style.position = 'fixed';
+  temp.style.left = '-9999px';
+  temp.style.top = '0';
+  temp.innerHTML = `<div class="pdf-body" style="font-family:Arial, Helvetica, sans-serif">${htmlString}</div>`;
+  document.body.appendChild(temp);
+
+  const opt = {
+    margin: [10, 10, 10, 10],
+    filename: filename,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, logging: false },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  html2pdf().from(temp).set(opt).outputPdf().then((pdf)=> {
+    try{
+      const blob = pdf.output('blob');
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      setTimeout(()=>{ try{ URL.revokeObjectURL(url); }catch(e){} }, 60_000);
+    }catch(e){
+      html2pdf().from(temp).set(opt).save();
+    } finally {
+      setTimeout(()=> temp.remove(), 500);
+    }
+  }).catch(err=>{
+    try{ html2pdf().from(temp).set(opt).save(); }catch(e){ console.error('PDF gen failed', e); alert('Failed to generate PDF') }
+    setTimeout(()=> temp.remove(), 500);
+  });
+}
+
+/* Small company header for PDF */
+function companyHeaderHtmlForPdf(company){
   return `
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px">
       <div style="display:flex;gap:12px;align-items:center">
-        <img src="${escapeHtml(company.logo||'assets/favicon.png')}" alt="logo" style="width:72px;height:72px;object-fit:contain;border-radius:8px" onerror="this.style.display='none'"/>
+        <img src="${escapeHtml(company.logo||'assets/favicon.png')}" style="width:72px;height:72px;object-fit:contain;border-radius:8px" onerror="this.style.display='none'"/>
         <div>
-          <div style="font-weight:700;font-size:18px">${escapeHtml(company.name || '')}</div>
-          <div style="font-size:12px;color:#333">${escapeHtml(company.address || '')}</div>
-          <div style="font-size:12px;color:#333">${escapeHtml(company.phone || '')}</div>
-          ${company.email ? `<div style="font-size:12px;color:#333">${escapeHtml(company.email)}</div>` : ''}
+          <div style="font-weight:800;font-size:18px">${escapeHtml(company.name||'')}</div>
+          <div style="font-size:12px">${escapeHtml(company.address||'')}</div>
+          <div style="font-size:12px">${escapeHtml(company.phone||'')}</div>
+          ${company.email ? `<div style="font-size:12px">${escapeHtml(company.email)}</div>` : ''}
         </div>
       </div>
       <div style="text-align:right">
@@ -794,117 +850,34 @@ function companyHeaderHtml(company){
   `;
 }
 
-/* Print current live bill summary (used by Bill Summary "Print Bill Summary" button) */
-function printCurrentBillSummary(){
-  const company = appState.company || {};
-  const mo = appState.mohajon || {};
-  const workersRows = appState.workers.map(w=>{
-    const pounds = Number(appState.productionInputs[w.id] || 0);
-    const earnings = pounds * Number(w.rate || 0);
-    const adjustment = Number(w.adjustment || 0);
-    const bonus = Number(w.bonus || 0);
-    const finalAmount = earnings - adjustment + bonus;
-    return `<tr>
-      <td>${escapeHtml(w.name)}</td>
-      <td>${escapeHtml(w.designation)}</td>
-      <td style="text-align:right">${pounds.toFixed(2)}</td>
-      <td style="text-align:right">${formatMoney(w.rate)}</td>
-      <td style="text-align:right">${formatMoney(earnings)}</td>
-      <td style="text-align:right">${formatMoney(adjustment)}</td>
-      <td style="text-align:right">${formatMoney(bonus)}</td>
-      <td style="text-align:right">${formatMoney(finalAmount)}</td>
-    </tr>`;
-  }).join('');
+/* ---------------------------
+   Print operations (now support transient todaySummary)
+   --------------------------- */
 
-  const expElec = Number(appState.expenses.electricity || 0);
-  const expMaint = Number(appState.expenses.maintenance || 0);
-  const expOther = Number(appState.expenses.other || 0);
-  const expTotal = expElec + expMaint + expOther;
+/* Called when user presses Bill Summary PDF on Bill Summary page.
+   - Generates the Bill Summary PDF (current data)
+   - Stores a transient todaySummary and updates Dashboard PDF options
+*/
+function onBillSummaryPdfPressed(){
+  // build live summary object
+  todaySummary = buildLiveSummaryObject();
+  // attach metadata
+  todaySummary.id = 'TODAY-BS-' + onlyDigits();
+  todaySummary.date = formatDateISO();
+  todaySummary.period = getWeekPeriodText();
 
-  const workersSubtotal = appState.workers.reduce((s,w)=>{
-    const pounds = Number(appState.productionInputs[w.id] || 0);
-    const earnings = pounds * Number(w.rate || 0);
-    return s + (earnings - Number(w.adjustment || 0) + Number(w.bonus || 0));
-  },0);
+  // generate the bill summary PDF immediately
+  generatePdfForSummary(todaySummary, 'bill-summary-today.pdf');
 
-  const income = Number(mo.moneyGiven || 0);
-  const net = income - workersSubtotal - expTotal;
-
-  const html = `
-    <div class="print-page printable">
-      ${companyHeaderHtml(company)}
-      <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
-
-      <h3>Mohajon</h3>
-      <table style="width:100%;border-collapse:collapse">
-        <thead><tr><th>Rate</th><th>Production</th><th>Bill</th><th>Money Given</th><th>Due</th></tr></thead>
-        <tbody>
-          <tr>
-            <td style="text-align:right">${formatMoney(mo.rate||0)}</td>
-            <td style="text-align:right">${Number(mo.totalProduction||0).toFixed(2)}</td>
-            <td style="text-align:right">${formatMoney(Number(mo.rate||0)*Number(mo.totalProduction||0))}</td>
-            <td style="text-align:right">${formatMoney(mo.moneyGiven||0)}</td>
-            <td style="text-align:right">${formatMoney((Number(mo.rate||0)*Number(mo.totalProduction||0)) - Number(mo.moneyGiven||0))}</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h3>Workers</h3>
-      <table style="width:100%;border-collapse:collapse">
-        <thead><tr><th>Worker</th><th>Role</th><th>Pounds</th><th>Rate</th><th>Bill</th><th>Adjustment</th><th>Bonus</th><th>Final Amount</th></tr></thead>
-        <tbody>${workersRows}</tbody>
-        <tfoot>
-          <tr>
-            <th colspan="7" style="text-align:right">Workers Subtotal</th>
-            <th style="text-align:right">${formatMoney(workersSubtotal)}</th>
-          </tr>
-        </tfoot>
-      </table>
-
-      <h3>Expenses</h3>
-      <table style="width:100%;border-collapse:collapse">
-        <thead><tr><th>Electricity</th><th>Maintenance</th><th>Other</th><th>Total</th></tr></thead>
-        <tbody>
-          <tr>
-            <td style="text-align:right">${formatMoney(expElec)}</td>
-            <td style="text-align:right">${formatMoney(expMaint)}</td>
-            <td style="text-align:right">${formatMoney(expOther)}</td>
-            <td style="text-align:right">${formatMoney(expTotal)}</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h3>Summary</h3>
-      <table style="width:100%;border-collapse:collapse">
-        <thead><tr><th>Income (Money Given)</th><th>Payments</th><th>Expenses</th><th>Net</th></tr></thead>
-        <tbody>
-          <tr>
-            <td style="text-align:right">${formatMoney(income)}</td>
-            <td style="text-align:right">${formatMoney(workersSubtotal)}</td>
-            <td style="text-align:right">${formatMoney(expTotal)}</td>
-            <td style="text-align:right">${formatMoney(net)}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  `;
-
-  const win = window.open('','_blank');
-  win.document.write('<html><head><title>Bill Summary</title><style>body{font-family:Arial, Helvetica, sans-serif;color:#000}table{border-collapse:collapse}table,th,td{border:1px solid #ddd;padding:8px}</style></head><body>'+html+'</body></html>');
-  win.document.close();
-  win.focus();
-  setTimeout(()=>{ try{ win.print(); win.close(); }catch(e){} }, 300);
+  // update dashboard area so user can open other related PDFs for this day
+  renderDashboardPdfOptions();
 }
 
-/* existing printing helpers (signature removed) */
-function printInvoice(invoiceIndex){
-  const inv = appState.invoices && appState.invoices[invoiceIndex];
-  if(!inv) return alert('Invoice not found.');
-  const company = appState.company || {};
-  const summary = (appState.summaries || []).find(s => s.date === inv.date && s.period === inv.period) || null;
-  const mohajon = summary ? (summary.mohajon || appState.mohajon) : appState.mohajon;
-
-  const workerRows = inv.workers.map(w => `
+/* Helpers to build HTML for various PDFs given objects (summary / invoice) */
+function generatePdfForSummary(summary, filename='bill-summary.pdf'){
+  const mo = summary.mohajon || {};
+  const comp = summary.company || {};
+  const workersRows = (summary.workers||[]).map(w=>`
     <tr>
       <td>${escapeHtml(w.name)}</td>
       <td>${escapeHtml(w.designation)}</td>
@@ -918,246 +891,241 @@ function printInvoice(invoiceIndex){
   `).join('');
 
   const html = `
-    <div class="print-page">
-      ${companyHeaderHtml(company)}
-      <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
-      <div style="display:flex;justify-content:space-between;align-items:center;">
+    ${companyHeaderHtmlForPdf(comp)}
+    <hr style="border:none;border-top:1px solid #000;margin:6px 0" />
+    <div style="margin-bottom:6px"><strong>Period:</strong> ${escapeHtml(summary.period || '')}</div>
+    <h3 style="margin:6px 0">Mohajon</h3>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:8px">
+      <thead><tr><th>Rate</th><th>Production</th><th>Bill</th><th>Money Given</th><th>Due</th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="text-align:right">${formatMoney(mo.rate||0)}</td>
+          <td style="text-align:right">${Number(mo.totalProduction||0).toFixed(2)}</td>
+          <td style="text-align:right">${formatMoney(Number(mo.rate||0)*Number(mo.totalProduction||0))}</td>
+          <td style="text-align:right">${formatMoney(mo.moneyGiven||0)}</td>
+          <td style="text-align:right">${formatMoney((Number(mo.rate||0)*Number(mo.totalProduction||0)) - Number(mo.moneyGiven||0))}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin:6px 0">Workers</h3>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:8px">
+      <thead><tr><th>Worker</th><th>Role</th><th>Pounds</th><th>Rate</th><th>Bill</th><th>Adjustment</th><th>Bonus</th><th>Final</th></tr></thead>
+      <tbody>${workersRows}</tbody>
+      <tfoot>
+        <tr>
+          <th colspan="7" style="text-align:right">Workers Subtotal</th>
+          <th style="text-align:right">${formatMoney(summary.totals.payments)}</th>
+        </tr>
+      </tfoot>
+    </table>
+
+    <h3 style="margin:6px 0">Expenses</h3>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:8px">
+      <thead><tr><th>Electricity</th><th>Maintenance</th><th>Other</th><th>Total</th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="text-align:right">${formatMoney(summary.expenses.electricity||0)}</td>
+          <td style="text-align:right">${formatMoney(summary.expenses.maintenance||0)}</td>
+          <td style="text-align:right">${formatMoney(summary.expenses.other||0)}</td>
+          <td style="text-align:right">${formatMoney(summary.totals.expenses||summary.expenses.electricity + summary.expenses.maintenance + summary.expenses.other)}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin:6px 0">Summary</h3>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:8px">
+      <thead><tr><th>Income</th><th>Payments</th><th>Expenses</th><th>Net</th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="text-align:right">${formatMoney(summary.totals.income)}</td>
+          <td style="text-align:right">${formatMoney(summary.totals.payments)}</td>
+          <td style="text-align:right">${formatMoney(summary.totals.expenses)}</td>
+          <td style="text-align:right">${formatMoney(summary.totals.net)}</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+  generatePdfFromHtml(html, filename);
+}
+
+/* Create an invoice object from summary (transient) */
+function invoiceFromSummary(summary){
+  return {
+    id: 'INV-TODAY-' + onlyDigits(),
+    date: summary.date || formatDateISO(),
+    period: summary.period || getWeekPeriodText(),
+    total: summary.totals.payments || 0,
+    workers: (summary.workers || []).map(w => ({ ...w, bill: w.bill, total: w.total }))
+  };
+}
+
+/* Generate invoice PDF from invoice object */
+function generatePdfForInvoiceObject(inv, filename){
+  const comp = appState.company || {};
+  const html = `
+    ${companyHeaderHtmlForPdf(comp)}
+    <hr style="border:none;border-top:1px solid #000;margin:6px 0" />
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div><strong>Invoice:</strong> ${escapeHtml(inv.id)}</div>
+      <div style="text-align:right">${escapeHtml(inv.period)}</div>
+    </div>
+
+    <table style="width:100%;border-collapse:collapse;margin-bottom:8px">
+      <thead><tr><th>Worker</th><th>Role</th><th>Pounds</th><th>Rate</th><th>Bill</th><th>Adjustment</th><th>Bonus</th><th>Total</th></tr></thead>
+      <tbody>
+        ${(inv.workers||[]).map(w=>`<tr>
+          <td>${escapeHtml(w.name)}</td><td>${escapeHtml(w.designation)}</td><td style="text-align:right">${Number(w.pounds).toFixed(2)}</td><td style="text-align:right">${formatMoney(w.rate)}</td><td style="text-align:right">${formatMoney(w.bill)}</td><td style="text-align:right">${formatMoney(w.adjustment)}</td><td style="text-align:right">${formatMoney(w.bonus)}</td><td style="text-align:right">${formatMoney(w.total)}</td>
+        </tr>`).join('')}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="7" style="text-align:right">Total Payments</th>
+          <th style="text-align:right">${formatMoney(inv.total)}</th>
+        </tr>
+      </tfoot>
+    </table>
+  `;
+  generatePdfFromHtml(html, filename);
+}
+
+/* Generate per-worker pages PDF for invoice object (one page per worker) */
+function generatePerWorkerPdfFromInvoiceObject(inv, filename){
+  const comp = appState.company || {};
+  const pages = (inv.workers||[]).map(w => `
+    <div style="page-break-after:always;">
+      ${companyHeaderHtmlForPdf(comp)}
+      <hr style="border:none;border-top:1px solid #000;margin:6px 0" />
+      <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
-          <div style="font-weight:700">Invoice: ${escapeHtml(inv.id)}</div>
-          <div style="font-size:12px">${escapeHtml(inv.period)}</div>
+          <div style="font-weight:800;font-size:16px">${escapeHtml(w.name)}</div>
+          <div style="font-size:12px">${escapeHtml(w.designation)}</div>
         </div>
         <div style="text-align:right">
-          <div style="font-size:12px">Mohajon: <strong>${escapeHtml(mohajon.company||mohajon.name||'')}</strong></div>
-          <div style="font-size:12px">${escapeHtml(mohajon.address||'')}</div>
-          <div style="font-size:12px">${escapeHtml(mohajon.phone||'')}</div>
+          <div style="font-size:12px">Invoice: <strong>${escapeHtml(inv.id)}</strong></div>
+          <div style="font-size:12px">${escapeHtml(inv.date)}</div>
         </div>
       </div>
 
       <div style="height:12px"></div>
 
-      <table style="width:100%;border-collapse:collapse">
-        <thead><tr>
-          <th>Worker</th><th>Role</th><th>Pounds</th><th>Rate</th><th>Bill</th><th>Adjustment</th><th>Bonus</th><th>Total</th>
-        </tr></thead>
-        <tbody>${workerRows}</tbody>
-        <tfoot>
-          <tr>
-            <th colspan="7" style="text-align:right">Total Payments</th>
-            <th style="text-align:right">${formatMoney(inv.total)}</th>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-  `;
-
-  const win = window.open('','_blank');
-  win.document.write('<html><head><title>Invoice '+escapeHtml(inv.id)+'</title><style>body{font-family:Arial, Helvetica, sans-serif;color:#000}table{border-collapse:collapse}table,th,td{border:1px solid #ddd;padding:8px}</style></head><body>'+html+'</body></html>');
-  win.document.close();
-  win.focus();
-  setTimeout(()=>{ try{ win.print(); win.close(); }catch(e){} }, 300);
-}
-
-function printAllWorkersForInvoice(invoiceIndex){
-  const inv = appState.invoices && appState.invoices[invoiceIndex];
-  if(!inv) return alert('Invoice not found.');
-  const company = appState.company || {};
-  const pages = inv.workers.map((w, idx) => {
-    return `
-      <div class="print-page">
-        ${companyHeaderHtml(company)}
-        <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
-        <div style="display:flex;gap:12px;align-items:center">
-          <div>
-            <div style="font-weight:700;font-size:16px">${escapeHtml(w.name)}</div>
-            <div style="font-size:12px">${escapeHtml(w.designation || '')}</div>
-          </div>
-          <div style="margin-left:auto;text-align:right">
-            <div style="font-size:12px">Invoice: <strong>${escapeHtml(inv.id)}</strong></div>
-            <div style="font-size:12px">${escapeHtml(inv.date)}</div>
-            <div style="font-size:12px">${escapeHtml(inv.period)}</div>
-          </div>
-        </div>
-
-        <div style="height:12px"></div>
-
-        <table style="width:100%;border-collapse:collapse">
-          <thead><tr><th>Designation</th><th>Rate</th><th>Production</th><th>Bill</th></tr></thead>
-          <tbody>
-            <tr>
-              <td>${escapeHtml(w.designation || '')}</td>
-              <td style="text-align:right">${formatMoney(w.rate)}</td>
-              <td style="text-align:right">${Number(w.pounds||0).toFixed(2)}</td>
-              <td style="text-align:right">${formatMoney(w.bill)}</td>
-            </tr>
-            <tr>
-              <td colspan="3">Adjustment</td>
-              <td style="text-align:right">${formatMoney(w.adjustment)}</td>
-            </tr>
-            <tr>
-              <td colspan="3">Bonus</td>
-              <td style="text-align:right">${formatMoney(w.bonus)}</td>
-            </tr>
-            <tr>
-              <th colspan="3" style="text-align:right">Total</th>
-              <th class="invoice-total" style="text-align:right">${formatMoney(w.total)}</th>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      ${idx < inv.workers.length-1 ? '<div class="page-break"></div>' : ''}
-    `;
-  }).join('');
-
-  const combined = `<div>${pages}</div>`;
-  const win = window.open('','_blank');
-  win.document.write('<html><head><title>Invoices</title><style>body{font-family:Arial, Helvetica, sans-serif;color:#000}table{border-collapse:collapse}table,th,td{border:1px solid #ddd;padding:8px}</style></head><body>'+combined+'</body></html>');
-  win.document.close();
-  win.focus();
-  setTimeout(()=>{ try{ win.print(); win.close(); }catch(e){} }, 300);
-}
-
-function printMohajonReceipt(invoiceIndex){
-  const inv = appState.invoices && appState.invoices[invoiceIndex];
-  if(!inv) return alert('Invoice not found.');
-  const company = appState.company || {};
-  const summary = (appState.summaries || []).find(s => s.date === inv.date && s.period === inv.period) || null;
-  const mo = summary ? (summary.mohajon || appState.mohajon) : appState.mohajon;
-  const receiptNo = onlyDigits('RCPT-' + inv.id);
-
-  const html = `
-    <div class="print-page">
-      ${companyHeaderHtml(company)}
-      <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
-
-      <div style="text-align:center;margin-bottom:8px">
-        <h3 style="margin:0">Receipt</h3>
-        <div style="font-size:12px">Receipt No: <strong>${receiptNo}</strong></div>
-      </div>
-
-      <div style="display:flex;gap:24px;flex-wrap:wrap">
-        <div style="flex:1;min-width:180px">
-          <strong>Paid By (Mohajon)</strong><br/>
-          <div style="margin-top:6px">${escapeHtml(mo.company||'')} ${mo.name ? ('— '+escapeHtml(mo.name)) : ''}</div>
-          <div style="font-size:12px;margin-top:6px">${escapeHtml(mo.address||'')}</div>
-          <div style="font-size:12px">${escapeHtml(mo.phone||'')}</div>
-        </div>
-        <div style="flex:1;min-width:180px;text-align:right">
-          <strong>Received By (Company)</strong><br/>
-          <div style="margin-top:6px">${escapeHtml(company.name||'')}</div>
-          <div style="font-size:12px;margin-top:6px">${escapeHtml(company.address||'')}</div>
-          <div style="font-size:12px">${escapeHtml(company.phone||'')}</div>
-        </div>
-      </div>
-
-      <div style="height:12px"></div>
-
-      <table style="width:100%;border-collapse:collapse">
-        <thead><tr><th>Rate</th><th>Production</th><th>Bill</th><th>Money Given</th><th>Due</th></tr></thead>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:8px">
+        <thead><tr><th>Designation</th><th>Rate</th><th>Production</th><th>Bill</th></tr></thead>
         <tbody>
           <tr>
-            <td style="text-align:right">${formatMoney(mo.rate)}</td>
-            <td style="text-align:right">${Number(mo.totalProduction||0).toFixed(2)}</td>
-            <td style="text-align:right">${formatMoney(Number(mo.rate||0)*Number(mo.totalProduction||0))}</td>
-            <td style="text-align:right">${formatMoney(mo.moneyGiven||0)}</td>
-            <td style="text-align:right">${formatMoney((Number(mo.rate||0)*Number(mo.totalProduction||0)) - Number(mo.moneyGiven||0))}</td>
+            <td>${escapeHtml(w.designation||'')}</td>
+            <td style="text-align:right">${formatMoney(w.rate)}</td>
+            <td style="text-align:right">${Number(w.pounds||0).toFixed(2)}</td>
+            <td style="text-align:right">${formatMoney(w.bill)}</td>
+          </tr>
+          <tr>
+            <td colspan="3">Adjustment</td>
+            <td style="text-align:right">${formatMoney(w.adjustment)}</td>
+          </tr>
+          <tr>
+            <td colspan="3">Bonus</td>
+            <td style="text-align:right">${formatMoney(w.bonus)}</td>
+          </tr>
+          <tr>
+            <th colspan="3" style="text-align:right">Total</th>
+            <th style="text-align:right;font-weight:800">${formatMoney(w.total)}</th>
           </tr>
         </tbody>
       </table>
     </div>
-  `;
-
-  const win = window.open('','_blank');
-  win.document.write('<html><head><title>Mohajon Receipt</title><style>body{font-family:Arial, Helvetica, sans-serif;color:#000}table{border-collapse:collapse}table,th,td{border:1px solid #ddd;padding:8px}</style></head><body>'+html+'</body></html>');
-  win.document.close();
-  win.focus();
-  setTimeout(()=>{ try{ win.print(); win.close(); }catch(e){} }, 300);
-}
-
-/* Print saved summary */
-function printSavedSummary(index){
-  const s = appState.summaries && appState.summaries[index];
-  if(!s) return;
-  const company = s.company || {};
-  let workersHtml = s.workers.map(w => `
-    <tr>
-      <td>${escapeHtml(w.name)}</td>
-      <td style="text-align:right">${Number(w.pounds).toFixed(2)}</td>
-      <td style="text-align:right">${formatMoney(w.rate)}</td>
-      <td style="text-align:right">${formatMoney(w.earnings)}</td>
-      <td style="text-align:right">${formatMoney(w.adjustment)}</td>
-      <td style="text-align:right">${formatMoney(w.bonus)}</td>
-      <td style="text-align:right">${formatMoney(w.finalAmount)}</td>
-    </tr>
   `).join('');
-
-  const html = `
-    <div class="print-page printable">
-      ${companyHeaderHtml(company)}
-      <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-        <div>
-          <div style="font-weight:700">Summary ID: ${escapeHtml(s.id)}</div>
-          <div style="font-size:12px">${escapeHtml(s.period)}</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:12px">${escapeHtml(s.date)}</div>
-        </div>
-      </div>
-
-      <div style="height:12px"></div>
-
-      <h4>Workers</h4>
-      <table style="width:100%;border-collapse:collapse">
-        <thead><tr><th>Worker</th><th>Pounds</th><th>Rate</th><th>Earnings</th><th>Adjustment</th><th>Bonus</th><th>Final</th></tr></thead>
-        <tbody>${workersHtml}</tbody>
-        <tfoot>
-          <tr>
-            <th colspan="6" style="text-align:right">Workers Subtotal</th>
-            <th style="text-align:right">${formatMoney(s.totals.payments)}</th>
-          </tr>
-        </tfoot>
-      </table>
-
-      <div style="height:10px"></div>
-
-      <h4>Expenses</h4>
-      <table style="width:100%;border-collapse:collapse">
-        <thead><tr><th>Electricity</th><th>Maintenance</th><th>Other</th><th>Total</th></tr></thead>
-        <tbody>
-          <tr>
-            <td style="text-align:right">${formatMoney(s.expenses.electricity||0)}</td>
-            <td style="text-align:right">${formatMoney(s.expenses.maintenance||0)}</td>
-            <td style="text-align:right">${formatMoney(s.expenses.other||0)}</td>
-            <td style="text-align:right">${formatMoney(s.totals.expenses||0)}</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div style="height:10px"></div>
-
-      <h4>Summary</h4>
-      <table style="width:100%;border-collapse:collapse">
-        <thead><tr><th>Income</th><th>Payments</th><th>Expenses</th><th>Net</th></tr></thead>
-        <tbody>
-          <tr>
-            <td style="text-align:right">${formatMoney(s.totals.income)}</td>
-            <td style="text-align:right">${formatMoney(s.totals.payments)}</td>
-            <td style="text-align:right">${formatMoney(s.totals.expenses)}</td>
-            <td style="text-align:right">${formatMoney(s.totals.net)}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  `;
-
-  const win = window.open('','_blank');
-  win.document.write('<html><head><title>Summary '+escapeHtml(s.id)+'</title><style>body{font-family:Arial, Helvetica, sans-serif;color:#000}table{border-collapse:collapse}table,th,td{border:1px solid #ddd;padding:8px}</style></head><body>'+html+'</body></html>');
-  win.document.close();
-  win.focus();
-  setTimeout(()=>{ try{ win.print(); win.close(); }catch(e){} }, 300);
+  generatePdfFromHtml(pages, filename);
 }
 
-/* Delete helpers (typed-confirm) */
+/* Generate receipt PDF for invoice object */
+function generateReceiptFromInvoiceObject(inv, filename){
+  const comp = appState.company || {};
+  const totalBill = inv.total;
+  const receiptNo = 'RCPT-' + onlyDigits();
+  const html = `
+    ${companyHeaderHtmlForPdf(comp)}
+    <hr style="border:none;border-top:1px solid #000;margin:6px 0" />
+    <div style="text-align:center;margin-bottom:8px">
+      <h3 style="margin:0">Receipt</h3>
+      <div style="font-size:12px">Receipt No: <strong>${receiptNo}</strong></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:8px">
+      <div>
+        <strong>From:</strong><br/>${escapeHtml(comp.name||'')}
+      </div>
+      <div style="text-align:right">
+        <strong>Total Payments:</strong><br/>${formatMoney(totalBill)}
+      </div>
+    </div>
+  `;
+  generatePdfFromHtml(html, filename);
+}
+
+/* ---------------------------
+   Dashboard: render Today's PDF options
+   --------------------------- */
+function renderDashboardPdfOptions(){
+  const container = document.getElementById('dashboard-today-pdf-options');
+  container.innerHTML = '';
+  if(!todaySummary) return;
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.style.border = '1px solid #dcdcdc';
+  card.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h4 style="margin:0">Today's Summary — ${escapeHtml(todaySummary.period || '')}</h4>
+      <div class="small">Generated: ${escapeHtml(todaySummary.date || '')}</div>
+    </div>
+    <div style="margin-top:10px" class="pdf-actions">
+      <button class="btn small" id="dash-pdf-billsummary">Bill Summary PDF</button>
+      <button class="btn small secondary" id="dash-pdf-invoice">Invoice PDF</button>
+      <button class="btn small secondary" id="dash-pdf-perworker">Per-Worker PDF</button>
+      <button class="btn small secondary" id="dash-pdf-receipt">Receipt PDF</button>
+      <button class="btn small ghost" id="dash-clear-today">Clear</button>
+    </div>
+  `;
+  container.appendChild(card);
+
+  // wire buttons
+  document.getElementById('dash-pdf-billsummary').addEventListener('click', ()=> generatePdfForSummary(todaySummary, 'bill-summary-today.pdf'));
+  document.getElementById('dash-pdf-invoice').addEventListener('click', ()=>{
+    const inv = invoiceFromSummary(todaySummary);
+    generatePdfForInvoiceObject(inv, `invoice-${inv.id}.pdf`);
+  });
+  document.getElementById('dash-pdf-perworker').addEventListener('click', ()=>{
+    const inv = invoiceFromSummary(todaySummary);
+    generatePerWorkerPdfFromInvoiceObject(inv, `invoice-${inv.id}-perworker.pdf`);
+  });
+  document.getElementById('dash-pdf-receipt').addEventListener('click', ()=>{
+    const inv = invoiceFromSummary(todaySummary);
+    generateReceiptFromInvoiceObject(inv, `receipt-${inv.id}.pdf`);
+  });
+  document.getElementById('dash-clear-today').addEventListener('click', ()=>{
+    if(!confirm('Remove today\'s PDF options from dashboard?')) return;
+    todaySummary = null;
+    renderDashboardPdfOptions();
+  });
+}
+
+/* ---------------------------
+   Wiring: Bill Summary page's PDF button
+   --------------------------- */
+document.getElementById('print-billsummary-btn').addEventListener('click', onBillSummaryPdfPressed);
+
+/* ---------------------------
+   Existing invoice-related functions (keep using appState arrays)
+   --------------------------- */
+function printInvoice(invoiceIndex){ const inv = appState.invoices && appState.invoices[invoiceIndex]; if(!inv) return alert('Invoice not found'); generatePdfForInvoiceObject(inv, `invoice-${inv.id}.pdf`); }
+function printAllWorkersForInvoice(invoiceIndex){ const inv = appState.invoices && appState.invoices[invoiceIndex]; if(!inv) return alert('Invoice not found'); generatePerWorkerPdfFromInvoiceObject(inv, `invoice-${inv.id}-perworker.pdf`); }
+function printMohajonReceipt(invoiceIndex){ const inv = appState.invoices && appState.invoices[invoiceIndex]; if(!inv) return alert('Invoice not found'); generateReceiptFromInvoiceObject(inv, `receipt-${inv.id}.pdf`); }
+
+/* Print a saved summary */
+function printSavedSummary(index){ const s = appState.summaries && appState.summaries[index]; if(!s) return; generatePdfForSummary(s, `summary-${s.id}.pdf`); }
+
+/* ---------------------------
+   Delete helpers
+   --------------------------- */
 function showDeleteConfirm(message, onConfirm){
   const modal = document.getElementById('confirm-modal');
   const txt = document.getElementById('confirm-text');
@@ -1179,10 +1147,7 @@ function showDeleteConfirm(message, onConfirm){
   cancel.addEventListener('click', cancelHandler);
 }
 
-/* Delete saved summary */
 function confirmDeleteSavedSummary(index){ showDeleteConfirm('Delete saved summary?', ()=>{ appState.summaries.splice(index,1); saveState(); }); }
-
-/* Delete invoice */
 function confirmDeleteInvoice(index){
   showDeleteConfirm('Delete this weekly invoice and its worker history entries?', ()=>{
     const inv = appState.invoices[index];
@@ -1198,12 +1163,10 @@ function confirmDeleteInvoice(index){
   });
 }
 
-/* Delete worker history entry */
-function confirmDeleteWorkerHistory(workerId, histIndex){
-  showDeleteConfirm('Delete this worker history entry?', ()=>{
-    if(appState.billingHistory[workerId] && appState.billingHistory[workerId][histIndex]){ appState.billingHistory[workerId].splice(histIndex,1); saveState(); }
-  });
-}
+/* ---------------------------
+   Small utilities
+   --------------------------- */
+function onlyDigits(seed=''){ return (String(seed||'').match(/\d+/g) || []).join('') || Math.floor(100000+Math.random()*900000); }
 
 /* ---------------------------
    Startup
@@ -1211,9 +1174,11 @@ function confirmDeleteWorkerHistory(workerId, histIndex){
 renderAll();
 applyCompanyHeader();
 
-/* Bill Summary print button (now in Bill Summary page) */
-document.getElementById('print-billsummary-btn')?.addEventListener('click', printCurrentBillSummary);
-
+/* ---------------------------
+   Expose some functions for debugging (optional)
+   --------------------------- */
+window._appState = appState;
+window._todaySummary = () => todaySummary;
 </script>
 </body>
 </html>
