@@ -87,7 +87,7 @@
   .hidden {display:none !important}
 
   /* signature CSS: now single authorised signature on RIGHT side */
-  .signature-right{margin-top:26px;display:flex;justify-content:flex-end;align-items:flex-end}
+  .signature-right{margin-top:26px;display:flex;justify-content:flex-end;Align-items:flex-end}
   .signature-line{border-top:1px solid #000;width:40%;padding-top:8px}
   .signature-caption{font-size:12px;color:#333;margin-top:6px;text-align:center}
 </style>
@@ -820,7 +820,7 @@ function showTypedConfirm({message='Type delete to confirm', confirmWord='delete
   cancel.addEventListener('click', cancelHandler);
 }
 
-function showSimpleConfirm({message='Are you sure?', okLabel='OK', onConfirm=null} = {}){
+function showSimpleConfirm({message='Are you sure?', okLabel='OK', onConfirm=null} = {}) {
   const modal = document.getElementById('confirm-modal');
   const txt = document.getElementById('confirm-text');
   const sub = document.getElementById('confirm-subtext');
@@ -849,7 +849,8 @@ function showDeleteConfirm(message, onConfirm){
 
 /* ---------------------------
    PREVIEW: helper to open preview window with Print / Close controls
-   All PDFs now remove Mohajon company/address/phone columns (only Rate/Production/MoneyGiven/Due appear).
+   All PDFs now remove Mohajon company/address/phone columns (only Rate/Production/Bill/MoneyGiven/Due appear),
+   and we added an explicit Bill column (Rate * Production).
    --------------------------- */
 function openPreviewWindow(innerHtml, title = 'Preview'){
   const win = window.open('','_blank');
@@ -939,8 +940,7 @@ function signatureRightHtml(){
 }
 
 /* Build preview HTML for current live bill summary
-   IMPORTANT: Mohajon table in ALL PDFs now excludes Company/Name/Address/Phone columns
-   and only prints Rate / Production / Money Given / Due as requested.
+   IMPORTANT: Mohajon table in PDFs now includes an explicit Bill column (Rate * Production).
 */
 function buildCurrentBillSummaryHtml(){
   const company = appState.company || {};
@@ -977,21 +977,24 @@ function buildCurrentBillSummaryHtml(){
   const income = Number(mo.moneyGiven || 0);
   const net = income - workersSubtotal - expTotal;
 
+  const billAmount = Number(mo.rate || 0) * Number(mo.totalProduction || 0);
+
   const html = `
     <div class="print-page">
       ${companyHeaderHtml(company)}
       <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
 
       <h3>Mohajon</h3>
-      <!-- Reduced columns: Rate / Production / Money Given / Due -->
+      <!-- Columns: Rate / Production / Bill / Money Given / Due -->
       <table>
-        <thead><tr><th style="text-align:right">Rate</th><th style="text-align:right">Production</th><th style="text-align:right">Money Given</th><th style="text-align:right">Due</th></tr></thead>
+        <thead><tr><th style="text-align:right">Rate</th><th style="text-align:right">Production</th><th style="text-align:right">Bill</th><th style="text-align:right">Money Given</th><th style="text-align:right">Due</th></tr></thead>
         <tbody>
           <tr>
             <td style="text-align:right">${formatMoney(mo.rate||0)}</td>
             <td style="text-align:right">${Number(mo.totalProduction||0).toFixed(2)}</td>
+            <td style="text-align:right">${formatMoney(billAmount)}</td>
             <td style="text-align:right">${formatMoney(mo.moneyGiven||0)}</td>
-            <td style="text-align:right">${formatMoney((Number(mo.rate||0)*Number(mo.totalProduction||0)) - Number(mo.moneyGiven||0))}</td>
+            <td style="text-align:right">${formatMoney(billAmount - Number(mo.moneyGiven||0))}</td>
           </tr>
         </tbody>
       </table>
@@ -1047,7 +1050,7 @@ function previewCurrentLiveBillSummary(){
 }
 
 /* Preview saved summary by index (0 is latest)
-   Saved summaries' Mohajon section will use reduced columns as well.
+   Saved summaries' Mohajon section now includes Bill column as well.
 */
 function previewSavedSummary(index){
   const s = appState.summaries && appState.summaries[index];
@@ -1070,6 +1073,8 @@ function previewSavedSummary(index){
 
   const expTotal = (s.expenses.electricity||0) + (s.expenses.maintenance||0) + (s.expenses.other||0);
 
+  const billAmount = Number(s.mohajon.rate || 0) * Number(s.mohajon.totalProduction || 0);
+
   const html = `
     <div class="print-page">
       ${companyHeaderHtml(company)}
@@ -1088,13 +1093,14 @@ function previewSavedSummary(index){
 
       <h4>Mohajon</h4>
       <table>
-        <thead><tr><th style="text-align:right">Rate</th><th style="text-align:right">Production</th><th style="text-align:right">Money Given</th><th style="text-align:right">Due</th></tr></thead>
+        <thead><tr><th style="text-align:right">Rate</th><th style="text-align:right">Production</th><th style="text-align:right">Bill</th><th style="text-align:right">Money Given</th><th style="text-align:right">Due</th></tr></thead>
         <tbody>
           <tr>
             <td style="text-align:right">${formatMoney(s.mohajon.rate||0)}</td>
             <td style="text-align:right">${Number(s.mohajon.totalProduction||0).toFixed(2)}</td>
+            <td style="text-align:right">${formatMoney(billAmount)}</td>
             <td style="text-align:right">${formatMoney(s.mohajon.moneyGiven||0)}</td>
-            <td style="text-align:right">${formatMoney((Number(s.mohajon.rate||0)*Number(s.mohajon.totalProduction||0)) - Number(s.mohajon.moneyGiven||0))}</td>
+            <td style="text-align:right">${formatMoney(billAmount - Number(s.mohajon.moneyGiven||0))}</td>
           </tr>
         </tbody>
       </table>
@@ -1148,7 +1154,7 @@ function previewSavedSummary(index){
 }
 
 /* Preview functions for saved/invoice items (invoice, per-worker, receipt)
-   All PDF versions use reduced Mohajon columns.
+   Invoice preview now includes Mohajon Bill in the small info box.
 */
 function previewInvoiceSummary(invoiceIndex){
   const inv = appState.invoices && appState.invoices[invoiceIndex];
@@ -1170,6 +1176,8 @@ function previewInvoiceSummary(invoiceIndex){
     </tr>
   `).join('');
 
+  const billAmount = Number(mohajon.rate || 0) * Number(mohajon.totalProduction || 0);
+
   const html = `
     <div class="print-page">
       ${companyHeaderHtml(company)}
@@ -1180,8 +1188,8 @@ function previewInvoiceSummary(invoiceIndex){
           <div style="font-size:12px">${escapeHtml(inv.period)}</div>
         </div>
         <div style="text-align:right">
-          <div style="font-size:12px">Mohajon Rate / Production / Given / Due</div>
-          <div style="font-size:12px">${formatMoney(mohajon.rate)} / ${Number(mohajon.totalProduction||0).toFixed(2)} / ${formatMoney(mohajon.moneyGiven||0)} / ${formatMoney((Number(mohajon.rate||0)*Number(mohajon.totalProduction||0)) - Number(mohajon.moneyGiven||0))}</div>
+          <div style="font-size:12px">Mohajon Rate / Production / Bill / Given / Due</div>
+          <div style="font-size:12px">${formatMoney(mohajon.rate)} / ${Number(mohajon.totalProduction||0).toFixed(2)} / ${formatMoney(billAmount)} / ${formatMoney(mohajon.moneyGiven||0)} / ${formatMoney(billAmount - Number(mohajon.moneyGiven||0))}</div>
         </div>
       </div>
 
@@ -1300,7 +1308,7 @@ function previewMohajonReceipt(invoiceIndex){
 
       <div style="height:12px"></div>
 
-      <!-- Reduced Mohajon columns -->
+      <!-- Reduced Mohajon columns (Receipt already included Bill) -->
       <table>
         <thead><tr><th style="text-align:right">Rate</th><th style="text-align:right">Production</th><th style="text-align:right">Bill</th><th style="text-align:right">Money Given</th><th style="text-align:right">Due</th></tr></thead>
         <tbody>
@@ -1369,4 +1377,3 @@ populateSettingsForm();
 </script>
 </body>
 </html>
-
