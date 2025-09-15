@@ -88,7 +88,6 @@
   .signature-line{border-top:1px solid #000;width:40%;padding-top:8px}
   .signature-caption{font-size:12px;color:#333;margin-top:6px;text-align:center}
 
-  /* small auto/manual badge */
   .auto-badge{font-size:12px;color:#0f5132;background:#d1e7dd;padding:6px;border-radius:6px;display:inline-block}
   .manual-badge{font-size:12px;color:#842029;background:#f8d7da;padding:6px;border-radius:6px;display:inline-block}
 </style>
@@ -187,9 +186,9 @@
       </table>
 
       <h3 style="margin-top:12px">Workers Production</h3>
-      <div class="small">Note: Worker production inputs are in <strong>double</strong> units. Bills are calculated as <strong>rate (৳/double) × production (double)</strong>. <em>1 double = 10 pounds</em>.</div>
+      <div class="small"><strong>One double = ten pounds.</strong></div>
       <table>
-        <thead><tr><th>Worker</th><th>Role</th><th>Double (units)</th><th>Rate (৳/double)</th><th>Bill</th><th>Adjustment</th><th>Bonus</th><th>Final Amount</th></tr></thead>
+        <thead><tr><th>Worker</th><th>Role</th><th style="text-align:right">Production (double)</th><th style="text-align:right">Rate (৳/double)</th><th style="text-align:right">Bill</th><th style="text-align:right">Adjustment</th><th style="text-align:right">Bonus</th><th style="text-align:right">Final Amount</th></tr></thead>
         <tbody id="bill-summary-workers-body"></tbody>
         <tfoot>
           <tr>
@@ -257,9 +256,6 @@
           <div class="setting-section-title">Mohajon & Production</div>
           <label>Mohajon — Company Name</label>
           <input type="text" id="setting-mohajon-company" />
-
-          <label style="margin-top:8px">Mohajon Contact Name</label>
-          <input type="text" id="setting-mohajon-name" />
 
           <label style="margin-top:8px">Mohajon Address</label>
           <input type="text" id="setting-mohajon-address" />
@@ -342,7 +338,7 @@
 /* ---------------------------
    App data model + persistence
    --------------------------- */
-const STORAGE_KEY = 'ntm_app_v8_workers_per_double';
+const STORAGE_KEY = 'ntm_app_v9_workers_per_double';
 
 function defaultState() {
   return {
@@ -355,7 +351,6 @@ function defaultState() {
     },
     mohajon: {
       company: 'Bukhari & Co.',
-      name: '',
       address: 'Goshala, Sirajgang',
       phone: '',
       rate: 20,               // ৳/pound default for Mohajon
@@ -395,7 +390,6 @@ function onlyDigits(str=''){ return (String(str||'').match(/\d+/g) || []).join('
 function escapeHtml(str){ if(str===null||str===undefined) return ''; return String(str).replace(/[&<>"']/g, function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];}); }
 
 // Helper: convert doubles to pounds (1 double = 10 pounds)
-// keep for Mohajon auto compute (Mohajon production is in pounds)
 function doublesToPounds(d){ return Number(d || 0) * 10; }
 
 /* ---------------------------
@@ -607,7 +601,6 @@ function populateSettingsForm(){
   // mohajon
   const m = appState.mohajon || {};
   document.getElementById('setting-mohajon-company').value = m.company || '';
-  document.getElementById('setting-mohajon-name').value = m.name || '';
   document.getElementById('setting-mohajon-address').value = m.address || '';
   document.getElementById('setting-mohajon-phone').value = m.phone || '';
   document.getElementById('setting-mohajon-rate').value = Number(m.rate||0) !== 0 ? Number(m.rate).toFixed(2) : '';
@@ -696,7 +689,7 @@ function attachProductionAutoFillListeners(){
     const w1 = Number(w1El ? w1El.value : 0) || 0;
     const w2 = Number(w2El ? w2El.value : 0) || 0;
     const sum = w1 + w2;
-    // Mohajon: only update if it's in auto mode (dataset.auto === 'true')
+    // Mohajon: only update if it's in auto mode (dataset.auto !== 'false')
     if(prodInputEl && prodInputEl.dataset.auto !== 'false'){
       const newMohPounds = (sum * 10);
       prodInputEl.value = Number(newMohPounds || 0).toFixed(2);
@@ -710,12 +703,10 @@ function attachProductionAutoFillListeners(){
       kunInput.dataset.auto = 'true';
     }
     // live update preview on settings page
-    // update internal productionInputs (in-memory) so render previews reflect changes even before saving
     ['w1','w2'].forEach(id=>{
       const el = document.querySelector('.worker-card[data-worker-id="'+id+'"] .ws-pounds');
       if(el) appState.productionInputs[id] = parseFloat(el.value || '0') || 0;
     });
-    // Also update kun internal
     if(kunInput) appState.productionInputs['w5'] = parseFloat(kunInput.value || '0') || 0;
     renderBillSummary();
   }
@@ -724,28 +715,23 @@ function attachProductionAutoFillListeners(){
   ['w1','w2'].forEach(id=>{
     const el = document.querySelector('.worker-card[data-worker-id="'+id+'"] .ws-pounds');
     if(el){
-      // when user types manually into machine inputs, mark that input as manual but still update derived fields
       el.addEventListener('input', ()=>{
-        // update internal productionInputs immediately
         appState.productionInputs[id] = parseFloat(el.value || '0') || 0;
         updateAutoTargets();
       });
-      // if user focuses the field and manually edits, it's okay — we treat it as source input
       el.addEventListener('change', ()=> updateAutoTargets());
     }
   });
 
-  // If user manually edits Mohajon production field -> mark it Manual (don't override anymore)
+  // Mohajon production manual toggle
   if(prodInputEl){
     prodInputEl.addEventListener('input', ()=>{
-      // if user types (not empty), mark as manual so auto updates stop overwriting
       if(prodInputEl.value !== ''){
         prodInputEl.dataset.auto = 'false';
         prodInputEl.dataset.manual = 'true';
         document.getElementById('mohajon-production-badge').className = 'manual-badge';
         document.getElementById('mohajon-production-badge').textContent = 'Manual';
       } else {
-        // empty -> revert to auto mode
         prodInputEl.dataset.auto = 'true';
         prodInputEl.dataset.manual = 'false';
         document.getElementById('mohajon-production-badge').className = 'auto-badge';
@@ -754,7 +740,7 @@ function attachProductionAutoFillListeners(){
     });
   }
 
-  // Kun input manual toggle: if user types into Kun, mark manual so it does not get auto-overwritten
+  // Kun input manual toggle
   if(kunInput){
     kunInput.addEventListener('input', ()=>{
       if(kunInput.value !== ''){
@@ -762,7 +748,6 @@ function attachProductionAutoFillListeners(){
       } else {
         kunInput.dataset.auto = 'true';
       }
-      // also update appState productionInputs live
       appState.productionInputs['w5'] = parseFloat(kunInput.value||'0') || 0;
       renderBillSummary();
     });
@@ -789,7 +774,6 @@ function performSaveData(){
   // Mohajon
   appState.mohajon = appState.mohajon || {};
   appState.mohajon.company = document.getElementById('setting-mohajon-company').value || '';
-  appState.mohajon.name = document.getElementById('setting-mohajon-name').value || '';
   appState.mohajon.address = document.getElementById('setting-mohajon-address').value || '';
   appState.mohajon.phone = document.getElementById('setting-mohajon-phone').value || '';
   appState.mohajon.rate = parseFloat(document.getElementById('setting-mohajon-rate').value) || 0;
@@ -823,10 +807,8 @@ function performSaveData(){
       w.rate = rate; w.adjustment = adjustment; w.bonus = bonus;
     }
     appState.productionInputs[id] = doubles;
-    // if user manually changed this input, mark data-auto false
     const inputEl = card.querySelector('.ws-pounds');
     if(inputEl && inputEl.dataset.auto === 'false'){
-      // user had manually edited; keep manual mark
       inputEl.dataset.auto = 'false';
     }
   });
@@ -1007,8 +989,8 @@ function showDeleteConfirm(message, onConfirm){
 
 /* ---------------------------
    PREVIEW & printing
-   - removed pounds columns for workers everywhere
-   - worker bill computed as rate * doubles
+   - replaced "Double" -> "Production (double)" where applicable
+   - sentence changed to "One double = ten pounds."
    --------------------------- */
 function openPreviewWindow(innerHtml, title = 'Preview'){
   const win = window.open('','_blank');
@@ -1156,9 +1138,9 @@ function buildCurrentBillSummaryHtml(){
       </table>
 
       <h3>Workers</h3>
-      <div class="small">Worker production shown in doubles (1 double = 10 lbs). Bills calculated as rate × double.</div>
+      <div class="small"><strong>One double = ten pounds.</strong></div>
       <table>
-        <thead><tr><th>Worker</th><th>Role</th><th>Double</th><th>Rate</th><th>Bill</th><th>Adjustment</th><th>Bonus</th><th>Final Amount</th></tr></thead>
+        <thead><tr><th>Worker</th><th>Role</th><th style="text-align:right">Production (double)</th><th>Rate</th><th>Bill</th><th>Adjustment</th><th>Bonus</th><th>Final Amount</th></tr></thead>
         <tbody>${workersRows}</tbody>
         <tfoot>
           <tr>
@@ -1261,9 +1243,9 @@ function previewSavedSummary(index){
       </table>
 
       <h4>Workers</h4>
-      <div class="small">Worker production shown in <strong>doubles</strong>. Bills calculated as <strong>rate × doubles</strong>.</div>
+      <div class="small">Worker production shown as <strong>doubles</strong>. <strong>One double = ten pounds.</strong></div>
       <table>
-        <thead><tr><th>Worker</th><th>Double</th><th>Rate</th><th>Earnings</th><th>Adjustment</th><th>Bonus</th><th>Final</th></tr></thead>
+        <thead><tr><th>Worker</th><th style="text-align:right">Production (double)</th><th style="text-align:right">Rate</th><th style="text-align:right">Earnings</th><th style="text-align:right">Adjustment</th><th style="text-align:right">Bonus</th><th style="text-align:right">Final</th></tr></thead>
         <tbody>${workersHtml}</tbody>
         <tfoot>
           <tr>
@@ -1309,7 +1291,7 @@ function previewSavedSummary(index){
   openPreviewWindow(html, 'Saved Summary '+s.id);
 }
 
-/* Preview invoice summary (Workers list) - removed pounds column */
+/* Preview invoice summary (Workers list) - "Double" header renamed to "Production (double)" */
 function previewInvoiceSummary(invoiceIndex){
   const inv = appState.invoices && appState.invoices[invoiceIndex];
   if(!inv) return alert('Invoice not found.');
@@ -1347,7 +1329,7 @@ function previewInvoiceSummary(invoiceIndex){
 
       <table>
         <thead><tr>
-          <th>Worker</th><th>Role</th><th>Double</th><th>Rate</th><th>Bill</th><th>Adjustment</th><th>Total</th>
+          <th>Worker</th><th>Role</th><th style="text-align:right">Production (double)</th><th>Rate</th><th>Bill</th><th>Adjustment</th><th>Total</th>
         </tr></thead>
         <tbody>${workerRows}</tbody>
         <tfoot>
@@ -1364,7 +1346,7 @@ function previewInvoiceSummary(invoiceIndex){
   openPreviewWindow(html, 'Invoice '+inv.id);
 }
 
-/* Per-worker pages - show doubles (no pounds column) */
+/* Per-worker pages - header uses "Production (double)" */
 function previewAllWorkersForInvoice(invoiceIndex){
   const inv = appState.invoices && appState.invoices[invoiceIndex];
   if(!inv) return alert('Invoice not found.');
@@ -1390,7 +1372,7 @@ function previewAllWorkersForInvoice(invoiceIndex){
         <div style="height:12px"></div>
 
         <table>
-          <thead><tr><th>Designation</th><th>Rate (৳/double)</th><th>Production (double)</th><th>Bill</th></tr></thead>
+          <thead><tr><th>Designation</th><th>Rate (৳/double)</th><th style="text-align:right">Production (double)</th><th>Bill</th></tr></thead>
           <tbody>
             <tr>
               <td>${escapeHtml(w.designation || '')}</td>
@@ -1422,7 +1404,7 @@ function previewAllWorkersForInvoice(invoiceIndex){
   openPreviewWindow(pages, 'Per-Worker Invoices (Combined)');
 }
 
-/* Mohajon receipt unchanged except workers' pounds removed; Mohajon production is pounds */
+/* Mohajon receipt unchanged except labels; Mohajon production is pounds */
 function previewMohajonReceipt(invoiceIndex){
   const inv = appState.invoices && appState.invoices[invoiceIndex];
   if(!inv) return alert('Invoice not found.');
@@ -1444,7 +1426,7 @@ function previewMohajonReceipt(invoiceIndex){
       <div style="display:flex;gap:24px;flex-wrap:wrap">
         <div style="flex:1;min-width:180px">
           <strong>Paid By (Mohajon)</strong><br/>
-          <div style="margin-top:6px">${escapeHtml(mo.company||'')} ${mo.name ? ('— '+escapeHtml(mo.name)) : ''}</div>
+          <div style="margin-top:6px">${escapeHtml(mo.company||'')}</div>
           <div style="font-size:12px;margin-top:6px">${escapeHtml(mo.address||'')}</div>
           <div style="font-size:12px">${escapeHtml(mo.phone||'')}</div>
         </div>
