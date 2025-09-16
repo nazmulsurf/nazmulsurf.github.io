@@ -121,6 +121,10 @@
     z-index: 50;
   }
   
+  .calculator-modal.active {
+    display: flex;
+  }
+  
   .calculator-modal-content {
     background: #fff;
     border-radius: 12px;
@@ -842,7 +846,7 @@ function renderWeeklyInvoicesTable(){
   const wrapper = document.getElementById('weekly-invoices-wrapper');
   const invoices = appState.invoices || [];
   if(!invoices.length){
-    wrapper.classList.add('hidden');
+  wrapper.classList.add('hidden');
     return;
   }
   wrapper.classList.remove('hidden');
@@ -986,7 +990,7 @@ function populateWorkerSettingsList(){
       <input type="number" class="ws-rate" placeholder="Rate (৳/double)" step="0.01" min="0" value="${escapeHtml(rateValue)}" />
       <input type="number" class="ws-pounds" placeholder="Production (double units)" step="0.01" min="0" value="${escapeHtml(doublesValue)}" data-auto="true" />
       <input type="number" class="ws-adjust" placeholder="Adjustment (e.g. 5.00)" step="0.01" value="${escapeHtml(adjustValue)}" />
-      <input type="number" class="ws-bonus" placeholder="Bonus (e.g. 10.00)" step="0.01" value="${escapeHtml(bonusValue)}" />
+      <input type="number" class="ws-bonus" placeholder="Bonus (e.e. 10.00)" step="0.01" value="${escapeHtml(bonusValue)}" />
     `;
 
     card.appendChild(rowTop);
@@ -1473,35 +1477,35 @@ function buildCurrentBillSummaryHtml(){
       </table>
 
       <h3>Expenses</h3>
-      <table>
-        <thead><tr><th>Electricity</th><th>Maintenance</th><th>Other</th><th>Total</th></tr></thead>
-        <tbody>
-          <tr>
-            <td style="text-align:right">${formatMoney(expElec)}</td>
-            <td style="text-align:right">${formatMoney(expMaint)}</td>
-            <td style="text-align:right">${formatMoney(expOther)}</td>
-            <td style="text-align:right">${formatMoney(expTotal)}</td>
-          </tr>
-        </tbody>
-      </table>
+  <table>
+    <thead><tr><th>Electricity</th><th>Maintenance</th><th>Other</th><th>Total</th></tr></thead>
+    <tbody>
+      <tr>
+        <td style="text-align:right">${formatMoney(expElec)}</td>
+        <td style="text-align:right">${formatMoney(expMaint)}</td>
+        <td style="text-align:right">${formatMoney(expOther)}</td>
+        <td style="text-align:right">${formatMoney(expTotal)}</td>
+      </tr>
+    </tbody>
+  </table>
 
-      <h3>Summary</h3>
-      <table>
-        <thead><tr><th>Income (Money Given)</th><th>Payments</th><th>Expenses</th><th>Net</th></tr></thead>
-        <tbody>
-          <tr>
-            <td style="text-align:right">${formatMoney(income)}</td>
-            <td style="text-align:right">${formatMoney(workersSubtotal)}</td>
-            <td style="text-align:right">${formatMoney(expTotal)}</td>
-            <td style="text-align:right">${formatMoney(net)}</td>
-          </tr>
-        </tbody>
-      </table>
+  <h3>Summary</h3>
+  <table>
+    <thead><tr><th>Income (Money Given)</th><th>Payments</th><th>Expenses</th><th>Net</th></tr></thead>
+    <tbody>
+      <tr>
+        <td style="text-align:right">${formatMoney(income)}</td>
+        <td style="text-align:right">${formatMoney(workersSubtotal)}</td>
+        <td style="text-align:right">${formatMoney(expTotal)}</td>
+        <td style="text-align:right">${formatMoney(net)}</td>
+      </tr>
+    </tbody>
+  </table>
 
-      ${signatureRightHtml()}
-    </div>
-  `;
-  return html;
+  ${signatureRightHtml()}
+</div>
+`;
+return html;
 }
 
 /* Preview current live bill summary */
@@ -1822,10 +1826,13 @@ function previewSummaryForInvoice(invoiceIndex){
 }
 
 /* ---------------------------
-   Calculator Functionality
+   Calculator Functionality - FIXED VERSION
    --------------------------- */
 function initCalculator() {
   // DOM Elements
+  const floatBtn = document.getElementById('calculator-float-btn');
+  const calculatorModal = document.getElementById('calculator-modal');
+  const closeCalculator = document.getElementById('calculator-close');
   const numbers = document.querySelectorAll('.calculator-number');
   const operators = document.querySelectorAll('.calculator-operator');
   const inputAnswer = document.getElementById('calculator-inputAnswer');
@@ -1834,24 +1841,36 @@ function initCalculator() {
   const deleteInputs = document.getElementById('calculator-delete');
   const historyPanel = document.getElementById('calculator-historyPanel');
   const historyList = document.getElementById('calculator-historyList');
-  const showHistoryBtn = document.getElementById('showHistory');
   const closeHistoryBtn = document.getElementById('calculator-closeHistory');
   const percentBtn = document.getElementById('calculator-percent');
+  
+  // Show calculator modal when floating button is clicked
+  floatBtn.addEventListener('click', function() {
+    calculatorModal.classList.add('active');
+  });
+  
+  // Close calculator modal
+  closeCalculator.addEventListener('click', function() {
+    calculatorModal.classList.remove('active');
+  });
+  
+  // Close history panel
+  closeHistoryBtn.addEventListener('click', function() {
+    historyPanel.classList.remove('active');
+  });
+  
+  // Close modal when clicking outside
+  calculatorModal.addEventListener('click', function(event) {
+    if (event.target === calculatorModal) {
+      calculatorModal.classList.remove('active');
+    }
+  });
   
   // State variables
   let operand1 = null;
   let operator = null;
   let calculationHistory = [];
   let lastCalculation = false;
-  
-  // Toggle history panel
-  showHistoryBtn.addEventListener('click', function() {
-    historyPanel.classList.add('active');
-  });
-  
-  closeHistoryBtn.addEventListener('click', function() {
-    historyPanel.classList.remove('active');
-  });
   
   // Number buttons
   numbers.forEach(number => {
@@ -2006,41 +2025,6 @@ function initCalculator() {
     
     historyList.prepend(historyItem);
   }
-  
-  // Close history when clicking outside
-  document.addEventListener('click', function(event) {
-    if (historyPanel.classList.contains('active') && 
-        !historyPanel.contains(event.target) && 
-        event.target !== showHistoryBtn) {
-      historyPanel.classList.remove('active');
-    }
-  });
-}
-
-/* ---------------------------
-   Floating Calculator Button & Modal
-   --------------------------- */
-function initFloatingCalculator() {
-  const floatBtn = document.getElementById('calculator-float-btn');
-  const calculatorModal = document.getElementById('calculator-modal');
-  const closeCalculator = document.getElementById('calculator-close');
-  
-  // Show calculator modal
-  floatBtn.addEventListener('click', function() {
-    calculatorModal.style.display = 'flex';
-  });
-  
-  // Close calculator modal
-  closeCalculator.addEventListener('click', function() {
-    calculatorModal.style.display = 'none';
-  });
-  
-  // Close modal when clicking outside
-  calculatorModal.addEventListener('click', function(event) {
-    if (event.target === calculatorModal) {
-      calculatorModal.style.display = 'none';
-    }
-  });
 }
 
 /* ---------------------------
@@ -2050,7 +2034,6 @@ renderAll();
 applyCompanyHeader();
 populateSettingsForm();
 initCalculator();
-initFloatingCalculator();
 
 </script>
 </body>
