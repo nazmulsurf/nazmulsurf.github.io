@@ -90,6 +90,214 @@
 
   .auto-badge{font-size:12px;color:#0f5132;background:#d1e7dd;padding:6px;border-radius:6px;display:inline-block}
   .manual-badge{font-size:12px;color:#842029;background:#f8d7da;padding:6px;border-radius:6px;display:inline-block}
+  
+  /* Calculator Styles */
+  .calculator-container {
+    background-color: #fff;
+    border-radius: var(--radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid #eee;
+    margin-top: 20px;
+  }
+  
+  .calculator-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    background-color: var(--panel);
+  }
+  
+  .calculator-title {
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 600;
+  }
+  
+  .history-toggle {
+    background: none;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 18px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+  }
+  
+  .history-toggle:hover {
+    background-color: #eee;
+  }
+  
+  .calculator-display {
+    padding: 15px;
+    text-align: right;
+    min-height: 90px;
+    background-color: #fff;
+  }
+  
+  .calculator-equation {
+    font-size: 16px;
+    color: var(--muted);
+    min-height: 24px;
+    margin-bottom: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .calculator-inputAnswer {
+    font-size: 32px;
+    font-weight: 400;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .calculator-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    padding: 12px;
+    background-color: #fff;
+  }
+  
+  .calculator-btn {
+    border: none;
+    border-radius: 6px;
+    height: 50px;
+    font-size: 18px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: #f7f7f7;
+    color: var(--text);
+  }
+  
+  .calculator-btn:hover {
+    background-color: #e9e9e9;
+  }
+  
+  .calculator-btn:active {
+    transform: scale(0.97);
+  }
+  
+  .calculator-number {
+    background-color: #f7f7f7;
+  }
+  
+  .calculator-operator {
+    background-color: #e9e9e9;
+    color: var(--text);
+  }
+  
+  .calculator-equals {
+    background-color: var(--accent);
+    color: #fff;
+  }
+  
+  .calculator-special {
+    background-color: #e9e9e9;
+    color: var(--text);
+  }
+  
+  .calculator-history-panel {
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 280px;
+    background-color: #fff;
+    border-left: 1px solid #eee;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 100;
+    padding: 20px;
+    overflow-y: auto;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .calculator-history-panel.active {
+    transform: translateX(0);
+  }
+  
+  .calculator-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .calculator-history-title {
+    font-size: 18px;
+    color: var(--text);
+    font-weight: 600;
+  }
+  
+  .calculator-close-history {
+    background: none;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 22px;
+  }
+  
+  .calculator-history-list {
+    color: var(--text);
+  }
+  
+  .calculator-history-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+  }
+  
+  .calculator-history-equation {
+    color: var(--muted);
+    font-size: 13px;
+  }
+  
+  .calculator-history-result {
+    font-weight: 500;
+    text-align: right;
+    margin-top: 4px;
+    color: var(--text);
+  }
+  
+  .calculator-empty-history {
+    text-align: center;
+    color: var(--muted);
+    margin-top: 30px;
+    font-style: italic;
+  }
+  
+  @media (max-width: 480px) {
+    .calculator-inputAnswer {
+      font-size: 28px;
+    }
+    
+    .calculator-buttons {
+      gap: 5px;
+      padding: 10px;
+    }
+    
+    .calculator-btn {
+      height: 45px;
+      font-size: 16px;
+    }
+    
+    .calculator-history-panel {
+      width: 85%;
+    }
+  }
 </style>
 </head>
 <body>
@@ -149,6 +357,49 @@
             <thead><tr><th>Invoice #</th><th>Date</th><th>Period</th><th>Total</th><th>Actions</th></tr></thead>
             <tbody></tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calculator Section -->
+    <div class="card">
+      <h3 style="margin-top:0">Calculator</h3>
+      <div class="calculator-container">
+        <div class="calculator-header">
+          <div class="calculator-title">Calculator</div>
+          <button class="history-toggle" id="showHistory">≡</button>
+        </div>
+        
+        <div class="calculator-display">
+          <div class="calculator-equation" id="calculator-equation"></div>
+          <div class="calculator-inputAnswer" id="calculator-inputAnswer">0</div>
+        </div>
+        
+        <div class="calculator-buttons">
+          <button class="calculator-btn calculator-special" id="calculator-allClear">AC</button>
+          <button class="calculator-btn calculator-special" id="calculator-clear">C</button>
+          <button class="calculator-btn calculator-special" id="calculator-delete">⌫</button>
+          <button class="calculator-btn calculator-operator">÷</button>
+          
+          <button class="calculator-btn calculator-number" id="calculator-seven">7</button>
+          <button class="calculator-btn calculator-number" id="calculator-eight">8</button>
+          <button class="calculator-btn calculator-number" id="calculator-nine">9</button>
+          <button class="calculator-btn calculator-operator">×</button>
+          
+          <button class="calculator-btn calculator-number" id="calculator-four">4</button>
+          <button class="calculator-btn calculator-number" id="calculator-five">5</button>
+          <button class="calculator-btn calculator-number" id="calculator-six">6</button>
+          <button class="calculator-btn calculator-operator">-</button>
+          
+          <button class="calculator-btn calculator-number" id="calculator-one">1</button>
+          <button class="calculator-btn calculator-number" id="calculator-two">2</button>
+          <button class="calculator-btn calculator-number" id="calculator-three">3</button>
+          <button class="calculator-btn calculator-operator">+</button>
+          
+          <button class="calculator-btn calculator-number" id="calculator-positiveNegative">±</button>
+          <button class="calculator-btn calculator-number" id="calculator-zero">0</button>
+          <button class="calculator-btn calculator-number" id="calculator-decimal">.</button>
+          <button class="calculator-btn calculator-equals" id="calculator-calculate">=</button>
         </div>
       </div>
     </div>
@@ -327,6 +578,17 @@
       <button class="btn secondary" id="confirm-cancel">Cancel</button>
       <button class="btn" id="confirm-ok">OK</button>
     </div>
+  </div>
+</div>
+
+<!-- Calculator History Panel -->
+<div class="calculator-history-panel" id="calculator-historyPanel">
+  <div class="calculator-history-header">
+    <div class="calculator-history-title">Calculation History</div>
+    <button class="calculator-close-history" id="calculator-closeHistory">×</button>
+  </div>
+  <div class="calculator-history-list" id="calculator-historyList">
+    <div class="calculator-empty-history">No calculations yet</div>
   </div>
 </div>
 
@@ -1496,15 +1758,212 @@ function previewSummaryForInvoice(invoiceIndex){
 }
 
 /* ---------------------------
+   Calculator Functionality
+   --------------------------- */
+function initCalculator() {
+  // DOM Elements
+  const numbers = document.querySelectorAll('.calculator-number');
+  const operators = document.querySelectorAll('.calculator-operator');
+  const inputAnswer = document.getElementById('calculator-inputAnswer');
+  const equation = document.getElementById('calculator-equation');
+  const clear = document.getElementById('calculator-clear');
+  const deleteInputs = document.getElementById('calculator-delete');
+  const historyPanel = document.getElementById('calculator-historyPanel');
+  const historyList = document.getElementById('calculator-historyList');
+  const showHistoryBtn = document.getElementById('showHistory');
+  const closeHistoryBtn = document.getElementById('calculator-closeHistory');
+  
+  // State variables
+  let operand1 = null;
+  let operator = null;
+  let calculationHistory = [];
+  let lastCalculation = false;
+  
+  // Toggle history panel
+  showHistoryBtn.addEventListener('click', function() {
+    historyPanel.classList.add('active');
+  });
+  
+  closeHistoryBtn.addEventListener('click', function() {
+    historyPanel.classList.remove('active');
+  });
+  
+  // Number buttons
+  numbers.forEach(number => {
+    number.addEventListener('click', function() {
+      if (lastCalculation) {
+        inputAnswer.textContent = '0';
+        equation.textContent = '';
+        lastCalculation = false;
+      }
+      
+      const inputValue = inputAnswer.textContent;
+      
+      if (inputValue === '0' || equation.textContent.endsWith('=')) {
+        inputAnswer.textContent = number.id === 'calculator-decimal' ? '0.' : number.textContent;
+        if (equation.textContent.endsWith('=')) equation.textContent = '';
+      } else {
+        if (number.id === 'calculator-decimal' && inputValue.includes('.')) return;
+        inputAnswer.textContent += number.textContent;
+      }
+    });
+  });
+  
+  // Clear input
+  clear.addEventListener('click', function() {
+    inputAnswer.textContent = '0';
+    equation.textContent = '';
+    operand1 = null;
+    operator = null;
+    lastCalculation = false;
+  });
+  
+  // All clear
+  document.getElementById('calculator-allClear').addEventListener('click', function() {
+    inputAnswer.textContent = '0';
+    equation.textContent = '';
+    operand1 = null;
+    operator = null;
+    calculationHistory = [];
+    historyList.innerHTML = '<div class="calculator-empty-history">No calculations yet</div>';
+    lastCalculation = false;
+  });
+  
+  // Delete last digit
+  deleteInputs.addEventListener('click', function() {
+    if (lastCalculation) {
+      inputAnswer.textContent = '0';
+      equation.textContent = '';
+      lastCalculation = false;
+      return;
+    }
+    
+    let inputValue = inputAnswer.textContent;
+    if (inputValue.length > 1) {
+      inputAnswer.textContent = inputValue.slice(0, -1);
+    } else {
+      inputAnswer.textContent = '0';
+    }
+  });
+  
+  // Change sign
+  document.getElementById('calculator-positiveNegative').addEventListener('click', function() {
+    const currentText = inputAnswer.textContent;
+    if (currentText !== '0') {
+      if (currentText.startsWith('-')) {
+        inputAnswer.textContent = currentText.slice(1);
+      } else {
+        inputAnswer.textContent = '-' + currentText;
+      }
+    }
+  });
+  
+  // Operators
+  operators.forEach(operatorButton => {
+    operatorButton.addEventListener('click', function() {
+      if (lastCalculation) {
+        operand1 = parseFloat(inputAnswer.textContent);
+        equation.textContent = operand1 + ' ' + operatorButton.textContent;
+        inputAnswer.textContent = '0';
+        operator = operatorButton.textContent;
+        lastCalculation = false;
+        return;
+      }
+      
+      if (operator !== null && !lastCalculation) {
+        performCalculation();
+      }
+      
+      operand1 = parseFloat(inputAnswer.textContent);
+      operator = operatorButton.textContent;
+      equation.textContent = operand1 + ' ' + operator;
+      inputAnswer.textContent = '0';
+    });
+  });
+  
+  // Calculation
+  document.getElementById('calculator-calculate').addEventListener('click', function() {
+    if (operator !== null && operand1 !== null) {
+      performCalculation();
+    }
+  });
+  
+  // Perform calculation
+  function performCalculation() {
+    const inputValue = parseFloat(inputAnswer.textContent);
+    
+    if (operand1 !== null && operator !== null) {
+      let result;
+      
+      switch (operator) {
+        case '+':
+          result = operand1 + inputValue;
+          break;
+        case '-':
+          result = operand1 - inputValue;
+          break;
+        case '×':
+          result = operand1 * inputValue;
+          break;
+        case '÷':
+          result = operand1 / inputValue;
+          break;
+        default:
+          break;
+      }
+      
+      equation.textContent = operand1 + ' ' + operator + ' ' + inputValue + ' =';
+      
+      if (result % 1 === 0) {
+        inputAnswer.textContent = result;
+      } else {
+        inputAnswer.textContent = result.toFixed(6);
+      }
+      
+      addToHistory(equation.textContent, inputAnswer.textContent);
+      
+      operand1 = null;
+      operator = null;
+      lastCalculation = true;
+    }
+  }
+  
+  // Add to history function
+  function addToHistory(equation, result) {
+    calculationHistory.push({equation, result});
+    
+    if (historyList.querySelector('.calculator-empty-history')) {
+      historyList.innerHTML = '';
+    }
+    
+    const historyItem = document.createElement('div');
+    historyItem.className = 'calculator-history-item';
+    historyItem.innerHTML = `
+      <div class="calculator-history-equation">${equation}</div>
+      <div class="calculator-history-result">${result}</div>
+    `;
+    
+    historyList.prepend(historyItem);
+  }
+  
+  // Close history when clicking outside
+  document.addEventListener('click', function(event) {
+    if (historyPanel.classList.contains('active') && 
+        !historyPanel.contains(event.target) && 
+        event.target !== showHistoryBtn) {
+      historyPanel.classList.remove('active');
+    }
+  });
+}
+
+/* ---------------------------
    Startup
    --------------------------- */
 renderAll();
 applyCompanyHeader();
 populateSettingsForm();
+initCalculator();
 
 </script>
 </body>
 </html>
-
-
-
