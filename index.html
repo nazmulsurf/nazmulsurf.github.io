@@ -91,6 +91,67 @@
   .auto-badge{font-size:12px;color:#0f5132;background:#d1e7dd;padding:6px;border-radius:6px;display:inline-block}
   .manual-badge{font-size:12px;color:#842029;background:#f8d7da;padding:6px;border-radius:6px;display:inline-block}
   
+  /* Floating Calculator Button */
+  .calculator-float-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    z-index: 30;
+    font-size: 24px;
+  }
+  
+  /* Calculator Modal Styles */
+  .calculator-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  
+  .calculator-modal-content {
+    background: #fff;
+    border-radius: 12px;
+    width: 96%;
+    max-width: 360px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    overflow: hidden;
+  }
+  
+  .calculator-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+    background-color: var(--panel);
+  }
+  
+  .calculator-modal-title {
+    font-weight: 600;
+    font-size: 16px;
+  }
+  
+  .calculator-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--text);
+  }
+  
   /* Calculator Styles */
   .calculator-container {
     background-color: #fff;
@@ -99,7 +160,6 @@
     width: 100%;
     overflow: hidden;
     border: 1px solid #eee;
-    margin-top: 20px;
   }
   
   .calculator-header {
@@ -361,49 +421,6 @@
       </div>
     </div>
 
-    <!-- Calculator Section -->
-    <div class="card">
-      <h3 style="margin-top:0">Calculator</h3>
-      <div class="calculator-container">
-        <div class="calculator-header">
-          <div class="calculator-title">Calculator</div>
-          <button class="history-toggle" id="showHistory">≡</button>
-        </div>
-        
-        <div class="calculator-display">
-          <div class="calculator-equation" id="calculator-equation"></div>
-          <div class="calculator-inputAnswer" id="calculator-inputAnswer">0</div>
-        </div>
-        
-        <div class="calculator-buttons">
-          <button class="calculator-btn calculator-special" id="calculator-allClear">AC</button>
-          <button class="calculator-btn calculator-special" id="calculator-clear">C</button>
-          <button class="calculator-btn calculator-special" id="calculator-delete">⌫</button>
-          <button class="calculator-btn calculator-operator">÷</button>
-          
-          <button class="calculator-btn calculator-number" id="calculator-seven">7</button>
-          <button class="calculator-btn calculator-number" id="calculator-eight">8</button>
-          <button class="calculator-btn calculator-number" id="calculator-nine">9</button>
-          <button class="calculator-btn calculator-operator">×</button>
-          
-          <button class="calculator-btn calculator-number" id="calculator-four">4</button>
-          <button class="calculator-btn calculator-number" id="calculator-five">5</button>
-          <button class="calculator-btn calculator-number" id="calculator-six">6</button>
-          <button class="calculator-btn calculator-operator">-</button>
-          
-          <button class="calculator-btn calculator-number" id="calculator-one">1</button>
-          <button class="calculator-btn calculator-number" id="calculator-two">2</button>
-          <button class="calculator-btn calculator-number" id="calculator-three">3</button>
-          <button class="calculator-btn calculator-operator">+</button>
-          
-          <button class="calculator-btn calculator-number" id="calculator-positiveNegative">±</button>
-          <button class="calculator-btn calculator-number" id="calculator-zero">0</button>
-          <button class="calculator-btn calculator-number" id="calculator-decimal">.</button>
-          <button class="calculator-btn calculator-equals" id="calculator-calculate">=</button>
-        </div>
-      </div>
-    </div>
-
   </section>
 
   <!-- BILL SUMMARY -->
@@ -568,15 +585,49 @@
 
 </div>
 
-<!-- Modal: typed-delete / generic confirm -->
-<div class="modal" id="confirm-modal">
-  <div class="box">
-    <div id="confirm-text" style="font-weight:700">Confirm action</div>
-    <div id="confirm-subtext" class="muted-small" style="margin-top:8px">Type <strong>delete</strong> below to confirm.</div>
-    <input type="text" id="confirm-input" placeholder="Type delete to confirm" style="margin-top:12px;padding:8px;border-radius:6px;border:1px solid #ddd;width:100%" />
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
-      <button class="btn secondary" id="confirm-cancel">Cancel</button>
-      <button class="btn" id="confirm-ok">OK</button>
+<!-- Floating Calculator Button -->
+<div class="calculator-float-btn" id="calculator-float-btn">🧮</div>
+
+<!-- Calculator Modal -->
+<div class="calculator-modal" id="calculator-modal">
+  <div class="calculator-modal-content">
+    <div class="calculator-modal-header">
+      <div class="calculator-modal-title">Calculator</div>
+      <button class="calculator-close" id="calculator-close">×</button>
+    </div>
+    
+    <div class="calculator-container">
+      <div class="calculator-display">
+        <div class="calculator-equation" id="calculator-equation"></div>
+        <div class="calculator-inputAnswer" id="calculator-inputAnswer">0</div>
+      </div>
+      
+      <div class="calculator-buttons">
+        <button class="calculator-btn calculator-special" id="calculator-allClear">AC</button>
+        <button class="calculator-btn calculator-special" id="calculator-clear">C</button>
+        <button class="calculator-btn calculator-special" id="calculator-delete">⌫</button>
+        <button class="calculator-btn calculator-operator">÷</button>
+        
+        <button class="calculator-btn calculator-number" id="calculator-seven">7</button>
+        <button class="calculator-btn calculator-number" id="calculator-eight">8</button>
+        <button class="calculator-btn calculator-number" id="calculator-nine">9</button>
+        <button class="calculator-btn calculator-operator">×</button>
+        
+        <button class="calculator-btn calculator-number" id="calculator-four">4</button>
+        <button class="calculator-btn calculator-number" id="calculator-five">5</button>
+        <button class="calculator-btn calculator-number" id="calculator-six">6</button>
+        <button class="calculator-btn calculator-operator">-</button>
+        
+        <button class="calculator-btn calculator-number" id="calculator-one">1</button>
+        <button class="calculator-btn calculator-number" id="calculator-two">2</button>
+        <button class="calculator-btn calculator-number" id="calculator-three">3</button>
+        <button class="calculator-btn calculator-operator">+</button>
+        
+        <button class="calculator-btn calculator-special" id="calculator-percent">%</button>
+        <button class="calculator-btn calculator-number" id="calculator-zero">0</button>
+        <button class="calculator-btn calculator-number" id="calculator-decimal">.</button>
+        <button class="calculator-btn calculator-equals" id="calculator-calculate">=</button>
+      </div>
     </div>
   </div>
 </div>
@@ -589,6 +640,19 @@
   </div>
   <div class="calculator-history-list" id="calculator-historyList">
     <div class="calculator-empty-history">No calculations yet</div>
+  </div>
+</div>
+
+<!-- Modal: typed-delete / generic confirm -->
+<div class="modal" id="confirm-modal">
+  <div class="box">
+    <div id="confirm-text" style="font-weight:700">Confirm action</div>
+    <div id="confirm-subtext" class="muted-small" style="margin-top:8px">Type <strong>delete</strong> below to confirm.</div>
+    <input type="text" id="confirm-input" placeholder="Type delete to confirm" style="margin-top:12px;padding:8px;border-radius:6px;border:1px solid #ddd;width:100%" />
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn secondary" id="confirm-cancel">Cancel</button>
+      <button class="btn" id="confirm-ok">OK</button>
+    </div>
   </div>
 </div>
 
@@ -1772,6 +1836,7 @@ function initCalculator() {
   const historyList = document.getElementById('calculator-historyList');
   const showHistoryBtn = document.getElementById('showHistory');
   const closeHistoryBtn = document.getElementById('calculator-closeHistory');
+  const percentBtn = document.getElementById('calculator-percent');
   
   // State variables
   let operand1 = null;
@@ -1846,15 +1911,11 @@ function initCalculator() {
     }
   });
   
-  // Change sign
-  document.getElementById('calculator-positiveNegative').addEventListener('click', function() {
-    const currentText = inputAnswer.textContent;
-    if (currentText !== '0') {
-      if (currentText.startsWith('-')) {
-        inputAnswer.textContent = currentText.slice(1);
-      } else {
-        inputAnswer.textContent = '-' + currentText;
-      }
+  // Percentage button
+  percentBtn.addEventListener('click', function() {
+    const currentValue = parseFloat(inputAnswer.textContent);
+    if (!isNaN(currentValue)) {
+      inputAnswer.textContent = (currentValue / 100).toString();
     }
   });
   
@@ -1957,12 +2018,39 @@ function initCalculator() {
 }
 
 /* ---------------------------
+   Floating Calculator Button & Modal
+   --------------------------- */
+function initFloatingCalculator() {
+  const floatBtn = document.getElementById('calculator-float-btn');
+  const calculatorModal = document.getElementById('calculator-modal');
+  const closeCalculator = document.getElementById('calculator-close');
+  
+  // Show calculator modal
+  floatBtn.addEventListener('click', function() {
+    calculatorModal.style.display = 'flex';
+  });
+  
+  // Close calculator modal
+  closeCalculator.addEventListener('click', function() {
+    calculatorModal.style.display = 'none';
+  });
+  
+  // Close modal when clicking outside
+  calculatorModal.addEventListener('click', function(event) {
+    if (event.target === calculatorModal) {
+      calculatorModal.style.display = 'none';
+    }
+  });
+}
+
+/* ---------------------------
    Startup
    --------------------------- */
 renderAll();
 applyCompanyHeader();
 populateSettingsForm();
 initCalculator();
+initFloatingCalculator();
 
 </script>
 </body>
