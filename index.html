@@ -1,0 +1,2723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Nazmul Twisting Mill</title>
+<link id="favico" rel="icon" href="assets/favicon.png" type="image/png" />
+<style>
+  :root{
+    --bg: #ffffff; --panel:#f7f7f7; --text:#0b0b0b; --muted:#6b6b6b; --accent:#000;
+    --radius:10px; --btn-radius:8px;
+    --red: #dc2626; --green: #059669;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text);padding:18px}
+  .container{max-width:1150px;margin:0 auto}
+  header{background:var(--accent);color:#fff;padding:18px;border-radius:var(--radius);margin-bottom:16px;display:flex;gap:12px;align-items:center;justify-content:flex-start}
+  header h1{margin:0;font-size:20px;font-weight:600}
+  header p{margin:2px 0;font-size:13px;opacity:.95}
+  header .logo{width:56px;height:56px;border-radius:8px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center}
+  header .logo img{max-width:48px;max-height:48px;display:block}
+
+  .nav{display:flex;gap:8px;margin:14px 0 20px;flex-wrap:wrap}
+  .nav button{background:#fff;color:var(--text);border:1px solid #dcdcdc;padding:8px 12px;border-radius:var(--btn-radius);cursor:pointer;font-weight:600;font-size:13px}
+  .nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+  .page{display:none;background:var(--panel);padding:16px;border-radius:var(--radius);margin-bottom:18px}
+  .page.active{display:block}
+  h2{margin-top:0;margin-bottom:8px;font-size:18px}
+  p.lead{margin-top:0;margin-bottom:12px;color:var(--muted)}
+  .grid{display:grid;gap:12px}
+  .grid.cols-2{grid-template-columns:repeat(2,1fr)}
+  .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+  .grid.cols-4{grid-template-columns:repeat(4,1fr)}
+  .card{background:#fff;border-radius:8px;padding:12px;border:1px solid #eee}
+  label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
+  input[type="number"], input[type="text"], textarea, select{width:100%;padding:8px 10px;border-radius:6px;border:1px solid #ddd;font-size:14px}
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  .small{font-size:13px;color:var(--muted)}
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+  th,td{padding:10px;border:1px solid #eee;text-align:left;font-size:14px}
+  th{background:#fafafa;font-weight:700;color:var(--muted);text-transform:uppercase;font-size:12px}
+  .btn{display:inline-block;padding:8px 12px;border-radius:var(--btn-radius);border:1px solid #111;background:#111;color:#fff;cursor:pointer;font-weight:600;font-size:13px}
+  .btn.secondary{background:#fff;color:#111;border:1px solid #111}
+  .btn.ghost{background:transparent;color:#111;border:1px solid #ccc}
+  .btn.restore{background:#fff;color:#111;border:1px dashed #bbb}
+  .btn.small{padding:6px 8px;font-size:13px}
+  .btn.delete{background:#000;color:#fff;border:1px solid #000;padding:6px 8px;border-radius:6px}
+  .muted{color:var(--muted)}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:40}
+  .modal .box{background:#fff;padding:18px;border-radius:10px;width:96%;max-width:980px;box-shadow:0 8px 30px rgba(0,0,0,0.12)}
+  .muted-small{color:var(--muted);font-size:13px}
+  .company-header{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+  .company-header img{width:72px;height:72px;border-radius:8px;object-fit:contain}
+  .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:860px){.settings-grid{grid-template-columns:1fr}}
+  .worker-settings-list .worker-card{background:#fafafa;border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid #eee}
+  .worker-settings-list .ws-row-top{margin-bottom:8px}
+  .worker-settings-list .ws-row-bottom{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+  @media (max-width:860px){ .worker-settings-list .ws-row-bottom{grid-template-columns:repeat(2,1fr)} }
+  .worker-settings-row input, .worker-settings-row select{padding:6px;font-size:13px}
+
+  @media (max-width:640px){
+    table{display:block;overflow:auto;white-space:nowrap}
+    header{flex-direction:column;align-items:flex-start;gap:8px}
+    header .logo{width:48px;height:48px}
+    header h1{font-size:18px}
+    .grid.cols-4{grid-template-columns:repeat(2,1fr)}
+    .grid.cols-3{grid-template-columns:1fr}
+    .grid.cols-2{grid-template-columns:1fr}
+  }
+
+  @media print{
+    body *{visibility:visible}
+    .no-print{display:none !important}
+    @page { size: A4; margin: 12mm; }
+  }
+
+  .print-page{background:#fff;color:#000;max-width:780px;margin:0 auto;padding:18px;border-radius:6px;min-height:280px;display:block}
+  .print-page table{margin-bottom:18px}
+  .page-break{page-break-after:always; break-after:page}
+  .invoice-total{font-weight:800;font-size:18px}
+
+  .worker-card input{width:100%}
+  .setting-section-title{font-weight:700;margin-bottom:6px}
+  .hidden {display:none !important}
+
+  .signature-right{margin-top:26px;display:flex;justify-content:flex-end;Align-items:flex-end}
+  .signature-line{border-top:1px solid #000;width:40%;padding-top:8px}
+  .signature-caption{font-size:12px;color:#333;margin-top:6px;text-align:center}
+
+  .auto-badge{font-size:12px;color:#0f5132;background:#d1e7dd;padding:6px;border-radius:6px;display:inline-block}
+  .manual-badge{font-size:12px;color:#842029;background:#f8d7da;padding:6px;border-radius:6px;display:inline-block}
+  
+  /* Adjustment button styles */
+  .adjustment-buttons {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  
+  .adjust-btn {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  
+  .adjust-btn.add {
+    background-color: var(--green);
+    color: white;
+  }
+  
+  .adjust-btn.reduce {
+    background-color: var(--red);
+    color: white;
+  }
+  
+  .adjust-btn.active {
+    box-shadow: 0 0 0 2px currentColor;
+  }
+  
+  .adjust-input.negative {
+    color: var(--red);
+  }
+  
+  .adjust-input.positive {
+    color: var(--green);
+  }
+  
+  /* Worker count controls */
+  .worker-count-section {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .worker-count-controls {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  
+  .count-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .count-control label {
+    flex: 1;
+    margin: 0;
+  }
+  
+  .count-input-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .count-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  .count-input {
+    width: 60px;
+    text-align: center;
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .count-display {
+    font-weight: bold;
+    color: var(--accent);
+  }
+  
+  /* Floating Calculator Button */
+  .calculator-float-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    z-index: 30;
+    font-size: 24px;
+  }
+  
+  /* Calculator Modal Styles */
+  .calculator-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  
+  .calculator-modal.active {
+    display: flex;
+  }
+  
+  .calculator-modal-content {
+    background: #fff;
+    border-radius: 12px;
+    width: 96%;
+    max-width: 360px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    overflow: hidden;
+  }
+  
+  .calculator-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #eee;
+    background-color: var(--panel);
+  }
+  
+  .calculator-modal-title {
+    font-weight: 600;
+    font-size: 16px;
+  }
+  
+  .calculator-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--text);
+  }
+  
+  /* Calculator Styles */
+  .calculator-container {
+    background-color: #fff;
+    border-radius: var(--radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid #eee;
+  }
+  
+  .calculator-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    background-color: var(--panel);
+  }
+  
+  .calculator-title {
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 600;
+  }
+  
+  .history-toggle {
+    background: none;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 18px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+  }
+  
+  .history-toggle:hover {
+    background-color: #eee;
+  }
+  
+  .calculator-display {
+    padding: 15px;
+    text-align: right;
+    min-height: 90px;
+    background-color: #fff;
+  }
+  
+  .calculator-equation {
+    font-size: 16px;
+    color: var(--muted);
+    min-height: 24px;
+    margin-bottom: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .calculator-inputAnswer {
+    font-size: 32px;
+    font-weight: 400;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .calculator-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    padding: 12px;
+    background-color: #fff;
+  }
+  
+  .calculator-btn {
+    border: none;
+    border-radius: 6px;
+    height: 50px;
+    font-size: 18px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: #f7f7f7;
+    color: var(--text);
+  }
+  
+  .calculator-btn:hover {
+    background-color: #e9e9e9;
+  }
+  
+  .calculator-btn:active {
+    transform: scale(0.97);
+  }
+  
+  .calculator-number {
+    background-color: #f7f7f7;
+  }
+  
+  .calculator-operator {
+    background-color: #e9e9e9;
+    color: var(--text);
+  }
+  
+  .calculator-equals {
+    background-color: var(--accent);
+    color: #fff;
+  }
+  
+  .calculator-special {
+    background-color: #e9e9e9;
+    color: var(--text);
+  }
+  
+  .calculator-history-panel {
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 280px;
+    background-color: #fff;
+    border-left: 1px solid #eee;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 100;
+    padding: 20px;
+    overflow-y: auto;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .calculator-history-panel.active {
+    transform: translateX(0);
+  }
+  
+  .calculator-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .calculator-history-title {
+    font-size: 18px;
+    color: var(--text);
+    font-weight: 600;
+  }
+  
+  .calculator-close-history {
+    background: none;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 22px;
+  }
+  
+  .calculator-history-list {
+    color: var(--text);
+  }
+  
+  .calculator-history-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+  }
+  
+  .calculator-history-equation {
+    color: var(--muted);
+    font-size: 13px;
+  }
+  
+  .calculator-history-result {
+    font-weight: 500;
+    text-align: right;
+    margin-top: 4px;
+    color: var(--text);
+  }
+  
+  .calculator-empty-history {
+    text-align: center;
+    color: var(--muted);
+    margin-top: 30px;
+    font-style: italic;
+  }
+  
+  @media (max-width: 480px) {
+    .calculator-inputAnswer {
+      font-size: 28px;
+    }
+    
+    .calculator-buttons {
+      gap: 5px;
+      padding: 10px;
+    }
+    
+    .calculator-btn {
+      height: 45px;
+      font-size: 16px;
+    }
+    
+    .calculator-history-panel {
+      width: 85%;
+    }
+    
+    .worker-settings-list .ws-row-bottom {
+      grid-template-columns: repeat(1, 1fr);
+    }
+    
+    .worker-count-controls {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo">
+      <img id="header-logo" src="assets/favicon.png" alt="Company logo" onerror="this.style.display='none'"/>
+    </div>
+    <div style="text-align:left">
+      <h1 id="header-name">Nazmul Twisting Mill</h1>
+      <p class="small" id="header-contact">Old Bogura Road, Telkupi — Phone: (+880) 1766759293 — Email: nazmul.fig@gmail.com</p>
+    </div>
+  </header>
+
+  <nav class="nav" role="navigation" aria-label="Main">
+    <button class="nav-btn active" data-page="dashboard">Dashboard</button>
+    <button class="nav-btn" data-page="bill-summary">Bill Summary</button>
+    <button class="nav-btn" data-page="settings">Settings</button>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="page active">
+    <h2>Dashboard</h2>
+    <p class="lead">Summary and histories</p>
+
+    <div class="grid cols-4">
+      <div class="card">
+        <div class="small">Revenue from Mohajon</div>
+        <div id="summary-mohajon" style="font-weight:700;font-size:20px">৳0.00</div>
+      </div>
+      <div class="card">
+        <div class="small">Total Worker Payments</div>
+        <div id="summary-workers" style="font-weight:700;font-size:20px">৳0.00</div>
+      </div>
+      <div class="card">
+        <div class="small">Total Expenses</div>
+        <div id="summary-expenses" style="font-weight:700;font-size:20px">৳0.00</div>
+      </div>
+      <div class="card">
+        <div class="small">Weekly Profit</div>
+        <div id="summary-profit" style="font-weight:700;font-size:20px">৳0.00</div>
+      </div>
+    </div>
+
+    <div style="margin-top:18px">
+      <h3 style="margin-bottom:10px">Weekly Production Summary</h3>
+      <div class="small">Saved weekly production summaries (will appear here after you press <strong>Save Summary</strong> in Bill Summary).</div>
+
+      <div id="weekly-invoices-wrapper" style="margin-top:8px" class="card hidden">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="small">Saved invoices from saved summaries</div>
+          <div style="display:flex;gap:8px;align-items:center"></div>
+        </div>
+        <div id="weekly-invoices-list">
+          <table id="weekly-invoices-table">
+            <thead><tr><th>Invoice #</th><th>Date</th><th>Period</th><th>Total</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- BILL SUMMARY -->
+  <section id="bill-summary" class="page">
+    <h2>Bill Summary</h2>
+    <p class="lead">A printable summary that includes Mohajon, worker production, expenses and net revenue.</p>
+
+    <div class="card printable" id="bill-summary-card">
+      <div class="company-header">
+        <img id="bs-logo" src="assets/favicon.png" alt="logo" onerror="this.style.display='none'"/>
+        <div>
+          <div style="font-weight:700" id="company-name-display">Nazmul Twisting Mill</div>
+          <div class="muted-small" id="company-address-display">Old Bogura Road, Telkupi</div>
+          <div class="muted-small" id="company-phone-display">Phone: (+880) 1766759293</div>
+          <div class="muted-small" id="company-email-display">Email: nazmul.fig@gmail.com</div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:0">Mohajon</h3>
+      <table>
+        <thead><tr><th>Rate (৳/pound)</th><th>Total Production (pounds)</th><th>Bill</th><th>Money Given</th><th>Due</th></tr></thead>
+        <tbody>
+          <tr>
+            <td id="bs-mohajon-rate">৳0.00</td>
+            <td id="bs-total-production">0.00</td>
+            <td id="bs-total-bill">৳0.00</td>
+            <td id="bs-total-given">৳0.00</td>
+            <td id="bs-total-due">৳0.00</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top:12px">Workers Production</h3>
+      <div class="small"><strong>One double = ten pounds.</strong></div>
+      <table>
+        <thead><tr><th>Worker</th><th>Role</th><th style="text-align:right">Production (double)</th><th style="text-align:right">Rate (৳/double)</th><th style="text-align:right">Bill</th><th style="text-align:right">Adjustment</th><th style="text-align:right">Bonus</th><th style="text-align:right">Final Amount</th></tr></thead>
+        <tbody id="bill-summary-workers-body"></tbody>
+        <tfoot>
+          <tr>
+            <th colspan="7" style="text-align:right">Subtotal</th>
+            <th id="bs-workers-subtotal">৳0.00</th>
+          </tr>
+        </tfoot>
+      </table>
+
+      <h3 style="margin-top:12px">Expenses</h3>
+      <table>
+        <thead><tr><th>Electricity</th><th>Maintenance</th><th>Other</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr>
+            <td id="bs-exp-elec">৳0.00</td>
+            <td id="bs-exp-maint">৳0.00</td>
+            <td id="bs-exp-other">৳0.00</td>
+            <td id="bs-exp-total">৳0.00</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top:12px">Summary</h3>
+      <table>
+        <thead><tr><th>Income (Money Given)</th><th>Payments to Workers</th><th>Expenses</th><th>Net Revenue</th></tr></thead>
+        <tbody>
+          <tr>
+            <td id="bs-income">৳0.00</td>
+            <td id="bs-payments">৳0.00</td>
+            <td id="bs-expenses">৳0.00</td>
+            <td id="bs-net">৳0.00</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="actions" style="margin-top:12px">
+        <button class="btn" id="save-summary-btn">Save Summary</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="settings" class="page">
+    <h2>Settings</h2>
+    <p class="lead">Update company details, mohajon details, worker details, and expenses. Save or reset from below.</p>
+
+    <div class="card">
+      <div class="settings-grid">
+        <div>
+          <div class="setting-section-title">Company Info</div>
+          <label>Company Name</label>
+          <input type="text" id="setting-company-name" />
+
+          <label style="margin-top:8px">Address</label>
+          <textarea id="setting-company-address" rows="2"></textarea>
+
+          <label style="margin-top:8px">Phone</label>
+          <input type="text" id="setting-company-phone" />
+
+          <label style="margin-top:8px">Email</label>
+          <input type="text" id="setting-company-email" />
+        </div>
+
+        <div>
+          <div class="setting-section-title">Mohajon & Production</div>
+          <label>Mohajon — Company Name</label>
+          <input type="text" id="setting-mohajon-company" />
+
+          <label style="margin-top:8px">Mohajon Address</label>
+          <input type="text" id="setting-mohajon-address" />
+
+          <label style="margin-top:8px">Mohajon Phone</label>
+          <input type="text" id="setting-mohajon-phone" />
+
+          <label style="margin-top:8px">Mohajon Rate (৳/pound)</label>
+          <input type="number" id="setting-mohajon-rate" step="0.01" min="0" placeholder="Rate (e.g. 120.00)" />
+
+          <label style="margin-top:8px">Total Production (pounds) <span id="mohajon-production-badge" class="auto-badge" style="margin-left:8px">Auto</span></label>
+          <input type="number" id="setting-mohajon-totalproduction" step="0.01" min="0" placeholder="Auto: Sum of all Machine production * 10" data-auto="true" />
+
+          <label style="margin-top:8px">Mohajon Money Given (৳)</label>
+          <input type="number" id="setting-mohajon-moneygiven" step="0.01" min="0" placeholder="Money given (e.g. 5000.00)" />
+        </div>
+      </div>
+
+      <hr style="margin:12px 0;border-top:1px solid #eee" />
+
+      <div style="margin-bottom:12px">
+        <h3 style="margin:6px 0">Expenses</h3>
+        <div style="margin-top:8px" class="grid cols-2">
+          <div>
+            <label>Electricity (৳)</label>
+            <input type="number" id="expense-electricity" value="0" min="0" step="0.01" />
+          </div>
+          <div>
+            <label>Maintenance (৳)</label>
+            <input type="number" id="expense-maintenance" value="0" min="0" step="0.01" />
+          </div>
+          <div>
+            <label>Other (৳)</label>
+            <input type="number" id="expense-other" value="0" min="0" step="0.01" />
+          </div>
+          <div style="display:flex;align-items:end;gap:8px">
+            <div style="width:100%">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr style="margin:12px 0;border-top:1px solid #eee" />
+
+      <!-- Worker Count Controls -->
+      <div class="worker-count-section">
+        <h3 style="margin:6px 0">Configure Workers (Max 10 each)</h3>
+        <div class="small">Set the number of workers for each type. Changes will update the worker list below.</div>
+        
+        <div class="worker-count-controls" style="margin-top:12px">
+          <div class="count-control">
+            <label>Machine Workers</label>
+            <div class="count-input-group">
+              <button class="count-btn" id="machine-down">-</button>
+              <input type="number" id="machine-count" class="count-input" min="0" max="10" value="2" />
+              <button class="count-btn" id="machine-up">+</button>
+            </div>
+            <div class="count-display" id="machine-display">2</div>
+          </div>
+          
+          <div class="count-control">
+            <label>Drum Workers</label>
+            <div class="count-input-group">
+              <button class="count-btn" id="drum-down">-</button>
+              <input type="number" id="drum-count" class="count-input" min="0" max="10" value="2" />
+              <button class="count-btn" id="drum-up">+</button>
+            </div>
+            <div class="count-display" id="drum-display">2</div>
+          </div>
+          
+          <div class="count-control">
+            <label>Kun Workers</label>
+            <div class="count-input-group">
+              <button class="count-btn" id="kun-down">-</button>
+              <input type="number" id="kun-count" class="count-input" min="0" max="10" value="1" />
+              <button class="count-btn" id="kun-up">+</button>
+            </div>
+            <div class="count-display" id="kun-display">1</div>
+          </div>
+        </div>
+        
+        <div class="small" style="margin-top:8px; color: var(--red); font-weight: 600;">
+          Note: If only 1 Kun worker exists, their production will automatically equal the sum of all Machine workers' production.
+          Drum workers' production will automatically match corresponding Machine workers' production.
+        </div>
+      </div>
+
+      <hr style="margin:12px 0;border-top:1px solid #eee" />
+
+      <div>
+        <h3 style="margin:6px 0">Worker Details</h3>
+        <div class="small" id="worker-count-text">5 Workers (2 Machine, 2 Drum, 1 Kun)</div>
+        <div id="worker-settings-list" class="worker-settings-list" style="margin-top:12px"></div>
+        <div style="margin-top:14px">
+          <div class="small" style="margin-top:8px">Note: After saving data, values will update throughout the app</div>
+          <div class="actions" style="margin-top:12px">
+            <button class="btn" id="save-data-btn">Save Data</button>
+            <button class="btn secondary" id="reset-data-btn">Reset Data</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Floating Calculator Button -->
+<div class="calculator-float-btn" id="calculator-float-btn">🧮</div>
+
+<!-- Calculator Modal -->
+<div class="calculator-modal" id="calculator-modal">
+  <div class="calculator-modal-content">
+    <div class="calculator-modal-header">
+      <div class="calculator-modal-title">Calculator</div>
+      <button class="calculator-close" id="calculator-close">×</button>
+    </div>
+    
+    <div class="calculator-container">
+      <div class="calculator-display">
+        <div class="calculator-equation" id="calculator-equation"></div>
+        <div class="calculator-inputAnswer" id="calculator-inputAnswer">0</div>
+      </div>
+      
+      <div class="calculator-buttons">
+        <button class="calculator-btn calculator-special" id="calculator-allClear">AC</button>
+        <button class="calculator-btn calculator-special" id="calculator-clear">C</button>
+        <button class="calculator-btn calculator-special" id="calculator-delete">⌫</button>
+        <button class="calculator-btn calculator-operator">÷</button>
+        
+        <button class="calculator-btn calculator-number" id="calculator-seven">7</button>
+        <button class="calculator-btn calculator-number" id="calculator-eight">8</button>
+        <button class="calculator-btn calculator-number" id="calculator-nine">9</button>
+        <button class="calculator-btn calculator-operator">×</button>
+        
+        <button class="calculator-btn calculator-number" id="calculator-four">4</button>
+        <button class="calculator-btn calculator-number" id="calculator-five">5</button>
+        <button class="calculator-btn calculator-number" id="calculator-six">6</button>
+        <button class="calculator-btn calculator-operator">-</button>
+        
+        <button class="calculator-btn calculator-number" id="calculator-one">1</button>
+        <button class="calculator-btn calculator-number" id="calculator-two">2</button>
+        <button class="calculator-btn calculator-number" id="calculator-three">3</button>
+        <button class="calculator-btn calculator-operator">+</button>
+        
+        <button class="calculator-btn calculator-special" id="calculator-percent">%</button>
+        <button class="calculator-btn calculator-number" id="calculator-zero">0</button>
+        <button class="calculator-btn calculator-number" id="calculator-decimal">.</button>
+        <button class="calculator-btn calculator-equals" id="calculator-calculate">=</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Calculator History Panel -->
+<div class="calculator-history-panel" id="calculator-historyPanel">
+  <div class="calculator-history-header">
+    <div class="calculator-history-title">Calculation History</div>
+    <button class="calculator-close-history" id="calculator-closeHistory">×</button>
+  </div>
+  <div class="calculator-history-list" id="calculator-historyList">
+    <div class="calculator-empty-history">No calculations yet</div>
+  </div>
+</div>
+
+<!-- Modal: typed-delete / generic confirm -->
+<div class="modal" id="confirm-modal">
+  <div class="box">
+    <div id="confirm-text" style="font-weight:700">Confirm action</div>
+    <div id="confirm-subtext" class="muted-small" style="margin-top:8px">Type <strong>delete</strong> below to confirm.</div>
+    <input type="text" id="confirm-input" placeholder="Type delete to confirm" style="margin-top:12px;padding:8px;border-radius:6px;border:1px solid #ddd;width:100%" />
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn secondary" id="confirm-cancel">Cancel</button>
+      <button class="btn" id="confirm-ok">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------------------
+   App data model + persistence
+   --------------------------- */
+const STORAGE_KEY = 'ntm_app_v11_fixed_production';
+
+function defaultState() {
+  return {
+    company: {
+      name: 'Nazmul Twisting Mill',
+      address: 'Old Bogura Road, Telkupi',
+      phone: '(+880) 1766759293',
+      email: 'nazmul.fig@gmail.com',
+      logo: 'assets/favicon.png'
+    },
+    mohajon: {
+      company: 'Bukhari & Co.',
+      address: 'Goshala, Sirajgang',
+      phone: '',
+      rate: 20,
+      totalProduction: 0,
+      moneyGiven: 0
+    },
+    // Dynamic worker configuration
+    workerCounts: {
+      machine: 2,
+      drum: 2,
+      kun: 1
+    },
+    // Workers will be generated dynamically
+    workers: [],
+    // Production inputs are in "double" units (1 double = 10 pounds)
+    productionInputs: {},
+    // Adjustment types: 'add' (green/positive) or 'reduce' (red/negative)
+    adjustmentTypes: {},
+    expenses: { electricity: 0, maintenance: 0, other: 0 },
+    invoices: [],
+    billingHistory: {},
+    summaries: []
+  };
+}
+
+// Helper function to generate workers based on counts
+function generateWorkersFromCounts(counts) {
+  const workers = [];
+  let idCounter = 1;
+  
+  // Machine workers
+  for (let i = 1; i <= counts.machine; i++) {
+    workers.push({
+      id: `m${idCounter}`,
+      name: `Machine ${i}`,
+      designation: 'Machine',
+      type: 'machine',
+      index: i,
+      rate: 45,
+      adjustment: 0,
+      adjustmentType: 'reduce',
+      bonus: 0,
+      phone: '',
+      address: ''
+    });
+    idCounter++;
+  }
+  
+  // Drum workers
+  for (let i = 1; i <= counts.drum; i++) {
+    workers.push({
+      id: `d${idCounter}`,
+      name: `Drum ${i}`,
+      designation: 'Drum Machine',
+      type: 'drum',
+      index: i,
+      rate: 28,
+      adjustment: 0,
+      adjustmentType: 'reduce',
+      bonus: 0,
+      phone: '',
+      address: ''
+    });
+    idCounter++;
+  }
+  
+  // Kun workers
+  for (let i = 1; i <= counts.kun; i++) {
+    workers.push({
+      id: `k${idCounter}`,
+      name: `Kun ${i}`,
+      designation: 'Kun Machine',
+      type: 'kun',
+      index: i,
+      rate: 19,
+      adjustment: 0,
+      adjustmentType: 'reduce',
+      bonus: 0,
+      phone: '',
+      address: ''
+    });
+    idCounter++;
+  }
+  
+  return workers;
+}
+
+// Initialize production inputs for workers
+function initializeProductionInputs(workers) {
+  const productionInputs = {};
+  workers.forEach(worker => {
+    productionInputs[worker.id] = 0;
+  });
+  return productionInputs;
+}
+
+// Initialize adjustment types for workers
+function initializeAdjustmentTypes(workers) {
+  const adjustmentTypes = {};
+  workers.forEach(worker => {
+    adjustmentTypes[worker.id] = 'reduce';
+  });
+  return adjustmentTypes;
+}
+
+let appState = loadState() || defaultState();
+
+// Generate workers if not already generated
+if (!appState.workers || appState.workers.length === 0) {
+  appState.workers = generateWorkersFromCounts(appState.workerCounts || defaultState().workerCounts);
+}
+
+// Initialize production inputs if empty
+if (!appState.productionInputs || Object.keys(appState.productionInputs).length === 0) {
+  appState.productionInputs = initializeProductionInputs(appState.workers);
+}
+
+// Initialize adjustment types if empty
+if (!appState.adjustmentTypes || Object.keys(appState.adjustmentTypes).length === 0) {
+  appState.adjustmentTypes = initializeAdjustmentTypes(appState.workers);
+}
+
+/* ---------------------------
+   Utilities
+   --------------------------- */
+function saveState(){ 
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); 
+  renderAll(); 
+}
+
+function loadState(){ 
+  try{ 
+    const raw = localStorage.getItem(STORAGE_KEY); 
+    return raw ? JSON.parse(raw) : null; 
+  } catch(e){ 
+    console.error(e); 
+    return null; 
+  } 
+}
+
+function updateFavicon(url){ 
+  const link = document.getElementById('favico') || document.querySelector('link[rel="icon"]'); 
+  if(link){ link.href = url; } 
+}
+
+function formatMoney(n){ 
+  return '৳' + Number(n || 0).toFixed(2); 
+}
+
+function formatDateISO(d = new Date()){ 
+  return d.toLocaleDateString() + ' ' + d.toLocaleTimeString(); 
+}
+
+function getWeekPeriodText(d = new Date()){ 
+  const end = new Date(d); 
+  const start = new Date(d); 
+  start.setDate(end.getDate() - 6); 
+  return `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`; 
+}
+
+function onlyDigits(str = ''){ 
+  return (String(str||'').match(/\d+/g) || []).join('') || Math.floor(100000 + Math.random() * 900000); 
+}
+
+function escapeHtml(str){ 
+  if(str === null || str === undefined) return ''; 
+  return String(str).replace(/[&<>"']/g, function(m){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+  }); 
+}
+
+// Helper: convert doubles to pounds (1 double = 10 pounds)
+function doublesToPounds(d){ 
+  return Number(d || 0) * 10; 
+}
+
+// Helper: get sum of production for a specific worker type
+function getProductionSumByType(type) {
+  let sum = 0;
+  appState.workers.forEach(worker => {
+    if (worker.type === type) {
+      sum += Number(appState.productionInputs[worker.id] || 0);
+    }
+  });
+  return sum;
+}
+
+// Update Drum and Kun worker production based on Machine workers
+function updateLinkedProductions() {
+  const machineWorkers = appState.workers.filter(w => w.type === 'machine').sort((a, b) => a.index - b.index);
+  const drumWorkers = appState.workers.filter(w => w.type === 'drum').sort((a, b) => a.index - b.index);
+  const kunWorkers = appState.workers.filter(w => w.type === 'kun').sort((a, b) => a.index - b.index);
+  
+  let totalMachineProduction = 0;
+  machineWorkers.forEach(w => {
+    totalMachineProduction += Number(appState.productionInputs[w.id] || 0);
+  });
+  
+  // Update drum workers (match corresponding machine worker by index)
+  machineWorkers.forEach((machineWorker, idx) => {
+    if (drumWorkers[idx]) {
+      const drumWorker = drumWorkers[idx];
+      const drumInput = document.querySelector(`.worker-card[data-worker-id="${drumWorker.id}"] .ws-pounds`);
+      if (drumInput && drumInput.dataset.auto !== 'false') {
+        const machineProduction = Number(appState.productionInputs[machineWorker.id] || 0);
+        drumInput.value = machineProduction.toFixed(2);
+        appState.productionInputs[drumWorker.id] = machineProduction;
+        drumInput.dataset.auto = 'true';
+      }
+    }
+  });
+  
+  // Update kun workers
+  if (kunWorkers.length === 1) {
+    // Special case: single kun worker gets sum of all machine workers
+    const kunWorker = kunWorkers[0];
+    const kunInput = document.querySelector(`.worker-card[data-worker-id="${kunWorker.id}"] .ws-pounds`);
+    if (kunInput && kunInput.dataset.auto !== 'false') {
+      kunInput.value = totalMachineProduction.toFixed(2);
+      appState.productionInputs[kunWorker.id] = totalMachineProduction;
+      kunInput.dataset.auto = 'true';
+    }
+  } else {
+    // Multiple kun workers: match corresponding machine worker by index
+    machineWorkers.forEach((machineWorker, idx) => {
+      if (kunWorkers[idx]) {
+        const kunWorker = kunWorkers[idx];
+        const kunInput = document.querySelector(`.worker-card[data-worker-id="${kunWorker.id}"] .ws-pounds`);
+        if (kunInput && kunInput.dataset.auto !== 'false') {
+          const machineProduction = Number(appState.productionInputs[machineWorker.id] || 0);
+          kunInput.value = machineProduction.toFixed(2);
+          appState.productionInputs[kunWorker.id] = machineProduction;
+          kunInput.dataset.auto = 'true';
+        }
+      }
+    });
+  }
+  
+  // Update mohajon production
+  updateMohajonProduction();
+  
+  // Re-render everything
+  renderBillSummary();
+  renderDashboard();
+}
+
+// Update Mohajon total production based on machine workers
+function updateMohajonProduction() {
+  const machineProductionSum = getProductionSumByType('machine');
+  const derivedMohajonTotal = doublesToPounds(machineProductionSum);
+  
+  const prodInputEl = document.getElementById('setting-mohajon-totalproduction');
+  if (prodInputEl && prodInputEl.dataset.auto !== 'false') {
+    prodInputEl.value = derivedMohajonTotal.toFixed(2);
+    appState.mohajon.totalProduction = derivedMohajonTotal;
+  }
+}
+
+/* ---------------------------
+   Navigation wiring
+   --------------------------- */
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const page = btn.dataset.page;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const el = document.getElementById(page);
+    if(el) el.classList.add('active');
+    if(page === 'bill-summary') renderBillSummary();
+    if(page === 'settings') {
+      populateSettingsForm();
+      updateWorkerCountDisplays();
+    }
+  });
+});
+
+/* ---------------------------
+   Apply company header
+   --------------------------- */
+function applyCompanyHeader(){
+  const c = appState.company || {};
+  const headerName = document.getElementById('header-name');
+  const headerContact = document.getElementById('header-contact');
+  const headerLogo = document.getElementById('header-logo');
+  const bsLogo = document.getElementById('bs-logo');
+  const compName = document.getElementById('company-name-display');
+  const compAddr = document.getElementById('company-address-display');
+  const compPhone = document.getElementById('company-phone-display');
+  const compEmail = document.getElementById('company-email-display');
+
+  if(headerName) headerName.textContent = (c.name || 'Company');
+  if(headerContact) headerContact.textContent = `${c.address || ''} — Phone: ${c.phone || ''} — Email: ${c.email || ''}`;
+  if(headerLogo) { headerLogo.src = c.logo || 'assets/favicon.png'; headerLogo.style.display = c.logo ? '' : ''; }
+  if(bsLogo) { bsLogo.src = c.logo || 'assets/favicon.png'; bsLogo.style.display = ''; }
+  if(compName) compName.textContent = c.name || '';
+  if(compAddr) compAddr.textContent = c.address || '';
+  if(compPhone) compPhone.textContent = `Phone: ${c.phone || ''}`;
+  if(compEmail) compEmail.textContent = `Email: ${c.email || ''}`;
+
+  if(c.logo) updateFavicon(c.logo);
+}
+
+/* ---------------------------
+   Render functions
+   --------------------------- */
+function renderAll(){
+  renderDashboard();
+  renderBillSummary();
+  renderWeeklyInvoicesTable();
+  applyCompanyHeader();
+  renderExpenses();
+}
+
+/* DASHBOARD */
+function renderDashboard(){
+  const mohajonAmt = Number(appState.mohajon.moneyGiven || 0);
+  const totalWorkersPaid = computeWorkersTotalPaid();
+  const expensesTotal = (appState.expenses.electricity||0) + (appState.expenses.maintenance||0) + (appState.expenses.other||0);
+  const profit = mohajonAmt - totalWorkersPaid - expensesTotal;
+  document.getElementById('summary-mohajon').textContent = formatMoney(mohajonAmt);
+  document.getElementById('summary-workers').textContent = formatMoney(totalWorkersPaid);
+  document.getElementById('summary-expenses').textContent = formatMoney(expensesTotal);
+  document.getElementById('summary-profit').textContent = formatMoney(profit);
+}
+
+/* BILL SUMMARY rendering */
+function renderBillSummary(){
+  const mo = appState.mohajon || {};
+
+  // Update linked productions first
+  updateLinkedProductions();
+  
+  const sumMachineDoubles = getProductionSumByType('machine');
+  const derivedMohajonTotal = doublesToPounds(sumMachineDoubles);
+  
+  const displayProduction = Number(mo.totalProduction || 0) || derivedMohajonTotal;
+  document.getElementById('bs-total-production').textContent = displayProduction.toFixed(2);
+
+  const bill = Number(mo.rate || 0) * displayProduction;
+  document.getElementById('bs-mohajon-rate').textContent = formatMoney(mo.rate || 0);
+  document.getElementById('bs-total-bill').textContent = formatMoney(bill);
+  document.getElementById('bs-total-given').textContent = formatMoney(mo.moneyGiven || 0);
+  document.getElementById('bs-total-due').textContent = formatMoney(bill - (mo.moneyGiven || 0));
+
+  const tbody = document.getElementById('bill-summary-workers-body');
+  tbody.innerHTML = '';
+  let workersSubtotal = 0;
+  
+  appState.workers.forEach(w => {
+    const doubles = Number(appState.productionInputs[w.id] || 0);
+    const earnings = doubles * Number(w.rate || 0);
+    
+    // Apply adjustment based on adjustment type
+    let adjustment = Number(w.adjustment || 0);
+    if (appState.adjustmentTypes[w.id] === 'reduce') {
+      adjustment = -Math.abs(adjustment);
+    } else {
+      adjustment = Math.abs(adjustment);
+    }
+    
+    const bonus = Number(w.bonus || 0);
+    const finalAmount = earnings + adjustment + bonus;
+    workersSubtotal += finalAmount;
+    
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escapeHtml(w.name)}</td>
+      <td>${escapeHtml(w.designation)}</td>
+      <td style="text-align:right">${doubles.toFixed(2)}</td>
+      <td style="text-align:right">${formatMoney(w.rate)}</td>
+      <td style="text-align:right">${formatMoney(earnings)}</td>
+      <td style="text-align:right">${adjustment < 0 ? '-' : ''}${formatMoney(Math.abs(adjustment))}</td>
+      <td style="text-align:right">${formatMoney(bonus)}</td>
+      <td style="text-align:right">${formatMoney(finalAmount)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  
+  document.getElementById('bs-workers-subtotal').textContent = formatMoney(workersSubtotal);
+
+  const expElec = Number(appState.expenses.electricity || 0);
+  const expMaint = Number(appState.expenses.maintenance || 0);
+  const expOther = Number(appState.expenses.other || 0);
+  const expTotal = expElec + expMaint + expOther;
+  document.getElementById('bs-exp-elec').textContent = formatMoney(expElec);
+  document.getElementById('bs-exp-maint').textContent = formatMoney(expMaint);
+  document.getElementById('bs-exp-other').textContent = formatMoney(expOther);
+  document.getElementById('bs-exp-total').textContent = formatMoney(expTotal);
+
+  const income = Number(appState.mohajon.moneyGiven || 0);
+  const payments = workersSubtotal;
+  const net = income - payments - expTotal;
+  document.getElementById('bs-income').textContent = formatMoney(income);
+  document.getElementById('bs-payments').textContent = formatMoney(payments);
+  document.getElementById('bs-expenses').textContent = formatMoney(expTotal);
+  document.getElementById('bs-net').textContent = formatMoney(net);
+}
+
+/* Weekly invoices table on dashboard */
+function renderWeeklyInvoicesTable(){
+  const tbody = document.querySelector('#weekly-invoices-table tbody');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  const wrapper = document.getElementById('weekly-invoices-wrapper');
+  const invoices = appState.invoices || [];
+  if(!invoices.length){
+    wrapper.classList.add('hidden');
+    return;
+  }
+  wrapper.classList.remove('hidden');
+
+  invoices.forEach((inv, idx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${escapeHtml(inv.id)}</td><td>${escapeHtml(inv.date)}</td><td>${escapeHtml(inv.period)}</td><td>${formatMoney(inv.total)}</td><td></td>`;
+    const actionsTd = tr.querySelector('td:last-child');
+
+    // Weekly Summary button first
+    const weeklyBtn = document.createElement('button');
+    weeklyBtn.className = 'btn small';
+    weeklyBtn.textContent = 'Weekly Summary';
+    weeklyBtn.addEventListener('click', () => previewSummaryForInvoice(idx));
+    actionsTd.appendChild(weeklyBtn);
+
+    // Workers button
+    const previewBtn = document.createElement('button');
+    previewBtn.className = 'btn small';
+    previewBtn.style.marginLeft='8px';
+    previewBtn.textContent = 'Workers';
+    previewBtn.addEventListener('click', () => previewInvoiceSummary(idx));
+    actionsTd.appendChild(previewBtn);
+
+    // Per-Worker combined
+    const printWorkersBtn = document.createElement('button');
+    printWorkersBtn.className = 'btn small';
+    printWorkersBtn.style.marginLeft='8px';
+    printWorkersBtn.textContent = 'Per-Worker';
+    printWorkersBtn.addEventListener('click', () => previewAllWorkersForInvoice(idx));
+    actionsTd.appendChild(printWorkersBtn);
+
+    // Receipt
+    const receiptBtn = document.createElement('button');
+    receiptBtn.className = 'btn small';
+    receiptBtn.style.marginLeft='8px';
+    receiptBtn.textContent = 'Receipt';
+    receiptBtn.addEventListener('click', () => previewMohajonReceipt(idx));
+    actionsTd.appendChild(receiptBtn);
+
+    const del = document.createElement('button');
+    del.className = 'btn delete';
+    del.style.marginLeft = '8px';
+    del.textContent = 'Delete';
+    del.addEventListener('click', () => confirmDeleteInvoice(idx));
+    actionsTd.appendChild(del);
+
+    tbody.appendChild(tr);
+  });
+}
+
+/* ---------------------------
+   Computations & interactions
+   --------------------------- */
+function computeWorkersTotalPaid(){
+  let total = 0;
+  appState.workers.forEach(w => {
+    const doubles = Number(appState.productionInputs[w.id] || 0);
+    const earnings = doubles * Number(w.rate || 0);
+    
+    let adjustment = Number(w.adjustment || 0);
+    if (appState.adjustmentTypes[w.id] === 'reduce') {
+      adjustment = -Math.abs(adjustment);
+    } else {
+      adjustment = Math.abs(adjustment);
+    }
+    
+    const finalAmount = earnings + adjustment + Number(w.bonus || 0);
+    total += finalAmount;
+  });
+  return total;
+}
+
+/* ---------------------------
+   Settings: populate, worker list, save, reset
+   --------------------------- */
+
+function populateSettingsForm(){
+  // company
+  const c = appState.company || {};
+  document.getElementById('setting-company-name').value = c.name || '';
+  document.getElementById('setting-company-address').value = c.address || '';
+  document.getElementById('setting-company-phone').value = c.phone || '';
+  document.getElementById('setting-company-email').value = c.email || '';
+
+  // mohajon
+  const m = appState.mohajon || {};
+  document.getElementById('setting-mohajon-company').value = m.company || '';
+  document.getElementById('setting-mohajon-address').value = m.address || '';
+  document.getElementById('setting-mohajon-phone').value = m.phone || '';
+  document.getElementById('setting-mohajon-rate').value = Number(m.rate||0) !== 0 ? Number(m.rate).toFixed(2) : '';
+
+  // Update worker count controls
+  updateWorkerCountDisplays();
+  
+  // worker list (and production inputs)
+  populateWorkerSettingsList();
+
+  // expenses
+  renderExpenses();
+}
+
+function updateWorkerCountDisplays() {
+  const counts = appState.workerCounts || defaultState().workerCounts;
+  
+  // Update input values
+  document.getElementById('machine-count').value = counts.machine;
+  document.getElementById('drum-count').value = counts.drum;
+  document.getElementById('kun-count').value = counts.kun;
+  
+  // Update display values
+  document.getElementById('machine-display').textContent = counts.machine;
+  document.getElementById('drum-display').textContent = counts.drum;
+  document.getElementById('kun-display').textContent = counts.kun;
+  
+  // Update worker count text
+  const totalWorkers = counts.machine + counts.drum + counts.kun;
+  document.getElementById('worker-count-text').textContent = 
+    `${totalWorkers} Workers (${counts.machine} Machine, ${counts.drum} Drum, ${counts.kun} Kun)`;
+}
+
+/* Populate worker settings list with dynamic workers */
+function populateWorkerSettingsList(){
+  const container = document.getElementById('worker-settings-list');
+  if(!container) return;
+  container.innerHTML = '';
+  
+  // Group workers by type for better organization
+  const machineWorkers = appState.workers.filter(w => w.type === 'machine').sort((a, b) => a.index - b.index);
+  const drumWorkers = appState.workers.filter(w => w.type === 'drum').sort((a, b) => a.index - b.index);
+  const kunWorkers = appState.workers.filter(w => w.type === 'kun').sort((a, b) => a.index - b.index);
+  
+  // Add section for Machine workers
+  if (machineWorkers.length > 0) {
+    const sectionTitle = document.createElement('div');
+    sectionTitle.className = 'setting-section-title';
+    sectionTitle.textContent = 'Machine Workers';
+    sectionTitle.style.marginTop = '16px';
+    container.appendChild(sectionTitle);
+    
+    machineWorkers.forEach(w => {
+      container.appendChild(createWorkerCard(w));
+    });
+  }
+  
+  // Add section for Drum workers
+  if (drumWorkers.length > 0) {
+    const sectionTitle = document.createElement('div');
+    sectionTitle.className = 'setting-section-title';
+    sectionTitle.textContent = 'Drum Workers';
+    sectionTitle.style.marginTop = '16px';
+    container.appendChild(sectionTitle);
+    
+    drumWorkers.forEach(w => {
+      container.appendChild(createWorkerCard(w));
+    });
+  }
+  
+  // Add section for Kun workers
+  if (kunWorkers.length > 0) {
+    const sectionTitle = document.createElement('div');
+    sectionTitle.className = 'setting-section-title';
+    sectionTitle.textContent = 'Kun Workers';
+    sectionTitle.style.marginTop = '16px';
+    container.appendChild(sectionTitle);
+    
+    kunWorkers.forEach(w => {
+      container.appendChild(createWorkerCard(w));
+    });
+  }
+  
+  // Attach event listeners
+  attachWorkerSettingsListeners();
+}
+
+function createWorkerCard(w) {
+  const card = document.createElement('div');
+  card.className = 'worker-card';
+  card.style.marginBottom = '10px';
+  card.dataset.workerId = w.id;
+  
+  const adjustmentType = appState.adjustmentTypes[w.id] || 'reduce';
+  const adjustmentValue = Number(w.adjustment || 0) !== 0 ? Math.abs(Number(w.adjustment)).toFixed(2) : '';
+  const bonusValue = Number(w.bonus || 0) !== 0 ? Number(w.bonus).toFixed(2) : '';
+  const doublesValue = Number(appState.productionInputs[w.id] || 0) !== 0 ? Number(appState.productionInputs[w.id]).toFixed(2) : '';
+  
+  // Set data-auto for drum and kun workers
+  const isAutoLinked = (w.type === 'drum' || w.type === 'kun');
+  const autoAttr = isAutoLinked ? 'data-auto="true"' : '';
+  
+  card.innerHTML = `
+    <div class="ws-row-top">
+      <input class="ws-name" placeholder="Name" value="${escapeHtml(w.name)}" />
+    </div>
+    <div class="ws-row-bottom">
+      <input class="ws-address" placeholder="Address" value="${escapeHtml(w.address||'')}" />
+      <input class="ws-phone" placeholder="Phone" value="${escapeHtml(w.phone||'')}" />
+      <input class="ws-designation" placeholder="Designation" value="${escapeHtml(w.designation||'')}" />
+      <input type="number" class="ws-rate" placeholder="Rate (৳/double)" step="0.01" min="0" value="${escapeHtml(w.rate)}" />
+      <input type="number" class="ws-pounds" placeholder="Production (double)" step="0.01" min="0" value="${escapeHtml(doublesValue)}" ${autoAttr} />
+      
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <div class="adjustment-buttons">
+          <button class="adjust-btn add ${adjustmentType === 'add' ? 'active' : ''}" type="button" data-action="add">+</button>
+          <button class="adjust-btn reduce ${adjustmentType === 'reduce' ? 'active' : ''}" type="button" data-action="reduce">-</button>
+          <input type="number" class="ws-adjust adjust-input ${adjustmentType === 'reduce' ? 'negative' : 'positive'}" 
+                 placeholder="Amount" step="0.01" value="${escapeHtml(adjustmentValue)}" />
+        </div>
+        <div style="font-size: 11px; color: #666; text-align: center;">
+          ${adjustmentType === 'add' ? 'Adding money' : 'Reducing money'}
+        </div>
+      </div>
+      
+      <input type="number" class="ws-bonus" placeholder="Bonus" step="0.01" value="${escapeHtml(bonusValue)}" />
+    </div>
+  `;
+  
+  return card;
+}
+
+function attachWorkerSettingsListeners() {
+  // Attach production input listeners
+  document.querySelectorAll('.ws-pounds').forEach(input => {
+    input.addEventListener('input', function() {
+      const workerId = this.closest('.worker-card').dataset.workerId;
+      const worker = appState.workers.find(w => w.id === workerId);
+      
+      // Update production value
+      appState.productionInputs[workerId] = parseFloat(this.value || '0') || 0;
+      
+      // If this is a machine worker, update linked productions
+      if (worker && worker.type === 'machine') {
+        updateLinkedProductions();
+      } else if (worker && (worker.type === 'drum' || worker.type === 'kun')) {
+        // If drum or kun worker is manually changed, mark as manual
+        this.dataset.auto = 'false';
+      }
+      
+      renderBillSummary();
+      renderDashboard();
+    });
+  });
+  
+  // Attach adjustment button listeners
+  document.querySelectorAll('.adjust-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const card = this.closest('.worker-card');
+      const workerId = card.dataset.workerId;
+      const action = this.dataset.action;
+      
+      // Update active button state
+      card.querySelectorAll('.adjust-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      
+      // Update adjustment type
+      appState.adjustmentTypes[workerId] = action;
+      
+      // Update input class for color
+      const adjustInput = card.querySelector('.ws-adjust');
+      adjustInput.classList.remove('negative', 'positive');
+      adjustInput.classList.add(action === 'reduce' ? 'negative' : 'positive');
+      
+      // Update helper text
+      const helperText = card.querySelector('.adjustment-buttons').nextElementSibling;
+      if (helperText) {
+        helperText.textContent = action === 'add' ? 'Adding money' : 'Reducing money';
+      }
+      
+      renderBillSummary();
+      renderDashboard();
+    });
+  });
+  
+  // Attach adjustment input listeners
+  document.querySelectorAll('.ws-adjust').forEach(input => {
+    input.addEventListener('input', function() {
+      const workerId = this.closest('.worker-card').dataset.workerId;
+      const worker = appState.workers.find(w => w.id === workerId);
+      if (worker) {
+        worker.adjustment = parseFloat(this.value || '0') || 0;
+      }
+      renderBillSummary();
+      renderDashboard();
+    });
+  });
+  
+  // Attach rate input listeners
+  document.querySelectorAll('.ws-rate').forEach(input => {
+    input.addEventListener('input', function() {
+      const workerId = this.closest('.worker-card').dataset.workerId;
+      const worker = appState.workers.find(w => w.id === workerId);
+      if (worker) {
+        worker.rate = parseFloat(this.value || '0') || 0;
+      }
+      renderBillSummary();
+      renderDashboard();
+    });
+  });
+  
+  // Attach bonus input listeners
+  document.querySelectorAll('.ws-bonus').forEach(input => {
+    input.addEventListener('input', function() {
+      const workerId = this.closest('.worker-card').dataset.workerId;
+      const worker = appState.workers.find(w => w.id === workerId);
+      if (worker) {
+        worker.bonus = parseFloat(this.value || '0') || 0;
+      }
+      renderBillSummary();
+      renderDashboard();
+    });
+  });
+  
+  // Attach name, phone, address, designation listeners
+  document.querySelectorAll('.ws-name, .ws-phone, .ws-address, .ws-designation').forEach(input => {
+    input.addEventListener('input', function() {
+      const workerId = this.closest('.worker-card').dataset.workerId;
+      const worker = appState.workers.find(w => w.id === workerId);
+      if (worker) {
+        const field = this.className.replace('ws-', '');
+        worker[field] = this.value;
+      }
+    });
+  });
+}
+
+/* Worker count control event listeners */
+function setupWorkerCountControls() {
+  // Machine worker controls
+  document.getElementById('machine-up').addEventListener('click', () => updateWorkerCount('machine', 1));
+  document.getElementById('machine-down').addEventListener('click', () => updateWorkerCount('machine', -1));
+  document.getElementById('machine-count').addEventListener('change', function() {
+    updateWorkerCount('machine', parseInt(this.value) - appState.workerCounts.machine);
+  });
+  
+  // Drum worker controls
+  document.getElementById('drum-up').addEventListener('click', () => updateWorkerCount('drum', 1));
+  document.getElementById('drum-down').addEventListener('click', () => updateWorkerCount('drum', -1));
+  document.getElementById('drum-count').addEventListener('change', function() {
+    updateWorkerCount('drum', parseInt(this.value) - appState.workerCounts.drum);
+  });
+  
+  // Kun worker controls
+  document.getElementById('kun-up').addEventListener('click', () => updateWorkerCount('kun', 1));
+  document.getElementById('kun-down').addEventListener('click', () => updateWorkerCount('kun', -1));
+  document.getElementById('kun-count').addEventListener('change', function() {
+    updateWorkerCount('kun', parseInt(this.value) - appState.workerCounts.kun);
+  });
+}
+
+function updateWorkerCount(type, delta) {
+  const current = appState.workerCounts[type] || 0;
+  const newCount = Math.max(0, Math.min(10, current + delta));
+  
+  if (newCount !== current) {
+    appState.workerCounts[type] = newCount;
+    
+    // Regenerate workers based on new counts
+    const oldWorkers = [...appState.workers];
+    const oldProductionInputs = {...appState.productionInputs};
+    const oldAdjustmentTypes = {...appState.adjustmentTypes};
+    
+    appState.workers = generateWorkersFromCounts(appState.workerCounts);
+    
+    // Preserve existing worker data where possible
+    appState.workers.forEach(newWorker => {
+      // Try to find matching old worker by type and index
+      const oldWorker = oldWorkers.find(old => 
+        old.type === newWorker.type && old.index === newWorker.index
+      );
+      
+      if (oldWorker) {
+        // Copy data from old worker
+        newWorker.rate = oldWorker.rate;
+        newWorker.adjustment = oldWorker.adjustment;
+        newWorker.bonus = oldWorker.bonus;
+        newWorker.phone = oldWorker.phone;
+        newWorker.address = oldWorker.address;
+        
+        // Copy production input
+        if (oldProductionInputs[oldWorker.id] !== undefined) {
+          appState.productionInputs[newWorker.id] = oldProductionInputs[oldWorker.id];
+        }
+        
+        // Copy adjustment type
+        if (oldAdjustmentTypes[oldWorker.id]) {
+          appState.adjustmentTypes[newWorker.id] = oldAdjustmentTypes[oldWorker.id];
+        }
+      }
+    });
+    
+    // Initialize any missing production inputs
+    appState.workers.forEach(worker => {
+      if (appState.productionInputs[worker.id] === undefined) {
+        appState.productionInputs[worker.id] = 0;
+      }
+      if (appState.adjustmentTypes[worker.id] === undefined) {
+        appState.adjustmentTypes[worker.id] = 'reduce';
+      }
+    });
+    
+    // Update linked productions
+    updateLinkedProductions();
+    
+    // Update UI
+    updateWorkerCountDisplays();
+    populateWorkerSettingsList();
+    renderBillSummary();
+    renderDashboard();
+  }
+}
+
+/* perform Save Data action */
+function performSaveData(){
+  // Company
+  const name = document.getElementById('setting-company-name').value || '';
+  const address = document.getElementById('setting-company-address').value || '';
+  const phone = document.getElementById('setting-company-phone').value || '';
+  const email = document.getElementById('setting-company-email').value || '';
+
+  appState.company = appState.company || {};
+  appState.company.name = name;
+  appState.company.address = address;
+  appState.company.phone = phone;
+  appState.company.email = email;
+
+  // Mohajon
+  appState.mohajon = appState.mohajon || {};
+  appState.mohajon.company = document.getElementById('setting-mohajon-company').value || '';
+  appState.mohajon.address = document.getElementById('setting-mohajon-address').value || '';
+  appState.mohajon.phone = document.getElementById('setting-mohajon-phone').value || '';
+  appState.mohajon.rate = parseFloat(document.getElementById('setting-mohajon-rate').value) || 0;
+  
+  // Mohajon total production
+  const totalProdInputEl = document.getElementById('setting-mohajon-totalproduction');
+  if(totalProdInputEl && totalProdInputEl.dataset.auto === 'false' && totalProdInputEl.value !== ''){
+    appState.mohajon.totalProduction = parseFloat(totalProdInputEl.value) || 0;
+  } else {
+    const machineProductionSum = getProductionSumByType('machine');
+    appState.mohajon.totalProduction = doublesToPounds(machineProductionSum);
+  }
+  
+  appState.mohajon.moneyGiven = parseFloat(document.getElementById('setting-mohajon-moneygiven').value) || 0;
+
+  // Worker count controls are already saved in appState.workerCounts
+  
+  // Workers data from settings form
+  const cards = document.querySelectorAll('.worker-card');
+  cards.forEach(card => {
+    const id = card.dataset.workerId;
+    const worker = appState.workers.find(w => w.id === id);
+    
+    if (worker) {
+      worker.name = card.querySelector('.ws-name').value.trim() || worker.name;
+      worker.phone = card.querySelector('.ws-phone').value.trim() || '';
+      worker.address = card.querySelector('.ws-address').value.trim() || '';
+      worker.designation = card.querySelector('.ws-designation').value.trim() || worker.designation;
+      worker.rate = parseFloat(card.querySelector('.ws-rate').value) || worker.rate;
+      worker.adjustment = parseFloat(card.querySelector('.ws-adjust').value) || 0;
+      worker.bonus = parseFloat(card.querySelector('.ws-bonus').value) || 0;
+      
+      // Production input
+      const productionInput = parseFloat(card.querySelector('.ws-pounds').value) || 0;
+      appState.productionInputs[id] = productionInput;
+      
+      // Adjustment type is already updated via event listeners
+    }
+  });
+  
+  // Update linked productions
+  updateLinkedProductions();
+
+  // expenses
+  appState.expenses.electricity = parseFloat(document.getElementById('expense-electricity').value) || 0;
+  appState.expenses.maintenance = parseFloat(document.getElementById('expense-maintenance').value) || 0;
+  appState.expenses.other = parseFloat(document.getElementById('expense-other').value) || 0;
+
+  applyCompanyHeader();
+  saveState();
+  alert('Data saved.');
+}
+
+/* Save Data: show simple OK/Cancel confirmation before saving */
+document.getElementById('save-data-btn').addEventListener('click', () => {
+  showSimpleConfirm({
+    message: 'Save settings and data? Click OK to confirm.',
+    okLabel: 'OK',
+    onConfirm: performSaveData
+  });
+});
+
+/* Reset Data: typed delete confirm */
+document.getElementById('reset-data-btn').addEventListener('click', () => {
+  showTypedConfirm({
+    message: 'Reset all data to defaults? This will remove saved summaries and settings.',
+    confirmWord: 'delete',
+    okLabel: 'Reset',
+    onConfirm: () => {
+      appState = defaultState();
+      appState.workers = generateWorkersFromCounts(appState.workerCounts);
+      appState.productionInputs = initializeProductionInputs(appState.workers);
+      appState.adjustmentTypes = initializeAdjustmentTypes(appState.workers);
+      saveState();
+      location.reload();
+    }
+  });
+});
+
+/* ---------------------------
+   Save Summary, invoices, preview functions
+   --------------------------- */
+
+function performSaveSummaryAndNavigateDashboard(){
+  const sharedId = 'INV-' + Math.floor(100000 + Math.random() * 900000);
+
+  const summary = {
+    id: sharedId,
+    date: formatDateISO(),
+    period: getWeekPeriodText(),
+    company: {...(appState.company || {})},
+    mohajon: { ...appState.mohajon },
+    workers: [],
+    expenses: { ...appState.expenses },
+    totals: {}
+  };
+
+  let workersSubtotal = 0;
+  appState.workers.forEach(w => {
+    const doubles = Number(appState.productionInputs[w.id] || 0);
+    const earnings = doubles * Number(w.rate || 0);
+    
+    let adjustment = Number(w.adjustment || 0);
+    if (appState.adjustmentTypes[w.id] === 'reduce') {
+      adjustment = -Math.abs(adjustment);
+    } else {
+      adjustment = Math.abs(adjustment);
+    }
+    
+    const bonus = Number(w.bonus || 0);
+    const finalAmount = earnings + adjustment + bonus;
+    workersSubtotal += finalAmount;
+    
+    summary.workers.push({ 
+      id: w.id, 
+      name: w.name, 
+      designation: w.designation, 
+      type: w.type,
+      index: w.index,
+      doubles: doubles, 
+      rate: w.rate, 
+      earnings, 
+      adjustment, 
+      bonus, 
+      finalAmount, 
+      phone: w.phone || '', 
+      address: w.address || '' 
+    });
+  });
+
+  const expTotal = (summary.expenses.electricity||0) + (summary.expenses.maintenance||0) + (summary.expenses.other||0);
+  const income = Number(summary.mohajon.moneyGiven || 0);
+  const net = income - workersSubtotal - expTotal;
+
+  summary.totals = { income, payments: workersSubtotal, expenses: expTotal, net };
+
+  appState.summaries = appState.summaries || [];
+  appState.summaries.unshift(summary);
+
+  // Create invoice entry with per-worker items
+  const invoice = {
+    id: sharedId,
+    date: summary.date,
+    period: summary.period,
+    total: summary.totals.payments,
+    workers: summary.workers.map(w => ({ 
+      id: w.id, 
+      name: w.name, 
+      designation: w.designation, 
+      type: w.type,
+      index: w.index,
+      doubles: w.doubles, 
+      rate: w.rate, 
+      bill: w.earnings, 
+      adjustment: w.adjustment, 
+      bonus: w.bonus, 
+      total: w.finalAmount 
+    }))
+  };
+
+  appState.invoices = appState.invoices || [];
+  appState.invoices.unshift(invoice);
+
+  // add billing history entries
+  invoice.workers.forEach(w => {
+    appState.billingHistory[w.id] = appState.billingHistory[w.id] || [];
+    appState.billingHistory[w.id].unshift({
+      date: invoice.date,
+      doubles: w.doubles,
+      bill: w.bill,
+      adjustment: w.adjustment,
+      bonus: w.bonus,
+      total: w.total,
+      invoiceId: invoice.id
+    });
+  });
+
+  saveState();
+  document.querySelector('[data-page="dashboard"]').click();
+}
+
+/* Save Summary button */
+document.getElementById('save-summary-btn').addEventListener('click', () => {
+  showSimpleConfirm({
+    message: 'Save this summary? Click OK to confirm.',
+    okLabel: 'OK',
+    onConfirm: performSaveSummaryAndNavigateDashboard
+  });
+});
+
+/* ---------------------------
+   Confirmation modal utilities
+   --------------------------- */
+function showTypedConfirm({message='Type delete to confirm', confirmWord='delete', okLabel='OK', onConfirm=null} = {}){ 
+  const modal = document.getElementById('confirm-modal');
+  const txt = document.getElementById('confirm-text');
+  const sub = document.getElementById('confirm-subtext');
+  const input = document.getElementById('confirm-input');
+  const ok = document.getElementById('confirm-ok');
+  const cancel = document.getElementById('confirm-cancel');
+
+  txt.textContent = message;
+  sub.innerHTML = `Type <strong>${escapeHtml(confirmWord)}</strong> below to confirm.`;
+  input.value = '';
+  input.style.display = '';
+  modal.style.display = 'flex';
+  input.focus();
+
+  function cleanup(){ modal.style.display = 'none'; ok.removeEventListener('click', okHandler); cancel.removeEventListener('click', cancelHandler); }
+  function okHandler(){ if((input.value||'').trim().toLowerCase()===String(confirmWord).toLowerCase()){ cleanup(); onConfirm && onConfirm(); } else { alert(`Type "${confirmWord}" exactly to confirm.`); input.focus(); } }
+  function cancelHandler(){ cleanup(); }
+  ok.textContent = okLabel || 'OK';
+  ok.addEventListener('click', okHandler);
+  cancel.addEventListener('click', cancelHandler);
+}
+
+function showSimpleConfirm({message='Are you sure?', okLabel='OK', onConfirm=null} = {}) {
+  const modal = document.getElementById('confirm-modal');
+  const txt = document.getElementById('confirm-text');
+  const sub = document.getElementById('confirm-subtext');
+  const input = document.getElementById('confirm-input');
+  const ok = document.getElementById('confirm-ok');
+  const cancel = document.getElementById('confirm-cancel');
+
+  txt.textContent = message;
+  sub.innerHTML = '';
+  input.value = '';
+  input.style.display = 'none';
+  modal.style.display = 'flex';
+
+  function cleanup(){ modal.style.display = 'none'; ok.removeEventListener('click', okHandler); cancel.removeEventListener('click', cancelHandler); }
+  function okHandler(){ cleanup(); onConfirm && onConfirm(); }
+  function cancelHandler(){ cleanup(); }
+  ok.textContent = okLabel || 'OK';
+  ok.addEventListener('click', okHandler);
+  cancel.addEventListener('click', cancelHandler);
+}
+
+function showDeleteConfirm(message, onConfirm){
+  showTypedConfirm({ message: message || 'Confirm delete', confirmWord: 'delete', okLabel: 'Delete', onConfirm });
+}
+
+/* ---------------------------
+   PREVIEW & printing
+   --------------------------- */
+function openPreviewWindow(innerHtml, title = 'Preview'){
+  const win = window.open('','_blank');
+  if(!win) return alert('Unable to open preview. Please allow popups in your browser.');
+  const baseStyles = `
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      body{font-family:Arial, Helvetica, sans-serif;color:#000;padding:12px}
+      .topbar{display:flex;gap:8px;align-items:center;position:sticky;top:0;background:#fff;padding:8px 0;margin-bottom:8px;z-index:20}
+      .topbar .title{font-weight:700;flex:1}
+      .topbar button{padding:8px 12px;border-radius:6px;border:1px solid #111;background:#111;color:#fff;cursor:pointer;font-weight:600}
+      .topbar button.secondary{background:#fff;color:#111}
+      .print-page{max-width:780px;margin:0 auto;padding:18px;border-radius:6px;background:#fff;min-height:280px}
+      table{width:100%;border-collapse:collapse;margin-top:8px}
+      table,th,td{border:1px solid #ddd;padding:8px}
+      th{background:#f6f6f6}
+      .page-break{page-break-after:always; break-after:page}
+      .signature-right{margin-top:26px;display:flex;justify-content:flex-end;align-items:flex-end}
+      .signature-line{border-top:1px solid #000;width:40%;padding-top:8px}
+      .signature-caption{font-size:12px;color:#333;margin-top:6px;text-align:center}
+      @media print{
+        .no-print{display:none !important}
+        @page { size: A4; margin: 12mm; }
+      }
+    </style>
+  `;
+  const html = `
+    <html>
+      <head>
+        <title>${escapeHtml(title)}</title>
+        ${baseStyles}
+      </head>
+      <body>
+        <div class="topbar no-print">
+          <div class="title">${escapeHtml(title)}</div>
+          <div style="display:flex;gap:6px">
+            <button id="doPrint">Print / Save as PDF</button>
+            <button id="closeWin" class="secondary">Close</button>
+          </div>
+        </div>
+
+        <div id="content">${innerHtml}</div>
+
+        <script>
+          document.getElementById('doPrint').addEventListener('click', function(){ window.focus(); window.print(); });
+          document.getElementById('closeWin').addEventListener('click', function(){ window.close(); });
+          window.addEventListener('load', function(){ try{ window.focus(); }catch(e){} });
+        <\/script>
+      </body>
+    </html>
+  `;
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+}
+
+function companyHeaderHtml(company){
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+      <div style="display:flex;gap:12px;align-items:center">
+        <img src="${escapeHtml(company.logo||'assets/favicon.png')}" alt="logo" style="width:72px;height:72px;object-fit:contain;border-radius:8px" onerror="this.style.display='none'"/>
+        <div>
+          <div style="font-weight:700;font-size:18px">${escapeHtml(company.name || '')}</div>
+          <div style="font-size:12px;color:#333">${escapeHtml(company.address || '')}</div>
+          <div style="font-size:12px;color:#333">${escapeHtml(company.phone || '')}</div>
+          ${company.email ? `<div style="font-size:12px;color:#333">${escapeHtml(company.email)}</div>` : ''}
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:12px">${formatDateISO()}</div>
+      </div>
+    </div>
+  `;
+}
+
+function signatureRightHtml(){
+  return `
+    <div class="signature-right">
+      <div>
+        <div class="signature-line"></div>
+        <div class="signature-caption">Authorized Signature</div>
+      </div>
+    </div>
+  `;
+}
+
+/* Build current live bill summary html */
+function buildCurrentBillSummaryHtml(){
+  const company = appState.company || {};
+  const mo = appState.mohajon || {};
+  
+  // Group workers by type
+  const machineWorkers = appState.workers.filter(w => w.type === 'machine').sort((a, b) => a.index - b.index);
+  const drumWorkers = appState.workers.filter(w => w.type === 'drum').sort((a, b) => a.index - b.index);
+  const kunWorkers = appState.workers.filter(w => w.type === 'kun').sort((a, b) => a.index - b.index);
+  
+  let workersHtml = '';
+  
+  // Machine workers section
+  if (machineWorkers.length > 0) {
+    workersHtml += `<tr><th colspan="8" style="background:#e9ecef; text-align:center">MACHINE WORKERS</th></tr>`;
+    machineWorkers.forEach(w => {
+      workersHtml += generateWorkerRowHtml(w);
+    });
+  }
+  
+  // Drum workers section
+  if (drumWorkers.length > 0) {
+    workersHtml += `<tr><th colspan="8" style="background:#e9ecef; text-align:center">DRUM WORKERS</th></tr>`;
+    drumWorkers.forEach(w => {
+      workersHtml += generateWorkerRowHtml(w);
+    });
+  }
+  
+  // Kun workers section
+  if (kunWorkers.length > 0) {
+    workersHtml += `<tr><th colspan="8" style="background:#e9ecef; text-align:center">KUN WORKERS</th></tr>`;
+    kunWorkers.forEach(w => {
+      workersHtml += generateWorkerRowHtml(w);
+    });
+  }
+  
+  const workersSubtotal = appState.workers.reduce((s,w) => {
+    const doubles = Number(appState.productionInputs[w.id] || 0);
+    const earnings = doubles * Number(w.rate || 0);
+    
+    let adjustment = Number(w.adjustment || 0);
+    if (appState.adjustmentTypes[w.id] === 'reduce') {
+      adjustment = -Math.abs(adjustment);
+    } else {
+      adjustment = Math.abs(adjustment);
+    }
+    
+    return s + (earnings + adjustment + Number(w.bonus || 0));
+  },0);
+
+  const expElec = Number(appState.expenses.electricity || 0);
+  const expMaint = Number(appState.expenses.maintenance || 0);
+  const expOther = Number(appState.expenses.other || 0);
+  const expTotal = expElec + expMaint + expOther;
+
+  const income = Number(mo.moneyGiven || 0);
+  const net = income - workersSubtotal - expTotal;
+
+  // Mohajon production
+  const machineProductionSum = getProductionSumByType('machine');
+  const billProduction = Number(mo.totalProduction || 0) || doublesToPounds(machineProductionSum);
+  const billAmount = Number(mo.rate || 0) * Number(billProduction || 0);
+
+  const html = `
+    <div class="print-page">
+      ${companyHeaderHtml(company)}
+      <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
+
+      <h3>Mohajon</h3>
+      <table>
+        <thead><tr><th style="text-align:right">Rate</th><th style="text-align:right">Production (pounds)</th><th style="text-align:right">Bill</th><th style="text-align:right">Money Given</th><th style="text-align:right">Due</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="text-align:right">${formatMoney(mo.rate||0)}</td>
+            <td style="text-align:right">${Number(billProduction||0).toFixed(2)}</td>
+            <td style="text-align:right">${formatMoney(billAmount)}</td>
+            <td style="text-align:right">${formatMoney(mo.moneyGiven||0)}</td>
+            <td style="text-align:right">${formatMoney(billAmount - Number(mo.moneyGiven||0))}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Workers</h3>
+      <div class="small"><strong>One double = ten pounds.</strong></div>
+      <table>
+        <thead><tr><th>Worker</th><th>Role</th><th style="text-align:right">Production (double)</th><th>Rate</th><th>Bill</th><th>Adjustment</th><th>Bonus</th><th>Final Amount</th></tr></thead>
+        <tbody>${workersHtml}</tbody>
+        <tfoot>
+          <tr>
+            <th colspan="7" style="text-align:right">Workers Subtotal</th>
+            <th style="text-align:right">${formatMoney(workersSubtotal)}</th>
+          </tr>
+        </tfoot>
+      </table>
+
+      <h3>Expenses</h3>
+      <table>
+        <thead><tr><th>Electricity</th><th>Maintenance</th><th>Other</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="text-align:right">${formatMoney(expElec)}</td>
+            <td style="text-align:right">${formatMoney(expMaint)}</td>
+            <td style="text-align:right">${formatMoney(expOther)}</td>
+            <td style="text-align:right">${formatMoney(expTotal)}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Summary</h3>
+      <table>
+        <thead><tr><th>Income (Money Given)</th><th>Payments</th><th>Expenses</th><th>Net</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="text-align:right">${formatMoney(income)}</td>
+            <td style="text-align:right">${formatMoney(workersSubtotal)}</td>
+            <td style="text-align:right">${formatMoney(expTotal)}</td>
+            <td style="text-align:right">${formatMoney(net)}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      ${signatureRightHtml()}
+    </div>
+  `;
+  return html;
+}
+
+function generateWorkerRowHtml(w) {
+  const doubles = Number(appState.productionInputs[w.id] || 0);
+  const earnings = doubles * Number(w.rate || 0);
+  
+  let adjustment = Number(w.adjustment || 0);
+  if (appState.adjustmentTypes[w.id] === 'reduce') {
+    adjustment = -Math.abs(adjustment);
+  } else {
+    adjustment = Math.abs(adjustment);
+  }
+  
+  const bonus = Number(w.bonus || 0);
+  const finalAmount = earnings + adjustment + bonus;
+  const adjustmentSign = adjustment < 0 ? '-' : '+';
+  
+  return `
+    <tr>
+      <td>${escapeHtml(w.name)}</td>
+      <td>${escapeHtml(w.designation)}</td>
+      <td style="text-align:right">${doubles.toFixed(2)}</td>
+      <td style="text-align:right">${formatMoney(w.rate)}</td>
+      <td style="text-align:right">${formatMoney(earnings)}</td>
+      <td style="text-align:right; color: ${adjustment < 0 ? 'var(--red)' : 'var(--green)'}">${adjustmentSign}${formatMoney(Math.abs(adjustment))}</td>
+      <td style="text-align:right">${formatMoney(bonus)}</td>
+      <td style="text-align:right">${formatMoney(finalAmount)}</td>
+    </tr>
+  `;
+}
+
+/* Preview current live bill summary */
+function previewCurrentLiveBillSummary(){
+  const html = buildCurrentBillSummaryHtml();
+  openPreviewWindow(html, 'Bill Summary Preview');
+}
+
+/* Preview saved summary by index */
+function previewSavedSummary(index){
+  const s = appState.summaries && appState.summaries[index];
+  if(!s) {
+    previewCurrentLiveBillSummary();
+    return;
+  }
+  const company = s.company || {};
+  let workersHtml = s.workers.map(w => `
+    <tr>
+      <td>${escapeHtml(w.name)}</td>
+      <td>${escapeHtml(w.designation)}</td>
+      <td style="text-align:right">${Number(w.doubles).toFixed(2)}</td>
+      <td style="text-align:right">${formatMoney(w.rate)}</td>
+      <td style="text-align:right">${formatMoney(w.earnings)}</td>
+      <td style="text-align:right">${w.adjustment < 0 ? '-' : '+'}${formatMoney(Math.abs(w.adjustment))}</td>
+      <td style="text-align:right">${formatMoney(w.bonus)}</td>
+      <td style="text-align:right">${formatMoney(w.finalAmount)}</td>
+    </tr>
+  `).join('');
+
+  const expTotal = (s.expenses.electricity||0) + (s.expenses.maintenance||0) + (s.expenses.other||0);
+
+  const billAmount = Number(s.mohajon.rate || 0) * Number(s.mohajon.totalProduction || 0);
+
+  const html = `
+    <div class="print-page">
+      ${companyHeaderHtml(company)}
+      <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div style="font-weight:700">Summary ID: ${escapeHtml(s.id)}</div>
+          <div style="font-size:12px">${escapeHtml(s.period)}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:12px">${escapeHtml(s.date)}</div>
+        </div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <h4>Mohajon</h4>
+      <table>
+        <thead><tr><th style="text-align:right">Rate</th><th style="text-align:right">Production (pounds)</th><th style="text-align:right">Bill</th><th style="text-align:right">Money Given</th><th style="text-align:right">Due</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="text-align:right">${formatMoney(s.mohajon.rate||0)}</td>
+            <td style="text-align:right">${Number(s.mohajon.totalProduction||0).toFixed(2)}</td>
+            <td style="text-align:right">${formatMoney(billAmount)}</td>
+            <td style="text-align:right">${formatMoney(s.mohajon.moneyGiven||0)}</td>
+            <td style="text-align:right">${formatMoney(billAmount - Number(s.mohajon.moneyGiven||0))}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Workers</h4>
+      <div class="small">Worker production shown as <strong>doubles</strong>. <strong>One double = ten pounds.</strong></div>
+      <table>
+        <thead><tr><th>Worker</th><th>Role</th><th style="text-align:right">Production</th><th style="text-align:right">Rate</th><th style="text-align:right">Earnings</th><th style="text-align:right">Adjustment</th><th style="text-align:right">Bonus</th><th style="text-align:right">Final</th></tr></thead>
+        <tbody>${workersHtml}</tbody>
+        <tfoot>
+          <tr>
+            <th colspan="7" style="text-align:right">Workers Subtotal</th>
+            <th style="text-align:right">${formatMoney(s.totals.payments)}</th>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div style="height:10px"></div>
+
+      <h4>Expenses</h4>
+      <table>
+        <thead><tr><th>Electricity</th><th>Maintenance</th><th>Other</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="text-align:right">${formatMoney(s.expenses.electricity||0)}</td>
+            <td style="text-align:right">${formatMoney(s.expenses.maintenance||0)}</td>
+            <td style="text-align:right">${formatMoney(s.expenses.other||0)}</td>
+            <td style="text-align:right">${formatMoney(expTotal)}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="height:10px"></div>
+
+      <h4>Summary</h4>
+      <table>
+        <thead><tr><th>Income</th><th>Payments</th><th>Expenses</th><th>Net</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="text-align:right">${formatMoney(s.totals.income)}</td>
+            <td style="text-align:right">${formatMoney(s.totals.payments)}</td>
+            <td style="text-align:right">${formatMoney(s.totals.expenses)}</td>
+            <td style="text-align:right">${formatMoney(s.totals.net)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+  openPreviewWindow(html, 'Saved Summary '+s.id);
+}
+
+/* Preview invoice summary (Workers list) */
+function previewInvoiceSummary(invoiceIndex){
+  const inv = appState.invoices && appState.invoices[invoiceIndex];
+  if(!inv) return alert('Invoice not found.');
+  const company = appState.company || {};
+  const summary = (appState.summaries || []).find(s => s.id === inv.id) || null;
+  const mohajon = summary ? (summary.mohajon || appState.mohajon) : appState.mohajon;
+
+  const workerRows = inv.workers.map(w => `
+    <tr>
+      <td>${escapeHtml(w.name)}</td>
+      <td>${escapeHtml(w.designation)}</td>
+      <td style="text-align:right">${Number(w.doubles).toFixed(2)}</td>
+      <td style="text-align:right">${formatMoney(w.rate)}</td>
+      <td style="text-align:right">${formatMoney(w.bill)}</td>
+      <td style="text-align:right">${w.adjustment < 0 ? '-' : '+'}${formatMoney(Math.abs(w.adjustment))}</td>
+      <td style="text-align:right">${formatMoney(w.total)}</td>
+    </tr>
+  `).join('');
+
+  const html = `
+    <div class="print-page">
+      ${companyHeaderHtml(company)}
+      <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-weight:700">Invoice: ${escapeHtml(inv.id)}</div>
+          <div style="font-size:12px">${escapeHtml(inv.period)}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:12px">${escapeHtml(inv.date)}</div>
+        </div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <table>
+        <thead><tr>
+          <th>Worker</th><th>Role</th><th style="text-align:right">Production (double)</th><th>Rate</th><th>Bill</th><th>Adjustment</th><th>Total</th>
+        </tr></thead>
+        <tbody>${workerRows}</tbody>
+        <tfoot>
+          <tr>
+            <th colspan="6" style="text-align:right">Total Payments</th>
+            <th style="text-align:right">${formatMoney(inv.total)}</th>
+          </tr>
+        </tfoot>
+      </table>
+
+      ${signatureRightHtml()}
+    </div>
+  `;
+  openPreviewWindow(html, 'Invoice '+inv.id);
+}
+
+/* Per-worker pages */
+function previewAllWorkersForInvoice(invoiceIndex){
+  const inv = appState.invoices && appState.invoices[invoiceIndex];
+  if(!inv) return alert('Invoice not found.');
+  const company = appState.company || {};
+
+  const pages = inv.workers.map((w, idx) => {
+    return `
+      <div class="print-page">
+        ${companyHeaderHtml(company)}
+        <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
+        <div style="display:flex;gap:12px;align-items:center">
+          <div>
+            <div style="font-weight:700;font-size:16px">${escapeHtml(w.name)}</div>
+            <div style="font-size:12px">${escapeHtml(w.designation || '')}</div>
+          </div>
+          <div style="margin-left:auto;text-align:right">
+            <div style="font-size:12px">Invoice: <strong>${escapeHtml(inv.id)}</strong></div>
+            <div style="font-size:12px">${escapeHtml(inv.date)}</div>
+            <div style="font-size:12px">${escapeHtml(inv.period)}</div>
+          </div>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <table>
+          <thead><tr><th>Designation</th><th>Rate (৳/double)</th><th style="text-align:right">Production (double)</th><th>Bill</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>${escapeHtml(w.designation || '')}</td>
+              <td style="text-align:right">${formatMoney(w.rate)}</td>
+              <td style="text-align:right">${Number(w.doubles||0).toFixed(2)}</td>
+              <td style="text-align:right">${formatMoney(w.bill)}</td>
+            </tr>
+            <tr>
+              <td colspan="3">Adjustment</td>
+              <td style="text-align:right">${w.adjustment < 0 ? '-' : '+'}${formatMoney(Math.abs(w.adjustment))}</td>
+            </tr>
+            <tr>
+              <td colspan="3">Bonus</td>
+              <td style="text-align:right">${formatMoney(w.bonus)}</td>
+            </tr>
+            <tr>
+              <th colspan="3" style="text-align:right">Total</th>
+              <th class="invoice-total" style="text-align:right">${formatMoney(w.total)}</th>
+            </tr>
+          </tbody>
+        </table>
+
+        ${signatureRightHtml()}
+      </div>
+      ${idx < inv.workers.length-1 ? '<div class="page-break"></div>' : ''}
+    `;
+  }).join('');
+
+  openPreviewWindow(pages, 'Per-Worker Invoices (Combined)');
+}
+
+/* Mohajon receipt */
+function previewMohajonReceipt(invoiceIndex){
+  const inv = appState.invoices && appState.invoices[invoiceIndex];
+  if(!inv) return alert('Invoice not found.');
+  const company = appState.company || {};
+  const summary = (appState.summaries || []).find(s => s.id === inv.id) || null;
+  const mo = summary ? (summary.mohajon || appState.mohajon) : appState.mohajon;
+  const receiptNo = onlyDigits('RCPT-' + inv.id);
+
+  const html = `
+    <div class="print-page">
+      ${companyHeaderHtml(company)}
+      <hr style="border:none;border-top:1px solid #000;margin:12px 0" />
+
+      <div style="text-align:center;margin-bottom:8px">
+        <h3 style="margin:0">Receipt</h3>
+        <div style="font-size:12px">Receipt No: <strong>${receiptNo}</strong></div>
+      </div>
+
+      <div style="display:flex;gap:24px;flex-wrap:wrap">
+        <div style="flex:1;min-width:180px">
+          <strong>Paid By (Mohajon)</strong><br/>
+          <div style="margin-top:6px">${escapeHtml(mo.company||'')}</div>
+          <div style="font-size:12px;margin-top:6px">${escapeHtml(mo.address||'')}</div>
+          <div style="font-size:12px">${escapeHtml(mo.phone||'')}</div>
+        </div>
+        <div style="flex:1;min-width:180px;text-align:right">
+          <strong>Received By (Company)</strong><br/>
+          <div style="margin-top:6px">${escapeHtml(company.name||'')}</div>
+          <div style="font-size:12px;margin-top:6px">${escapeHtml(company.address||'')}</div>
+          <div style="font-size:12px">${escapeHtml(company.phone||'')}</div>
+        </div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <!-- Mohajon columns (Receipt includes Bill) -->
+      <table>
+        <thead><tr><th style="text-align:right">Rate</th><th style="text-align:right">Production (pounds)</th><th style="text-align:right">Bill</th><th style="text-align:right">Money Given</th><th style="text-align:right">Due</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="text-align:right">${formatMoney(mo.rate)}</td>
+            <td style="text-align:right">${Number(mo.totalProduction||0).toFixed(2)}</td>
+            <td style="text-align:right">${formatMoney(Number(mo.rate||0)*Number(mo.totalProduction||0))}</td>
+            <td style="text-align:right">${formatMoney(mo.moneyGiven||0)}</td>
+            <td style="text-align:right">${formatMoney((Number(mo.rate||0)*Number(mo.totalProduction||0)) - Number(mo.moneyGiven||0))}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      ${signatureRightHtml()}
+    </div>
+  `;
+  openPreviewWindow(html, 'Mohajon Receipt');
+}
+
+/* ---------------------------
+   Delete helpers
+   --------------------------- */
+function confirmDeleteInvoice(index){
+  showDeleteConfirm('Delete this weekly invoice and its worker history entries?', ()=>{
+    const inv = appState.invoices[index];
+    if(inv && inv.workers){
+      inv.workers.forEach(w=>{
+        const hist = appState.billingHistory[w.id] || [];
+        const idx = hist.findIndex(h => (h.invoiceId && h.invoiceId === inv.id));
+        if(idx >= 0) hist.splice(idx,1);
+      });
+    }
+    appState.invoices.splice(index,1);
+    saveState();
+  });
+}
+
+/* ---------------------------
+   Expenses sync
+   --------------------------- */
+function renderExpenses(){
+  document.getElementById('expense-electricity').value = Number(appState.expenses.electricity||0).toFixed(2);
+  document.getElementById('expense-maintenance').value = Number(appState.expenses.maintenance||0).toFixed(2);
+  document.getElementById('expense-other').value = Number(appState.expenses.other||0).toFixed(2);
+}
+
+/* ---------------------------
+   Dashboard Weekly Summary button wiring
+   --------------------------- */
+function previewSummaryForInvoice(invoiceIndex){
+  const inv = appState.invoices && appState.invoices[invoiceIndex];
+  if(!inv) return alert('Invoice not found.');
+  const sIndex = (appState.summaries || []).findIndex(s => s.id === inv.id);
+  if(sIndex >= 0){
+    previewSavedSummary(sIndex);
+  } else {
+    previewCurrentLiveBillSummary();
+  }
+}
+
+/* ---------------------------
+   Calculator Functionality
+   --------------------------- */
+function initCalculator() {
+  // DOM Elements
+  const floatBtn = document.getElementById('calculator-float-btn');
+  const calculatorModal = document.getElementById('calculator-modal');
+  const closeCalculator = document.getElementById('calculator-close');
+  const numbers = document.querySelectorAll('.calculator-number');
+  const operators = document.querySelectorAll('.calculator-operator');
+  const inputAnswer = document.getElementById('calculator-inputAnswer');
+  const equation = document.getElementById('calculator-equation');
+  const clear = document.getElementById('calculator-clear');
+  const deleteInputs = document.getElementById('calculator-delete');
+  const historyPanel = document.getElementById('calculator-historyPanel');
+  const historyList = document.getElementById('calculator-historyList');
+  const closeHistoryBtn = document.getElementById('calculator-closeHistory');
+  const percentBtn = document.getElementById('calculator-percent');
+  
+  // Show calculator modal when floating button is clicked
+  floatBtn.addEventListener('click', function() {
+    calculatorModal.classList.add('active');
+  });
+  
+  // Close calculator modal
+  closeCalculator.addEventListener('click', function() {
+    calculatorModal.classList.remove('active');
+  });
+  
+  // Close history panel
+  closeHistoryBtn.addEventListener('click', function() {
+    historyPanel.classList.remove('active');
+  });
+  
+  // Close modal when clicking outside
+  calculatorModal.addEventListener('click', function(event) {
+    if (event.target === calculatorModal) {
+      calculatorModal.classList.remove('active');
+    }
+  });
+  
+  // State variables
+  let operand1 = null;
+  let operator = null;
+  let calculationHistory = [];
+  let lastCalculation = false;
+  
+  // Number buttons
+  numbers.forEach(number => {
+    number.addEventListener('click', function() {
+      if (lastCalculation) {
+        inputAnswer.textContent = '0';
+        equation.textContent = '';
+        lastCalculation = false;
+      }
+      
+      const inputValue = inputAnswer.textContent;
+      
+      if (inputValue === '0' || equation.textContent.endsWith('=')) {
+        inputAnswer.textContent = number.id === 'calculator-decimal' ? '0.' : number.textContent;
+        if (equation.textContent.endsWith('=')) equation.textContent = '';
+      } else {
+        if (number.id === 'calculator-decimal' && inputValue.includes('.')) return;
+        inputAnswer.textContent += number.textContent;
+      }
+    });
+  });
+  
+  // Clear input
+  clear.addEventListener('click', function() {
+    inputAnswer.textContent = '0';
+    equation.textContent = '';
+    operand1 = null;
+    operator = null;
+    lastCalculation = false;
+  });
+  
+  // All clear
+  document.getElementById('calculator-allClear').addEventListener('click', function() {
+    inputAnswer.textContent = '0';
+    equation.textContent = '';
+    operand1 = null;
+    operator = null;
+    calculationHistory = [];
+    historyList.innerHTML = '<div class="calculator-empty-history">No calculations yet</div>';
+    lastCalculation = false;
+  });
+  
+  // Delete last digit
+  deleteInputs.addEventListener('click', function() {
+    if (lastCalculation) {
+      inputAnswer.textContent = '0';
+      equation.textContent = '';
+      lastCalculation = false;
+      return;
+    }
+    
+    let inputValue = inputAnswer.textContent;
+    if (inputValue.length > 1) {
+      inputAnswer.textContent = inputValue.slice(0, -1);
+    } else {
+      inputAnswer.textContent = '0';
+    }
+  });
+  
+  // Percentage button
+  percentBtn.addEventListener('click', function() {
+    const currentValue = parseFloat(inputAnswer.textContent);
+    if (!isNaN(currentValue)) {
+      inputAnswer.textContent = (currentValue / 100).toString();
+    }
+  });
+  
+  // Operators
+  operators.forEach(operatorButton => {
+    operatorButton.addEventListener('click', function() {
+      if (lastCalculation) {
+        operand1 = parseFloat(inputAnswer.textContent);
+        equation.textContent = operand1 + ' ' + operatorButton.textContent;
+        inputAnswer.textContent = '0';
+        operator = operatorButton.textContent;
+        lastCalculation = false;
+        return;
+      }
+      
+      if (operator !== null && !lastCalculation) {
+        performCalculation();
+      }
+      
+      operand1 = parseFloat(inputAnswer.textContent);
+      operator = operatorButton.textContent;
+      equation.textContent = operand1 + ' ' + operator;
+      inputAnswer.textContent = '0';
+    });
+  });
+  
+  // Calculation
+  document.getElementById('calculator-calculate').addEventListener('click', function() {
+    if (operator !== null && operand1 !== null) {
+      performCalculation();
+    }
+  });
+  
+  // Perform calculation
+  function performCalculation() {
+    const inputValue = parseFloat(inputAnswer.textContent);
+    
+    if (operand1 !== null && operator !== null) {
+      let result;
+      
+      switch (operator) {
+        case '+':
+          result = operand1 + inputValue;
+          break;
+        case '-':
+          result = operand1 - inputValue;
+          break;
+        case '×':
+          result = operand1 * inputValue;
+          break;
+        case '÷':
+          result = operand1 / inputValue;
+          break;
+        default:
+          break;
+      }
+      
+      equation.textContent = operand1 + ' ' + operator + ' ' + inputValue + ' =';
+      
+      if (result % 1 === 0) {
+        inputAnswer.textContent = result;
+      } else {
+        inputAnswer.textContent = result.toFixed(6);
+      }
+      
+      addToHistory(equation.textContent, inputAnswer.textContent);
+      
+      operand1 = null;
+      operator = null;
+      lastCalculation = true;
+    }
+  }
+  
+  // Add to history function
+  function addToHistory(equation, result) {
+    calculationHistory.push({equation, result});
+    
+    if (historyList.querySelector('.calculator-empty-history')) {
+      historyList.innerHTML = '';
+    }
+    
+    const historyItem = document.createElement('div');
+    historyItem.className = 'calculator-history-item';
+    historyItem.innerHTML = `
+      <div class="calculator-history-equation">${equation}</div>
+      <div class="calculator-history-result">${result}</div>
+    `;
+    
+    historyList.prepend(historyItem);
+  }
+}
+
+/* ---------------------------
+   Startup
+   --------------------------- */
+// Initialize the app
+function initializeApp() {
+  // Ensure workers are generated
+  if (!appState.workers || appState.workers.length === 0) {
+    appState.workers = generateWorkersFromCounts(appState.workerCounts || defaultState().workerCounts);
+  }
+  
+  // Ensure production inputs are initialized
+  if (!appState.productionInputs || Object.keys(appState.productionInputs).length === 0) {
+    appState.productionInputs = initializeProductionInputs(appState.workers);
+  }
+  
+  // Ensure adjustment types are initialized
+  if (!appState.adjustmentTypes || Object.keys(appState.adjustmentTypes).length === 0) {
+    appState.adjustmentTypes = initializeAdjustmentTypes(appState.workers);
+  }
+  
+  // Update linked productions
+  updateLinkedProductions();
+  
+  // Render everything
+  renderAll();
+  applyCompanyHeader();
+  populateSettingsForm();
+  
+  // Setup worker count controls
+  setupWorkerCountControls();
+  
+  // Initialize calculator
+  initCalculator();
+  
+  // Initial save to ensure state is saved
+  saveState();
+}
+
+// Start the app
+initializeApp();
+
+</script>
+</body>
+</html>
